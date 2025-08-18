@@ -8,7 +8,7 @@ return [
     Webkul\Employee\EmployeePlugin::class,
     Webkul\Inventory\InventoryPlugin::class,
     Webkul\Invoice\InvoicePlugin::class,
-    // Webkul\Product\ProductPlugin::class,
+    Webkul\Product\ProductPlugin::class,
     Webkul\Payment\PaymentPlugin::class,
     Webkul\Partner\PartnerPlugin::class,
     Webkul\Project\ProjectPlugin::class,
