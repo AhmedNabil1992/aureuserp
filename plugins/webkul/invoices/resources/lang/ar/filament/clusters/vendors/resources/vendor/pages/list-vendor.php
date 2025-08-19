@@ -1,11 +1,11 @@
 <?php
 
-return  [
-    'title' => 'Vendors',
+return [
+    'title' => 'الموردون',
 
     'header-actions' => [
         'create' => [
-            'title' => 'New Vendor',
+            'title' => 'مورد جديد',
         ]
     ]
 ];

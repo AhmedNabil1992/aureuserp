@@ -2,8 +2,8 @@
 
 return [
     'tabs' => [
-        'with-skill'    => 'With Skill',
-        'without-skill' => 'Without Skill',
-        'archived'      => 'Archived',
+        'with-skill' => 'بمهارة',
+        'without-skill' => 'بدون مهارة',
+        'archived' => 'مؤرشف',
     ],
 ];

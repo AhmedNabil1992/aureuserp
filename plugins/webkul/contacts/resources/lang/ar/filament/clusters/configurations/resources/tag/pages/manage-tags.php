@@ -3,17 +3,17 @@
 return [
     'header-actions' => [
         'create' => [
-            'label' => 'New Tag',
+            'label' => 'إشارة جديدة',
 
             'notification' => [
-                'title' => 'Tag created',
-                'body'  => 'The tag has been created successfully.',
+                'title' => 'تم إنشاء الإشارة',
+                'body' => 'تم إنشاء الإشارة بنجاح.',
             ],
         ],
     ],
 
     'tabs' => [
-        'all'      => 'All',
-        'archived' => 'Archived',
+        'all' => 'الكل',
+        'archived' => 'المؤرشف',
     ],
 ];

@@ -2,7 +2,7 @@
 
 return [
     'notification' => [
-        'title' => 'Cash rounding created',
-        'body'  => 'The cash rounding has been created successfully.',
+        'title' => 'تم إنشاء تقريب النقدية',
+        'body' => 'تم إنشاء تقريب النقدية بنجاح.',
     ],
 ];

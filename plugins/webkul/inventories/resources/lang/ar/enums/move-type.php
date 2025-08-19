@@ -1,6 +1,6 @@
 <?php
 
 return [
-    'direct' => 'As soon as possible',
-    'one'    => 'When all products are ready',
+    'direct' => 'بأسرع وقت ممكن',
+    'one' => 'عند جاهزية جميع المنتجات',
 ];

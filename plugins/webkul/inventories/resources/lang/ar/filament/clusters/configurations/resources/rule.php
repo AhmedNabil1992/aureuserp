@@ -2,62 +2,62 @@
 
 return [
     'navigation' => [
-        'title' => 'Rules',
-        'group' => 'Warehouse Management',
+        'title' => 'القواعد',
+        'group' => 'إدارة المستودعات',
     ],
 
     'form' => [
         'sections' => [
             'general' => [
-                'title'  => 'General',
+                'title' => 'عام',
 
                 'fields' => [
-                    'name'                        => 'Name',
-                    'action'                      => 'Action',
-                    'operation-type'              => 'Operation Type',
-                    'source-location'             => 'Source Location',
-                    'destination-location'        => 'Destination Location',
-                    'supply-method'               => 'Supply Method',
-                    'supply-method-hint-tooltip'  => 'Take From Stock: Products are sourced directly from the available stock in the source location.<br/>Trigger Another Rule: The system ignores available stock and searches for a stock rule to replenish the source location.<br/>Take From Stock, if Unavailable, Trigger Another Rule: Products are first taken from available stock. If none is available, the system applies a stock rule to bring products into the source location.',
-                    'automatic-move'              => 'Automatic Move',
-                    'automatic-move-hint-tooltip' => 'Manual Operation: Creates a separate stock move after the current one.<br/>Automatic No Step Added: Directly replaces the location in the original move without adding an extra step.',
+                    'name' => 'الاسم',
+                    'action' => 'الإجراء',
+                    'operation-type' => 'نوع العملية',
+                    'source-location' => 'الموقع المصدر',
+                    'destination-location' => 'الموقع الوجهة',
+                    'supply-method' => 'طريقة التوريد',
+                    'supply-method-hint-tooltip' => 'أخذ من المخزون: يتم جلب المنتجات مباشرة من المخزون المتوفر في الموقع المصدر.<br/>تشغيل قاعدة أخرى: يتجاهل النظام المخزون المتوفر ويبحث عن قاعدة مخزون لتزويد الموقع المصدر.<br/>أخذ من المخزون، إذا غير متوفر، تشغيل قاعدة أخرى: يتم أخذ المنتجات أولاً من المخزون المتوفر، وإذا لم يتوفر، يطبق النظام قاعدة مخزون لجلب المنتجات إلى الموقع المصدر.',
+                    'automatic-move' => 'نقل تلقائي',
+                    'automatic-move-hint-tooltip' => 'عملية يدوية: ينشئ حركة مخزون منفصلة بعد الحركة الحالية.<br/>تلقائي بدون إضافة خطوة: يستبدل الموقع في الحركة الأصلية مباشرة دون إضافة خطوة إضافية.',
 
                     'action-information' => [
-                        'pull' => 'When products are required in <b>:sourceLocation</b>, :operation is generated from <b>:destinationLocation</b> to meet the demand.',
-                        'push' => 'When products reach <b>:sourceLocation</b>,</br><b>:operation</b> is generated to transfer them to <b>:destinationLocation</b>.',
+                        'pull' => 'عند الحاجة إلى المنتجات في <b>:sourceLocation</b>، يتم إنشاء :operation من <b>:destinationLocation</b> لتلبية الطلب.',
+                        'push' => 'عند وصول المنتجات إلى <b>:sourceLocation</b>، يتم إنشاء <b>:operation</b> لنقلها إلى <b>:destinationLocation</b>.',
                     ],
                 ],
             ],
 
             'settings' => [
-                'title'  => 'Settings',
+                'title' => 'الإعدادات',
 
                 'fields' => [
-                    'partner-address'              => 'Partner Address',
-                    'partner-address-hint-tooltip' => 'Address where goods should be delivered. Optional.',
-                    'lead-time'                    => 'Lead Time (Days)',
-                    'lead-time-hint-tooltip'       => 'The expected transfer date will be calculated using this lead time.',
+                    'partner-address' => 'عنوان الشريك',
+                    'partner-address-hint-tooltip' => 'العنوان الذي يجب تسليم البضائع إليه. اختياري.',
+                    'lead-time' => 'مدة التنفيذ (أيام)',
+                    'lead-time-hint-tooltip' => 'سيتم حساب تاريخ النقل المتوقع باستخدام هذه المدة.',
                 ],
 
                 'fieldsets' => [
                     'applicability' => [
-                        'title'  => 'Applicability',
+                        'title' => 'القابلية للتطبيق',
 
                         'fields' => [
-                            'route'   => 'Route',
-                            'company' => 'Company',
+                            'route' => 'المسار',
+                            'company' => 'الشركة',
                         ],
                     ],
 
                     'propagation' => [
-                        'title'  => 'Propagation',
+                        'title' => 'الانتشار',
 
                         'fields' => [
-                            'propagation-procurement-group'              => 'Propagation of Procurement Group',
-                            'propagation-procurement-group-hint-tooltip' => 'If selected, canceling the move created by this rule will also cancel the subsequent move.',
-                            'cancel-next-move'                           => 'Cancel Next Move',
-                            'warehouse-to-propagate'                     => 'Warehouse to Propagate',
-                            'warehouse-to-propagate-hint-tooltip'        => 'The warehouse assigned to the created move or procurement, which may differ from the warehouse this rule applies to (e.g., for resupply rules from another warehouse).',
+                            'propagation-procurement-group' => 'انتشار مجموعة الشراء',
+                            'propagation-procurement-group-hint-tooltip' => 'إذا تم تحديده، فإن إلغاء الحركة التي أنشأتها هذه القاعدة سيؤدي أيضاً إلى إلغاء الحركة التالية.',
+                            'cancel-next-move' => 'إلغاء الحركة التالية',
+                            'warehouse-to-propagate' => 'المستودع للانتشار',
+                            'warehouse-to-propagate-hint-tooltip' => 'المستودع المخصص للحركة أو الشراء الذي قد يختلف عن المستودع الذي تنطبق عليه هذه القاعدة (مثلاً لقواعد إعادة التوريد من مستودع آخر).',
                         ],
                     ],
                 ],
@@ -68,65 +68,65 @@ return [
 
     'table' => [
         'columns' => [
-            'name'                 => 'Name',
-            'action'               => 'Action',
-            'source-location'      => 'Source Location',
-            'destination-location' => 'Destination Location',
-            'route'                => 'Route',
-            'deleted-at'           => 'Deleted At',
-            'created-at'           => 'Created At',
-            'updated-at'           => 'Updated At',
+            'name' => 'الاسم',
+            'action' => 'الإجراء',
+            'source-location' => 'الموقع المصدر',
+            'destination-location' => 'الموقع الوجهة',
+            'route' => 'المسار',
+            'deleted-at' => 'تاريخ الحذف',
+            'created-at' => 'تاريخ الإنشاء',
+            'updated-at' => 'تاريخ التحديث',
         ],
 
         'groups' => [
-            'action'               => 'Action',
-            'source-location'      => 'Source Location',
-            'destination-location' => 'Destination Location',
-            'route'                => 'Route',
-            'created-at'           => 'Created At',
-            'updated-at'           => 'Updated At',
+            'action' => 'الإجراء',
+            'source-location' => 'الموقع المصدر',
+            'destination-location' => 'الموقع الوجهة',
+            'route' => 'المسار',
+            'created-at' => 'تاريخ الإنشاء',
+            'updated-at' => 'تاريخ التحديث',
         ],
 
         'filters' => [
-            'action'               => 'Action',
-            'source-location'      => 'Source Location',
-            'destination-location' => 'Destination Location',
-            'route'                => 'Route',
-            'company'              => 'Company',
+            'action' => 'الإجراء',
+            'source-location' => 'الموقع المصدر',
+            'destination-location' => 'الموقع الوجهة',
+            'route' => 'المسار',
+            'company' => 'الشركة',
         ],
 
         'actions' => [
             'edit' => [
                 'notification' => [
-                    'title' => 'Rule updated',
-                    'body'  => 'The rule has been updated successfully.',
+                    'title' => 'تم تحديث القاعدة',
+                    'body' => 'تم تحديث القاعدة بنجاح.',
                 ],
             ],
 
             'restore' => [
                 'notification' => [
-                    'title' => 'Rule restored',
-                    'body'  => 'The rule has been restored successfully.',
+                    'title' => 'تم استعادة القاعدة',
+                    'body' => 'تم استعادة القاعدة بنجاح.',
                 ],
             ],
 
             'delete' => [
                 'notification' => [
-                    'title' => 'Rule deleted',
-                    'body'  => 'The rule has been deleted successfully.',
+                    'title' => 'تم حذف القاعدة',
+                    'body' => 'تم حذف القاعدة بنجاح.',
                 ],
             ],
 
             'force-delete' => [
                 'notification' => [
                     'success' => [
-                        'title' => 'Rule force deleted',
-                        'body'  => 'The rule has been force deleted successfully.',
+                        'title' => 'تم حذف القاعدة نهائياً',
+                        'body' => 'تم حذف القاعدة نهائياً بنجاح.',
                     ],
 
                     'error' => [
-                        'title' => 'Rule could not be deleted',
-                        'body'  => 'The rule cannot be deleted because it is currently in use.',
+                        'title' => 'تعذر حذف القاعدة',
+                        'body' => 'لا يمكن حذف القاعدة لأنها قيد الاستخدام حالياً.',
                     ],
                 ],
             ],
@@ -135,28 +135,28 @@ return [
         'bulk-actions' => [
             'restore' => [
                 'notification' => [
-                    'title' => 'Rules restored',
-                    'body'  => 'The rules has been restored successfully.',
+                    'title' => 'تم استعادة القواعد',
+                    'body' => 'تم استعادة القواعد بنجاح.',
                 ],
             ],
 
             'delete' => [
                 'notification' => [
-                    'title' => 'Rules deleted',
-                    'body'  => 'The rules has been deleted successfully.',
+                    'title' => 'تم حذف القواعد',
+                    'body' => 'تم حذف القواعد بنجاح.',
                 ],
             ],
 
             'force-delete' => [
                 'notification' => [
                     'success' => [
-                        'title' => 'Rules force deleted',
-                        'body'  => 'The rules has been force deleted successfully.',
+                        'title' => 'تم حذف القواعد نهائياً',
+                        'body' => 'تم حذف القواعد نهائياً بنجاح.',
                     ],
 
                     'error' => [
-                        'title' => 'Rules could not be deleted',
-                        'body'  => 'The rules cannot be deleted because they are currently in use.',
+                        'title' => 'تعذر حذف القواعد',
+                        'body' => 'لا يمكن حذف القواعد لأنها قيد الاستخدام حالياً.',
                     ],
                 ],
             ],
@@ -166,34 +166,34 @@ return [
     'infolist' => [
         'sections' => [
             'general' => [
-                'title' => 'Rule Details',
+                'title' => 'تفاصيل القاعدة',
 
                 'description' => [
-                    'pull' => 'When products are required in <b>:sourceLocation</b>, <b>:operation</b> is generated from <b>:destinationLocation</b> to meet the demand.',
-                    'push' => 'When products reach in <b>:sourceLocation</b>, <b>:operation</b> is generated to transfer them to <b>:destinationLocation</b>.',
+                    'pull' => 'عند الحاجة إلى المنتجات في <b>:sourceLocation</b>، يتم إنشاء <b>:operation</b> من <b>:destinationLocation</b> لتلبية الطلب.',
+                    'push' => 'عند وصول المنتجات إلى <b>:sourceLocation</b>، يتم إنشاء <b>:operation</b> لنقلها إلى <b>:destinationLocation</b>.',
                 ],
 
                 'entries' => [
-                    'name'                 => 'Rule Name',
-                    'action'               => 'Action',
-                    'operation-type'       => 'Operation Type',
-                    'source-location'      => 'Source Location',
-                    'destination-location' => 'Destination Location',
-                    'route'                => 'Route',
-                    'company'              => 'Company',
-                    'partner-address'      => 'Partner Address',
-                    'lead-time'            => 'Lead Time',
-                    'action-information'   => 'Action Information',
+                    'name' => 'اسم القاعدة',
+                    'action' => 'الإجراء',
+                    'operation-type' => 'نوع العملية',
+                    'source-location' => 'الموقع المصدر',
+                    'destination-location' => 'الموقع الوجهة',
+                    'route' => 'المسار',
+                    'company' => 'الشركة',
+                    'partner-address' => 'عنوان الشريك',
+                    'lead-time' => 'مدة التنفيذ',
+                    'action-information' => 'معلومات الإجراء',
                 ],
             ],
 
             'record-information' => [
-                'title' => 'Record Information',
+                'title' => 'معلومات السجل',
 
                 'entries' => [
-                    'created-by'   => 'Created By',
-                    'created-at'   => 'Created At',
-                    'last-updated' => 'Last Updated',
+                    'created-by' => 'أنشئ بواسطة',
+                    'created-at' => 'تاريخ الإنشاء',
+                    'last-updated' => 'آخر تحديث',
                 ],
             ],
         ],

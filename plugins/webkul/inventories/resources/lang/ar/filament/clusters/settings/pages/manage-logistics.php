@@ -1,10 +1,10 @@
 <?php
 
 return [
-    'title' => 'Manage Logistics',
+    'title' => 'إدارة اللوجستيات',
 
     'form' => [
-        'enable-dropshipping'             => 'Dropshipping',
-        'enable-dropshipping-helper-text' => 'This enables a dropshipping route for products, allowing vendors to ship directly to customers. When a product is set to dropship, a purchase request for quotation is generated upon sales order confirmation. This is an on-demand process, with the customer\'s delivery address used instead of the warehouse address.',
+        'enable-dropshipping' => 'الدروب شيب',
+        'enable-dropshipping-helper-text' => 'يُمكنك هذا من تفعيل مسار الدروب شيب للمنتجات، مما يسمح للموردين بالشحن مباشرة للعملاء. عند تعيين المنتج كدروب شيب، يتم إنشاء طلب شراء عند تأكيد طلب البيع. هذه عملية عند الطلب، ويُستخدم عنوان تسليم العميل بدلاً من عنوان المستودع.',
     ],
 ];

@@ -2,17 +2,17 @@
 
 return [
     'tabs' => [
-        'all'      => 'All',
-        'archived' => 'Archived',
+        'all' => 'الكل',
+        'archived' => 'المؤرشف',
     ],
 
     'header-actions' => [
         'create' => [
-            'label' => 'New Skill Type',
+            'label' => 'إضافة نوع مهارة جديدة',
 
             'notification' => [
-                'title' => 'Skill Type created',
-                'body'  => 'The skill type has been created successfully.',
+                'title' => 'تم إنشاء نوع المهارة',
+                'body' => 'تم إنشاء نوع المهارة بنجاح.',
             ],
         ],
     ],

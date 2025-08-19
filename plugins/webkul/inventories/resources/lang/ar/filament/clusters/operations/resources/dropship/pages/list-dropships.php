@@ -3,11 +3,11 @@
 return [
     'header-actions' => [
         'create' => [
-            'label' => 'New Dropship',
+            'label' => 'دروب شيب جديد',
 
             'notification' => [
-                'title' => 'Dropship created',
-                'body'  => 'The dropship has been created successfully.',
+                'title' => 'تم إنشاء الدروب شيب',
+                'body' => 'تم إنشاء الدروب شيب بنجاح.',
             ],
         ],
     ],

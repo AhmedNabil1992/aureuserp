@@ -1,9 +1,9 @@
 <?php
 
 return [
-    'draft'     => 'Draft',
-    'confirmed' => 'Waiting',
-    'assigned'  => 'Ready',
-    'done'      => 'Done',
-    'canceled'  => 'Canceled',
+    'draft' => 'مسودة',
+    'confirmed' => 'بانتظار',
+    'assigned' => 'جاهز',
+    'done' => 'منجز',
+    'canceled' => 'ملغي',
 ];

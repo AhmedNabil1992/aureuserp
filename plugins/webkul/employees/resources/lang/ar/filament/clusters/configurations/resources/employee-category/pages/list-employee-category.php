@@ -3,11 +3,11 @@
 return [
     'header-actions' => [
         'create' => [
-            'label' => 'New Tag',
+            'label' => 'إضافة تصنيف موظف جديد',
 
             'notification' => [
-                'title' => 'Tag created',
-                'body'  => 'The tag has been created successfully.',
+                'title' => 'تم إنشاء تصنيف الموظف',
+                'body' => 'تم إنشاء تصنيف الموظف بنجاح.',
             ],
         ],
     ],

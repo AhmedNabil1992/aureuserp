@@ -2,7 +2,7 @@
 
 return [
     'notification' => [
-        'title' => 'Fiscal Position created',
-        'body'  => 'The fiscal position has been created successfully.',
+        'title' => 'تم إنشاء الوضع الضريبي',
+        'body' => 'تم إنشاء الوضع الضريبي بنجاح.',
     ],
 ];

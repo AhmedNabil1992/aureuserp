@@ -3,19 +3,19 @@
 return [
     'header-actions' => [
         'print' => [
-            'label' => 'Print',
+            'label' => 'طباعة',
         ],
 
         'delete' => [
             'notification' => [
                 'success' => [
-                    'title' => 'Receipt Deleted',
-                    'body'  => 'The receipt has been deleted successfully.',
+                    'title' => 'تم حذف الإيصال',
+                    'body' => 'تم حذف الإيصال بنجاح.',
                 ],
 
                 'error' => [
-                    'title' => 'Receipt could not be deleted',
-                    'body'  => 'The Receipt cannot be deleted because it is currently in use.',
+                    'title' => 'تعذر حذف الإيصال',
+                    'body' => 'لا يمكن حذف الإيصال لأنه قيد الاستخدام حالياً.',
                 ],
             ],
         ],

@@ -1,12 +1,12 @@
 <?php
 
 return [
-    'title' => 'Bank Accounts',
+    'title' => 'الحسابات البنكية',
 
     'table' => [
         'header-actions' => [
             'create' => [
-                'title' => 'New Bank Account',
+                'title' => 'حساب بنكي جديد',
             ]
         ]
     ]

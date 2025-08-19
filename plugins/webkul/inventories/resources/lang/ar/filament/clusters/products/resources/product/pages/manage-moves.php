@@ -1,35 +1,35 @@
 <?php
 
 return [
-    'title' => 'IN/OUT',
+    'title' => 'الوارد/الصادر',
 
     'tabs' => [
-        'todo'     => 'To Do',
-        'done'     => 'Done',
-        'incoming' => 'Incoming',
-        'outgoing' => 'Outgoing',
-        'internal' => 'Internal',
+        'todo' => 'قيد التنفيذ',
+        'done' => 'منجز',
+        'incoming' => 'الوارد',
+        'outgoing' => 'الصادر',
+        'internal' => 'داخلي',
     ],
 
     'table' => [
         'columns' => [
-            'date'                 => 'Date',
-            'reference'            => 'Reference',
-            'product'              => 'Product',
-            'package'              => 'Package',
-            'lot'                  => 'Lot / Serial Numbers',
-            'source-location'      => 'Source Location',
-            'destination-location' => 'Destination Location',
-            'quantity'             => 'Quantity',
-            'state'                => 'State',
-            'done-by'              => 'Done By',
+            'date' => 'التاريخ',
+            'reference' => 'المرجع',
+            'product' => 'المنتج',
+            'package' => 'الطرد',
+            'lot' => 'دفعة / أرقام تسلسلية',
+            'source-location' => 'الموقع المصدر',
+            'destination-location' => 'الموقع الوجهة',
+            'quantity' => 'الكمية',
+            'state' => 'الحالة',
+            'done-by' => 'تم بواسطة',
         ],
 
         'actions' => [
             'delete' => [
                 'notification' => [
-                    'title' => 'Move deleted',
-                    'body'  => 'The move has been deleted successfully.',
+                    'title' => 'تم حذف الحركة',
+                    'body' => 'تم حذف الحركة بنجاح.',
                 ],
             ],
         ],

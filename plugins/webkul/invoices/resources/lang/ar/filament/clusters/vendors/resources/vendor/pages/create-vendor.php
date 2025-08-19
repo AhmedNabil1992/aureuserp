@@ -1,5 +1,5 @@
 <?php
 
-return  [
-    'title' => 'Create Vendor',
+return [
+    'title' => 'إنشاء مورد',
 ];

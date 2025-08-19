@@ -2,15 +2,15 @@
 
 return [
     'notification' => [
-        'title' => 'Department updated',
-        'body'  => 'The department has been updated successfully.',
+        'title' => 'تم تحديث القسم',
+        'body' => 'تم تحديث القسم بنجاح.',
     ],
 
     'header-actions' => [
         'delete' => [
             'notification' => [
-                'title' => 'Department deleted',
-                'body'  => 'The department has been deleted successfully.',
+                'title' => 'تم حذف القسم',
+                'body' => 'تم حذف القسم بنجاح.',
             ],
         ],
     ],

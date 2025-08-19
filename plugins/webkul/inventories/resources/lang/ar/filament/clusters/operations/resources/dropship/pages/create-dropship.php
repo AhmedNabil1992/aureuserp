@@ -1,10 +1,10 @@
 <?php
 
 return [
-    'title' => 'Create Dropship',
+    'title' => 'إنشاء دروب شيب',
 
     'notification' => [
-        'title' => 'Dropship created',
-        'body'  => 'The dropship has been created successfully.',
+        'title' => 'تم إنشاء الدروب شيب',
+        'body' => 'تم إنشاء الدروب شيب بنجاح.',
     ],
 ];

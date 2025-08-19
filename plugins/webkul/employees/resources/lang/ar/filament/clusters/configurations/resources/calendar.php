@@ -1,52 +1,52 @@
 <?php
 
 return [
-    'title' => 'Working Schedules',
+    'title' => 'جداول العمل',
 
     'navigation' => [
-        'title' => 'Working Schedules',
-        'group' => 'Employee',
+        'title' => 'جداول العمل',
+        'group' => 'الموظف',
     ],
 
     'groups' => [
-        'status'     => 'Status',
-        'created-by' => 'Created By',
-        'created-at' => 'Created At',
-        'updated-at' => 'Updated At',
+        'status' => 'الحالة',
+        'created-by' => 'أنشئ بواسطة',
+        'created-at' => 'تاريخ الإنشاء',
+        'updated-at' => 'تاريخ التحديث',
     ],
 
     'form' => [
         'sections' => [
             'general' => [
-                'title'  => 'General Information',
+                'title' => 'معلومات عامة',
                 'fields' => [
-                    'name'                  => 'Name',
-                    'schedule-name'         => 'Schedule Name',
-                    'schedule-name-tooltip' => 'Please write descriptive working schedule name.',
-                    'timezone'              => 'Timezone',
-                    'timezone-tooltip'      => 'Please select the timezone for the working schedule.',
-                    'company'               => 'Company',
+                    'name' => 'الاسم',
+                    'schedule-name' => 'اسم الجدول',
+                    'schedule-name-tooltip' => 'يرجى كتابة اسم جدول عمل وصفي.',
+                    'timezone' => 'المنطقة الزمنية',
+                    'timezone-tooltip' => 'يرجى اختيار المنطقة الزمنية لجدول العمل.',
+                    'company' => 'الشركة',
                 ],
             ],
 
             'configuration' => [
-                'title'  => 'Work Hours Configuration',
+                'title' => 'إعدادات ساعات العمل',
                 'fields' => [
-                    'hours-per-day'                   => 'Hours Per Day',
-                    'hours-per-day-suffix'            => 'Hours',
-                    'full-time-required-hours'        => 'Full Time Required Hours',
-                    'full-time-required-hours-suffix' => 'Hours Per Week',
+                    'hours-per-day' => 'ساعات في اليوم',
+                    'hours-per-day-suffix' => 'ساعات',
+                    'full-time-required-hours' => 'ساعات العمل المطلوبة للدوام الكامل',
+                    'full-time-required-hours-suffix' => 'ساعات في الأسبوع',
                 ],
             ],
 
             'flexibility' => [
-                'title'  => 'Flexibility',
+                'title' => 'المرونة',
                 'fields' => [
-                    'status'                     => 'Status',
-                    'two-weeks-calendar'         => 'Two Weeks Calendar',
-                    'two-weeks-calendar-tooltip' => 'Enable alternating two-week work schedule.',
-                    'flexible-hours'             => 'Flexible Hours',
-                    'flexible-hours-tooltip'     => 'Allow employees to have flexible work hours.',
+                    'status' => 'الحالة',
+                    'two-weeks-calendar' => 'جدول أسبوعين',
+                    'two-weeks-calendar-tooltip' => 'تفعيل جدول عمل متناوب كل أسبوعين.',
+                    'flexible-hours' => 'ساعات مرنة',
+                    'flexible-hours-tooltip' => 'السماح للموظفين بساعات عمل مرنة.',
                 ],
             ],
         ],
@@ -54,62 +54,62 @@ return [
 
     'table' => [
         'columns' => [
-            'id'             => 'ID',
-            'name'           => 'Schedule Name',
-            'timezone'       => 'Timezone',
-            'company'        => 'Company',
-            'flexible-hours' => 'Flexible Hours',
-            'status'         => 'Status',
-            'daily-hours'    => 'Daily Hours',
-            'created-by'     => 'Created By',
-            'created-at'     => 'Created At',
-            'updated-at'     => 'Updated At',
+            'id' => 'المعرف',
+            'name' => 'اسم الجدول',
+            'timezone' => 'المنطقة الزمنية',
+            'company' => 'الشركة',
+            'flexible-hours' => 'ساعات مرنة',
+            'status' => 'الحالة',
+            'daily-hours' => 'ساعات يومية',
+            'created-by' => 'أنشئ بواسطة',
+            'created-at' => 'تاريخ الإنشاء',
+            'updated-at' => 'تاريخ التحديث',
         ],
 
         'filters' => [
-            'company'           => 'Company',
-            'is-active'         => 'Status',
-            'two-week-calendar' => 'Two Weeks Calendar',
-            'flexible-hours'    => 'Flexible Hours',
-            'timezone'          => 'Timezone',
-            'name'              => 'Schedule Name',
-            'attendance'        => 'Attendance',
-            'created-by'        => 'Created By',
-            'daily-hours'       => 'Daily Hours',
-            'updated-at'        => 'Updated At',
-            'created-at'        => 'Created At',
+            'company' => 'الشركة',
+            'is-active' => 'الحالة',
+            'two-week-calendar' => 'جدول أسبوعين',
+            'flexible-hours' => 'ساعات مرنة',
+            'timezone' => 'المنطقة الزمنية',
+            'name' => 'اسم الجدول',
+            'attendance' => 'الحضور',
+            'created-by' => 'أنشئ بواسطة',
+            'daily-hours' => 'ساعات يومية',
+            'updated-at' => 'تاريخ التحديث',
+            'created-at' => 'تاريخ الإنشاء',
         ],
 
         'groups' => [
-            'name'           => 'Schedule Name',
-            'status'         => 'Status',
-            'timezone'       => 'Timezone',
-            'flexible-hours' => 'Flexible Hours',
-            'daily-hours'    => 'Daily Hours',
-            'created-by'     => 'Created By',
-            'created-at'     => 'Created At',
-            'updated-at'     => 'Updated At',
+            'name' => 'اسم الجدول',
+            'status' => 'الحالة',
+            'timezone' => 'المنطقة الزمنية',
+            'flexible-hours' => 'ساعات مرنة',
+            'daily-hours' => 'ساعات يومية',
+            'created-by' => 'أنشئ بواسطة',
+            'created-at' => 'تاريخ الإنشاء',
+            'updated-at' => 'تاريخ التحديث',
         ],
 
         'actions' => [
             'restore' => [
                 'notification' => [
-                    'title' => 'Calendar Plan restored',
-                    'body'  => 'The calendar plan has been restored successfully.',
+                    'title' => 'تم استعادة خطة الجدول',
+                    'body' => 'تم استعادة خطة الجدول بنجاح.',
                 ],
             ],
 
             'delete' => [
                 'notification' => [
-                    'title' => 'Calendar Plan deleted',
-                    'body'  => 'The calendar plan has been deleted successfully.',
+                    'title' => 'تم حذف خطة الجدول',
+                    'body' => 'تم حذف خطة الجدول بنجاح.',
                 ],
             ],
 
             'force-delete' => [
                 'notification' => [
-                    'title' => 'Calendar Plan force deleted',
-                    'body'  => 'The calendar plan has been force deleted successfully.',
+                    'title' => 'تم حذف خطة الجدول نهائياً',
+                    'body' => 'تم حذف خطة الجدول نهائياً بنجاح.',
                 ],
             ],
         ],
@@ -117,22 +117,22 @@ return [
         'bulk-actions' => [
             'restore' => [
                 'notification' => [
-                    'title' => 'Calendar Plans restored',
-                    'body'  => 'The calendar plans has been restored successfully.',
+                    'title' => 'تم استعادة خطط الجداول',
+                    'body' => 'تم استعادة خطط الجداول بنجاح.',
                 ],
             ],
 
             'delete' => [
                 'notification' => [
-                    'title' => 'Calendar Plans deleted',
-                    'body'  => 'The calendar plans has been deleted successfully.',
+                    'title' => 'تم حذف خطط الجداول',
+                    'body' => 'تم حذف خطط الجداول بنجاح.',
                 ],
             ],
 
             'force-delete' => [
                 'notification' => [
-                    'title' => 'Calendar Plans force deleted',
-                    'body'  => 'The calendar plans has been force deleted successfully.',
+                    'title' => 'تم حذف خطط الجداول نهائياً',
+                    'body' => 'تم حذف خطط الجداول نهائياً بنجاح.',
                 ],
             ],
         ],
@@ -141,35 +141,35 @@ return [
     'infolist' => [
         'sections' => [
             'general' => [
-                'title'   => 'General Information',
+                'title' => 'معلومات عامة',
                 'entries' => [
-                    'name'                  => 'Name',
-                    'schedule-name'         => 'Schedule Name',
-                    'schedule-name-tooltip' => 'Please write descriptive working schedule name.',
-                    'timezone'              => 'Timezone',
-                    'timezone-tooltip'      => 'Please select the timezone for the working schedule.',
-                    'company'               => 'Company',
+                    'name' => 'الاسم',
+                    'schedule-name' => 'اسم الجدول',
+                    'schedule-name-tooltip' => 'يرجى كتابة اسم جدول عمل وصفي.',
+                    'timezone' => 'المنطقة الزمنية',
+                    'timezone-tooltip' => 'يرجى اختيار المنطقة الزمنية لجدول العمل.',
+                    'company' => 'الشركة',
                 ],
             ],
 
             'configuration' => [
-                'title'   => 'Work Hours Configuration',
+                'title' => 'إعدادات ساعات العمل',
                 'entries' => [
-                    'hours-per-day'                   => 'Hours Per Day',
-                    'hours-per-day-suffix'            => 'Hours',
-                    'full-time-required-hours'        => 'Full Time Required Hours',
-                    'full-time-required-hours-suffix' => 'Hours Per Week',
+                    'hours-per-day' => 'ساعات في اليوم',
+                    'hours-per-day-suffix' => 'ساعات',
+                    'full-time-required-hours' => 'ساعات العمل المطلوبة للدوام الكامل',
+                    'full-time-required-hours-suffix' => 'ساعات في الأسبوع',
                 ],
             ],
 
             'flexibility' => [
-                'title'   => 'Flexibility',
+                'title' => 'المرونة',
                 'entries' => [
-                    'status'                     => 'Status',
-                    'two-weeks-calendar'         => 'Two Weeks Calendar',
-                    'two-weeks-calendar-tooltip' => 'Enable alternating two-week work schedule.',
-                    'flexible-hours'             => 'Flexible Hours',
-                    'flexible-hours-tooltip'     => 'Allow employees to have flexible work hours.',
+                    'status' => 'الحالة',
+                    'two-weeks-calendar' => 'جدول أسبوعين',
+                    'two-weeks-calendar-tooltip' => 'تفعيل جدول عمل متناوب كل أسبوعين.',
+                    'flexible-hours' => 'ساعات مرنة',
+                    'flexible-hours-tooltip' => 'السماح للموظفين بساعات عمل مرنة.',
                 ],
             ],
         ],

@@ -1,17 +1,17 @@
 <?php
 
 return [
-    'label' => 'Mark as Todo',
+    'label' => 'تعيين كـ "قيد التنفيذ"',
 
     'notification' => [
         'warning' => [
-            'title' => 'Receipt has no moves',
-            'body'  => 'The receipt has no moves to mark as todo.',
+            'title' => 'الإيصال لا يحتوي على حركات',
+            'body' => 'الإيصال لا يحتوي على حركات ليتم تعيينها كـ "قيد التنفيذ".',
         ],
 
         'success' => [
-            'title' => 'Receipt marked as todo',
-            'body'  => 'The receipt has been marked as todo successfully.',
+            'title' => 'تم تعيين الإيصال كـ "قيد التنفيذ"',
+            'body' => 'تم تعيين الإيصال كـ "قيد التنفيذ" بنجاح.',
         ],
     ],
 ];

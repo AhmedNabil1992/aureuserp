@@ -2,21 +2,21 @@
 
 return [
     'tabs' => [
-        'all'        => 'All',
-        'internal'   => 'Internal',
-        'customer'   => 'Customer',
-        'production' => 'Production',
-        'vendor'     => 'Vendor',
-        'archived'   => 'Archived',
+        'all' => 'الكل',
+        'internal' => 'داخلي',
+        'customer' => 'عميل',
+        'production' => 'إنتاج',
+        'vendor' => 'مورد',
+        'archived' => 'مؤرشف',
     ],
 
     'header-actions' => [
         'create' => [
-            'label' => 'New Location',
+            'label' => 'موقع جديد',
 
             'notification' => [
-                'title' => 'Location created',
-                'body'  => 'The location has been created successfully.',
+                'title' => 'تم إنشاء الموقع',
+                'body' => 'تم إنشاء الموقع بنجاح.',
             ],
         ],
     ],

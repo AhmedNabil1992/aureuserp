@@ -1,5 +1,5 @@
 <?php
 
-return  [
-    'title' => 'View Vendor',
+return [
+    'title' => 'عرض المورد',
 ];

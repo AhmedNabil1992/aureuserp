@@ -1,18 +1,18 @@
 <?php
 
 return [
-    'title' => 'Refund',
+    'title' => 'المردودات',
 
     'navigation' => [
-        'title' => 'Refunds',
+        'title' => 'المردودات',
     ],
 
     'form' => [
-        'biller'            => 'Biller',
-        'name'              => 'Vendor Credit Note',
-        'name-placeholder'  => 'RBILL/2025/02/0001',
-        'reference'         => 'Reference',
-        'payment-reference' => 'Payment Reference',
-        'date'              => 'Accounting Date',
+        'biller' => 'المُصدر',
+        'name' => 'إشعار دائن المورد',
+        'name-placeholder' => 'RBILL/2025/02/0001',
+        'reference' => 'المرجع',
+        'payment-reference' => 'مرجع الدفع',
+        'date' => 'تاريخ المحاسبة',
     ],
 ];

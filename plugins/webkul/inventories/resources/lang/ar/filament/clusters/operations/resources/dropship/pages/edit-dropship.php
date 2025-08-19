@@ -2,25 +2,25 @@
 
 return [
     'notification' => [
-        'title' => 'Dropship updated',
-        'body'  => 'The dropship has been updated successfully.',
+        'title' => 'تم تحديث الدروب شيب',
+        'body' => 'تم تحديث الدروب شيب بنجاح.',
     ],
 
     'header-actions' => [
         'print' => [
-            'label' => 'Print',
+            'label' => 'طباعة',
         ],
 
         'delete' => [
             'notification' => [
                 'success' => [
-                    'title' => 'Dropship deleted',
-                    'body'  => 'The dropship has been deleted successfully.',
+                    'title' => 'تم حذف الدروب شيب',
+                    'body' => 'تم حذف الدروب شيب بنجاح.',
                 ],
 
                 'error' => [
-                    'title' => 'Dropship could not be deleted',
-                    'body'  => 'The dropship cannot be deleted because it is currently in use.',
+                    'title' => 'تعذر حذف الدروب شيب',
+                    'body' => 'لا يمكن حذف الدروب شيب لأنه قيد الاستخدام حالياً.',
                 ],
             ],
         ],

@@ -2,26 +2,26 @@
 
 return [
     'navigation' => [
-        'title' => 'Packagings',
-        'group' => 'Products',
+        'title' => 'التغليفات',
+        'group' => 'المنتجات',
     ],
 
     'form' => [
-        'package-type' => 'Package Type',
-        'routes'       => 'Routes',
+        'package-type' => 'نوع الطرد',
+        'routes' => 'المسارات',
     ],
 
     'table' => [
         'columns' => [
-            'package-type' => 'Package Type',
+            'package-type' => 'نوع الطرد',
         ],
 
         'groups' => [
-            'package-type' => 'Package Type',
+            'package-type' => 'نوع الطرد',
         ],
 
         'filters' => [
-            'package-type' => 'Package Type',
+            'package-type' => 'نوع الطرد',
         ],
     ],
 
@@ -29,16 +29,16 @@ return [
         'sections' => [
             'general' => [
                 'entries' => [
-                    'package_type' => 'Package Type',
+                    'package_type' => 'نوع الطرد',
                 ],
             ],
 
             'routing' => [
-                'title' => 'Routing Information',
+                'title' => 'معلومات المسار',
 
                 'entries' => [
-                    'routes'     => 'Warehouse Routes',
-                    'route_name' => 'Route Name',
+                    'routes' => 'مسارات المستودع',
+                    'route_name' => 'اسم المسار',
                 ],
             ],
         ],

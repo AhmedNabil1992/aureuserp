@@ -3,11 +3,11 @@
 return [
     'header-actions' => [
         'create' => [
-            'label' => 'New Title',
+            'label' => 'عنوان جديد',
 
             'notification' => [
-                'title' => 'Title created',
-                'body'  => 'The title has been created successfully.',
+                'title' => 'تم إنشاء العنوان',
+                'body' => 'تم إنشاء العنوان بنجاح.',
             ],
         ],
     ],

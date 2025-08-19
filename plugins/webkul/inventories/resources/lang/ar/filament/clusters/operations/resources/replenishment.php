@@ -2,8 +2,8 @@
 
 return [
     'navigation' => [
-        'title' => 'Replenishment',
-        'group' => 'Procurement',
+        'title' => 'إعادة التوريد',
+        'group' => 'المشتريات',
     ],
 
     'form' => [
@@ -13,24 +13,24 @@ return [
 
     'table' => [
         'columns' => [
-            'product'           => 'Product',
-            'location'          => 'Location',
-            'route'             => 'Route',
-            'vendor'            => 'Vendor',
-            'trigger'           => 'Trigger',
-            'on-hand'           => 'On Hand',
-            'min'               => 'Min',
-            'max'               => 'Max',
-            'multiple-quantity' => 'Multiple Quantity',
-            'to-order'          => 'To Order',
-            'uom'               => 'UOM',
-            'company'           => 'Company',
+            'product' => 'المنتج',
+            'location' => 'الموقع',
+            'route' => 'المسار',
+            'vendor' => 'المورد',
+            'trigger' => 'المشغل',
+            'on-hand' => 'المتوفر',
+            'min' => 'الحد الأدنى',
+            'max' => 'الحد الأقصى',
+            'multiple-quantity' => 'كمية متعددة',
+            'to-order' => 'للطلب',
+            'uom' => 'وحدة القياس',
+            'company' => 'الشركة',
         ],
 
         'groups' => [
-            'location' => 'Location',
-            'product'  => 'Product',
-            'category' => 'Category',
+            'location' => 'الموقع',
+            'product' => 'المنتج',
+            'category' => 'الفئة',
         ],
 
         'filters' => [
@@ -38,17 +38,17 @@ return [
 
         'header-actions' => [
             'create' => [
-                'label' => 'Add Replenishment',
+                'label' => 'إضافة إعادة توريد',
 
                 'notification' => [
-                    'title' => 'Replenishment added',
-                    'body'  => 'The replenishment has been added successfully.',
+                    'title' => 'تمت إضافة إعادة التوريد',
+                    'body' => 'تمت إضافة إعادة التوريد بنجاح.',
                 ],
 
                 'before' => [
                     'notification' => [
-                        'title' => 'Replenishment already exists',
-                        'body'  => 'A replenishment already exists for this configuration. Please update the existing replenishment instead.',
+                        'title' => 'إعادة التوريد موجودة مسبقاً',
+                        'body' => 'توجد إعادة توريد مسبقاً لهذا التكوين. يرجى تحديث إعادة التوريد الحالية بدلاً من ذلك.',
                     ],
                 ],
             ],

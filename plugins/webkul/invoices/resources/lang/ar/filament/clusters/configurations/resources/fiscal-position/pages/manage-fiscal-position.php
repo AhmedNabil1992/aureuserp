@@ -2,6 +2,6 @@
 
 return [
     'navigation' => [
-        'title' => 'Manage Fiscal Position Taxes',
+        'title' => 'إدارة ضرائب الوضع الضريبي',
     ],
 ];

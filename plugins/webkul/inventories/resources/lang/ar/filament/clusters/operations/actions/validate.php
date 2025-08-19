@@ -1,36 +1,36 @@
 <?php
 
 return [
-    'label'             => 'Validate',
-    'modal-heading'     => 'Create Back Order?',
-    'modal-description' => 'Create a backorder if the remaining products will be processed later. If not, do not generate a backorder.',
+    'label' => 'تحقق',
+    'modal-heading' => 'إنشاء طلب خلفي؟',
+    'modal-description' => 'أنشئ طلباً خلفياً إذا سيتم معالجة المنتجات المتبقية لاحقاً. إذا لم يكن كذلك، لا تقم بإنشاء طلب خلفي.',
 
     'extra-modal-footer-actions' => [
         'no-backorder' => [
-            'label' => 'No Backorder',
+            'label' => 'بدون طلب خلفي',
         ],
     ],
 
     'notification' => [
         'warning' => [
             'lines-missing' => [
-                'title' => 'No quantities are reserved',
-                'body'  => 'No quantities are reserved for the transfer.',
+                'title' => 'لا توجد كميات محجوزة',
+                'body' => 'لا توجد كميات محجوزة للنقل.',
             ],
 
             'lot-missing' => [
-                'title' => 'Supply Lot/Serial Number',
-                'body'  => 'You need to supply a Lot/Serial Number for products',
+                'title' => 'تزويد رقم الدفعة/التسلسلي',
+                'body' => 'يجب عليك تزويد رقم دفعة/تسلسلي للمنتجات',
             ],
 
             'serial-qty' => [
-                'title' => 'Serial Number Already Assigned',
-                'body'  => 'The serial number has already been assigned to another product.',
+                'title' => 'تم تعيين الرقم التسلسلي مسبقاً',
+                'body' => 'تم تعيين الرقم التسلسلي بالفعل لمنتج آخر.',
             ],
 
             'partial-package' => [
-                'title' => 'Can not move same package content',
-                'body'  => 'You cannot move the same package contents more than once within a single transfer or split the package between two locations.',
+                'title' => 'لا يمكن نقل نفس محتوى الطرد',
+                'body' => 'لا يمكنك نقل نفس محتويات الطرد أكثر من مرة ضمن عملية نقل واحدة أو تقسيم الطرد بين موقعين.',
             ],
         ],
     ],

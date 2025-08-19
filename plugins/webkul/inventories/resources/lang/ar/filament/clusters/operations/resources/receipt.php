@@ -2,8 +2,8 @@
 
 return [
     'navigation' => [
-        'title' => 'Receipts',
-        'group' => 'Transfers',
+        'title' => 'الإيصالات',
+        'group' => 'النقل',
     ],
 
     'table' => [
@@ -11,13 +11,13 @@ return [
             'delete' => [
                 'notification' => [
                     'success' => [
-                        'title' => 'Receipt deleted',
-                        'body'  => 'The receipt ras been deleted successfully.',
+                        'title' => 'تم حذف الإيصال',
+                        'body' => 'تم حذف الإيصال بنجاح.',
                     ],
 
                     'error' => [
-                        'title' => 'Receipt could not be deleted',
-                        'body'  => 'The receipt cannot be deleted because it is currently in use.',
+                        'title' => 'تعذر حذف الإيصال',
+                        'body' => 'لا يمكن حذف الإيصال لأنه قيد الاستخدام حالياً.',
                     ],
                 ],
             ],
@@ -27,13 +27,13 @@ return [
             'delete' => [
                 'notification' => [
                     'success' => [
-                        'title' => 'Receipts deleted',
-                        'body'  => 'The receipts has been deleted successfully.',
+                        'title' => 'تم حذف الإيصالات',
+                        'body' => 'تم حذف الإيصالات بنجاح.',
                     ],
 
                     'error' => [
-                        'title' => 'Receipts could not be deleted',
-                        'body'  => 'The receipts cannot be deleted because they are currently in use.',
+                        'title' => 'تعذر حذف الإيصالات',
+                        'body' => 'لا يمكن حذف الإيصالات لأنها قيد الاستخدام حالياً.',
                     ],
                 ],
             ],
