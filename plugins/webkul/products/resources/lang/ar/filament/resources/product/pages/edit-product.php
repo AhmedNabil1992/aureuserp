@@ -2,25 +2,25 @@
 
 return [
     'notification' => [
-        'title' => 'Product updated',
-        'body'  => 'The product has been updated successfully.',
+        'title' => 'تم تحديث المنتج',
+        'body' => 'تم تحديث المنتج بنجاح.',
     ],
 
     'header-actions' => [
         'print' => [
-            'label' => 'Print Labels',
+            'label' => 'طباعة الملصقات',
 
             'form' => [
                 'fields' => [
-                    'quantity' => 'Number of Labels',
-                    'format'   => 'Format',
+                    'quantity' => 'عدد الملصقات',
+                    'format' => 'التنسيق',
 
                     'format-options' => [
-                        'dymo'       => 'Dymo',
-                        '2x7_price'  => '2x7 with price',
-                        '4x7_price'  => '4x7 with price',
-                        '4x12'       => '4x12',
-                        '4x12_price' => '4x12 with price',
+                        'dymo' => 'Dymo',
+                        '2x7_price' => '2×7 مع السعر',
+                        '4x7_price' => '4×7 مع السعر',
+                        '4x12' => '4×12',
+                        '4x12_price' => '4×12 مع السعر',
                     ],
                 ],
             ],
@@ -28,8 +28,8 @@ return [
 
         'delete' => [
             'notification' => [
-                'title' => 'Product deleted',
-                'body'  => 'The product has been deleted successfully.',
+                'title' => 'تم حذف المنتج',
+                'body' => 'تم حذف المنتج بنجاح.',
             ],
         ],
     ],

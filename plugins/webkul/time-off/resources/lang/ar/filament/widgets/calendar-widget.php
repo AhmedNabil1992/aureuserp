@@ -3,28 +3,28 @@
 return [
     'modal-actions' => [
         'edit' => [
-            'title' => 'Edit',
+            'title' => 'تعديل',
         ],
 
         'delete' => [
-            'title' => 'Delete',
+            'title' => 'حذف',
         ],
     ],
 
     'view-action' => [
-        'title'       => 'View',
-        'description' => 'View Time Off Request',
+        'title' => 'عرض',
+        'description' => 'عرض طلب الإجازة',
     ],
 
     'header-actions' => [
         'create' => [
-            'title'       => 'New Time Off',
-            'description' => 'Create Time Off Request',
+            'title' => 'إجازة جديدة',
+            'description' => 'إنشاء طلب إجازة',
 
             'employee-not-found' => [
                 'notification' => [
-                    'title' => 'Employee Not Found',
-                    'body'  => 'Please add an employee to your profile before creating a time off request.',
+                    'title' => 'الموظف غير موجود',
+                    'body' => 'يرجى إضافة موظف إلى ملفك الشخصي قبل إنشاء طلب إجازة.',
                 ],
             ],
         ],
@@ -32,25 +32,25 @@ return [
 
     'form' => [
         'fields' => [
-            'time-off-type'     => 'Time Off Type',
-            'request-date-from' => 'Request Date From',
-            'request-date-to'   => 'Request Date To',
-            'period'            => 'Period',
-            'half-day'          => 'Half Day',
-            'requested-days'    => 'Requested (Days/Hours)',
-            'description'       => 'Description',
+            'time-off-type' => 'نوع الإجازة',
+            'request-date-from' => 'تاريخ بدء الطلب',
+            'request-date-to' => 'تاريخ نهاية الطلب',
+            'period' => 'الفترة',
+            'half-day' => 'نصف يوم',
+            'requested-days' => 'الأيام/الساعات المطلوبة',
+            'description' => 'الوصف',
         ],
     ],
 
     'infolist' => [
         'entries' => [
-            'time-off-type'           => 'Time Off Type',
-            'request-date-from'       => 'Request Date From',
-            'request-date-to'         => 'Request Date To',
-            'description'             => 'Description',
+            'time-off-type' => 'Time Off Type',
+            'request-date-from' => 'Request Date From',
+            'request-date-to' => 'Request Date To',
+            'description' => 'Description',
             'description-placeholder' => 'No description provided',
-            'duration'                => 'Duration',
-            'status'                  => 'Status',
+            'duration' => 'Duration',
+            'status' => 'Status',
         ],
     ],
 

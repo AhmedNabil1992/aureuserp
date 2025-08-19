@@ -4,21 +4,21 @@ return [
     'form' => [
         'sections' => [
             'general' => [
-                'title'  => 'General',
+                'title' => 'عام',
 
                 'fields' => [
-                    'name' => 'Name',
-                    'type' => 'Type',
+                    'name' => 'الاسم',
+                    'type' => 'النوع',
                 ],
             ],
 
             'options' => [
-                'title'  => 'Options',
+                'title' => 'الخيارات',
 
                 'fields' => [
-                    'name'        => 'Name',
-                    'color'       => 'Color',
-                    'extra-price' => 'Extra Price',
+                    'name' => 'الاسم',
+                    'color' => 'اللون',
+                    'extra-price' => 'سعر إضافي',
                 ],
             ],
         ],
@@ -26,48 +26,48 @@ return [
 
     'table' => [
         'columns' => [
-            'name'        => 'Name',
-            'type'        => 'Type',
-            'deleted-at'  => 'Deleted At',
-            'created-at'  => 'Created At',
-            'updated-at'  => 'Updated At',
+            'name' => 'الاسم',
+            'type' => 'النوع',
+            'deleted-at' => 'تاريخ الحذف',
+            'created-at' => 'تاريخ الإنشاء',
+            'updated-at' => 'تاريخ التحديث',
         ],
 
         'groups' => [
-            'type'       => 'Type',
-            'created-at' => 'Created At',
-            'updated-at' => 'Updated At',
+            'type' => 'النوع',
+            'created-at' => 'تاريخ الإنشاء',
+            'updated-at' => 'تاريخ التحديث',
         ],
 
         'filters' => [
-            'type' => 'Type',
+            'type' => 'النوع',
         ],
 
         'actions' => [
             'restore' => [
                 'notification' => [
-                    'title' => 'Attribute restored',
-                    'body'  => 'The attribute has been restored successfully.',
+                    'title' => 'تمت استعادة السمة',
+                    'body' => 'تم استعادة السمة بنجاح.',
                 ],
             ],
 
             'delete' => [
                 'notification' => [
-                    'title' => 'Attribute deleted',
-                    'body'  => 'The attribute has been deleted successfully.',
+                    'title' => 'تم حذف السمة',
+                    'body' => 'تم حذف السمة بنجاح.',
                 ],
             ],
 
             'force-delete' => [
                 'notification' => [
                     'success' => [
-                        'title' => 'Attribute force deleted',
-                        'body'  => 'The attribute has been force deleted successfully.',
+                        'title' => 'تم الحذف الإجباري للسمة',
+                        'body' => 'تم الحذف الإجباري للسمة بنجاح.',
                     ],
 
                     'error' => [
-                        'title' => 'Attribute could not be deleted',
-                        'body'  => 'The attribute cannot be deleted because it is currently in use.',
+                        'title' => 'تعذر حذف السمة',
+                        'body' => 'لا يمكن حذف السمة لأنها قيد الاستخدام حاليًا.',
                     ],
                 ],
             ],
@@ -76,28 +76,28 @@ return [
         'bulk-actions' => [
             'restore' => [
                 'notification' => [
-                    'title' => 'Attributes restored',
-                    'body'  => 'The attributes has been restored successfully.',
+                    'title' => 'تمت استعادة السمات',
+                    'body' => 'تم استعادة السمات بنجاح.',
                 ],
             ],
 
             'delete' => [
                 'notification' => [
-                    'title' => 'Attributes deleted',
-                    'body'  => 'The attributes has been deleted successfully.',
+                    'title' => 'تم حذف السمات',
+                    'body' => 'تم حذف السمات بنجاح.',
                 ],
             ],
 
             'force-delete' => [
                 'notification' => [
                     'success' => [
-                        'title' => 'Attributes force deleted',
-                        'body'  => 'The attributes has been force deleted successfully.',
+                        'title' => 'تم الحذف الإجباري للسمات',
+                        'body' => 'تم الحذف الإجباري للسمات بنجاح.',
                     ],
 
                     'error' => [
-                        'title' => 'Attributes could not be deleted',
-                        'body'  => 'The attributes cannot be deleted because they are currently in use.',
+                        'title' => 'تعذر حذف السمات',
+                        'body' => 'لا يمكن حذف السمات لأنها قيد الاستخدام حاليًا.',
                     ],
                 ],
             ],
@@ -107,21 +107,21 @@ return [
     'infolist' => [
         'sections' => [
             'general' => [
-                'title' => 'General Information',
+                'title' => 'معلومات عامة',
 
                 'entries' => [
-                    'name' => 'Name',
-                    'type' => 'Type',
+                    'name' => 'الاسم',
+                    'type' => 'النوع',
                 ],
             ],
 
             'record-information' => [
-                'title' => 'Record Information',
+                'title' => 'معلومات السجل',
 
                 'entries' => [
-                    'creator'    => 'Created By',
-                    'created_at' => 'Created At',
-                    'updated_at' => 'Last Updated At',
+                    'creator' => 'أنشئ بواسطة',
+                    'created_at' => 'تاريخ الإنشاء',
+                    'updated_at' => 'آخر تحديث في',
                 ],
             ],
         ],

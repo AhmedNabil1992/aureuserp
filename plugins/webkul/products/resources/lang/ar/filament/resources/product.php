@@ -7,131 +7,131 @@ return [
                 'title' => 'General',
 
                 'fields' => [
-                    'name'             => 'Name',
-                    'name-placeholder' => 'eg. T-shirt',
-                    'description'      => 'Description',
-                    'tags'             => 'Tags',
+                    'name' => 'الاسم',
+                    'name-placeholder' => 'مثال: تي-شيرت',
+                    'description' => 'الوصف',
+                    'tags' => 'العلامات',
                 ],
             ],
 
             'images' => [
-                'title' => 'Images',
+                'title' => 'الصور',
             ],
 
             'inventory' => [
-                'title' => 'Inventory',
+                'title' => 'المخزون',
 
                 'fields' => [],
 
                 'fieldsets' => [
                     'logistics' => [
-                        'title' => 'Logistics',
+                        'title' => 'الخدمات اللوجستية',
 
                         'fields' => [
-                            'weight' => 'Weight',
-                            'volume' => 'Volume',
+                            'weight' => 'الوزن',
+                            'volume' => 'الحجم',
                         ],
                     ],
                 ],
             ],
 
             'settings' => [
-                'title' => 'Settings',
+                'title' => 'الإعدادات',
 
                 'fields' => [
-                    'type'      => 'Type',
-                    'reference' => 'Reference',
-                    'barcode'   => 'Barcode',
-                    'category'  => 'Category',
-                    'company'   => 'Company',
+                    'type' => 'النوع',
+                    'reference' => 'الرقم المرجعي',
+                    'barcode' => 'الباركود',
+                    'category' => 'الفئة',
+                    'company' => 'الشركة',
                 ],
             ],
 
             'pricing' => [
-                'title' => 'Pricing',
+                'title' => 'التسعير',
 
                 'fields' => [
-                    'price' => 'Price',
-                    'cost'  => 'Cost',
+                    'price' => 'السعر',
+                    'cost' => 'التكلفة',
                 ],
             ],
 
             'additional' => [
-                'title' => 'Additional',
+                'title' => 'إضافي',
             ],
         ],
     ],
 
     'table' => [
         'columns' => [
-            'name'        => 'Name',
-            'variants'    => 'Variants',
-            'images'      => 'Images',
-            'type'        => 'Type',
-            'reference'   => 'Reference',
-            'responsible' => 'Responsible',
-            'barcode'     => 'Barcode',
-            'category'    => 'Category',
-            'company'     => 'Company',
-            'price'       => 'Price',
-            'cost'        => 'Cost',
-            'on-hand'     => 'On Hand',
-            'tags'        => 'Tags',
-            'deleted-at'  => 'Deleted At',
-            'created-at'  => 'Created At',
-            'updated-at'  => 'Updated At',
+            'name' => 'الاسم',
+            'variants' => 'الاختلافات',
+            'images' => 'الصور',
+            'type' => 'النوع',
+            'reference' => 'الرقم المرجعي',
+            'responsible' => 'المسؤول',
+            'barcode' => 'الباركود',
+            'category' => 'الفئة',
+            'company' => 'الشركة',
+            'price' => 'السعر',
+            'cost' => 'التكلفة',
+            'on-hand' => 'المتوفر',
+            'tags' => 'العلامات',
+            'deleted-at' => 'تاريخ الحذف',
+            'created-at' => 'تاريخ الإنشاء',
+            'updated-at' => 'تاريخ التحديث',
         ],
 
         'groups' => [
-            'type'       => 'Type',
-            'category'   => 'Category',
-            'created-at' => 'Created At',
+            'type' => 'النوع',
+            'category' => 'الفئة',
+            'created-at' => 'تاريخ الإنشاء',
         ],
 
         'filters' => [
-            'name'        => 'Name',
-            'type'        => 'Type',
-            'reference'   => 'Reference',
-            'barcode'     => 'Barcode',
-            'category'    => 'Category',
-            'company'     => 'Company',
-            'price'       => 'Price',
-            'cost'        => 'Cost',
-            'is-favorite' => 'Is Favorite',
-            'weight'      => 'Weight',
-            'volume'      => 'Volume',
-            'tags'        => 'Tags',
-            'responsible' => 'Responsible',
-            'created-at'  => 'Created At',
-            'updated-at'  => 'Updated At',
-            'creator'     => 'Creator',
+            'name' => 'الاسم',
+            'type' => 'النوع',
+            'reference' => 'الرقم المرجعي',
+            'barcode' => 'الباركود',
+            'category' => 'الفئة',
+            'company' => 'الشركة',
+            'price' => 'السعر',
+            'cost' => 'التكلفة',
+            'is-favorite' => 'مفضل',
+            'weight' => 'الوزن',
+            'volume' => 'الحجم',
+            'tags' => 'العلامات',
+            'responsible' => 'المسؤول',
+            'created-at' => 'تاريخ الإنشاء',
+            'updated-at' => 'تاريخ التحديث',
+            'creator' => 'المنشئ',
         ],
 
         'actions' => [
             'restore' => [
                 'notification' => [
-                    'title' => 'Product restored',
-                    'body'  => 'The product has been restored successfully.',
+                    'title' => 'تم استعادة المنتج',
+                    'body' => 'تم استعادة المنتج بنجاح.',
                 ],
             ],
 
             'delete' => [
                 'notification' => [
-                    'title' => 'Product deleted',
-                    'body'  => 'The product has been deleted successfully.',
+                    'title' => 'تم حذف المنتج',
+                    'body' => 'تم حذف المنتج بنجاح.',
                 ],
             ],
 
             'force-delete' => [
                 'notification' => [
                     'success' => [
-                        'title' => 'Product force deleted',
-                        'body'  => 'The product has been force deleted successfully.',
+                        'title' => 'تم الحذف الإجباري للمنتج',
+                        'body' => 'تم الحذف الإجباري للمنتج بنجاح.',
                     ],
 
                     'error' => [
-                        'title' => 'Product could not be deleted',
-                        'body'  => 'The product cannot be deleted because it is currently in use.',
+                        'title' => 'تعذر حذف المنتج',
+                        'body' => 'لا يمكن حذف المنتج لأنه قيد الاستخدام حاليًا.',
                     ],
                 ],
             ],
@@ -139,19 +139,19 @@ return [
 
         'bulk-actions' => [
             'print' => [
-                'label' => 'Print Labels',
+                'label' => 'طباعة الملصقات',
 
                 'form' => [
                     'fields' => [
-                        'quantity' => 'Number of Labels',
-                        'format'   => 'Format',
+                        'quantity' => 'عدد الملصقات',
+                        'format' => 'التنسيق',
 
                         'format-options' => [
-                            'dymo'       => 'Dymo',
-                            '2x7_price'  => '2x7 with price',
-                            '4x7_price'  => '4x7 with price',
-                            '4x12'       => '4x12',
-                            '4x12_price' => '4x12 with price',
+                            'dymo' => 'Dymo',
+                            '2x7_price' => '2x7 مع السعر',
+                            '4x7_price' => '4x7 مع السعر',
+                            '4x12' => '4x12',
+                            '4x12_price' => '4x12 مع السعر',
                         ],
                     ],
                 ],
@@ -159,28 +159,28 @@ return [
 
             'restore' => [
                 'notification' => [
-                    'title' => 'Products restored',
-                    'body'  => 'The products has been restored successfully.',
+                    'title' => 'تم استعادة المنتجات',
+                    'body' => 'تم استعادة المنتجات بنجاح.',
                 ],
             ],
 
             'delete' => [
                 'notification' => [
-                    'title' => 'Products deleted',
-                    'body'  => 'The products has been deleted successfully.',
+                    'title' => 'تم حذف المنتجات',
+                    'body' => 'تم حذف المنتجات بنجاح.',
                 ],
             ],
 
             'force-delete' => [
                 'notification' => [
                     'success' => [
-                        'title' => 'Products force deleted',
-                        'body'  => 'The products has been force deleted successfully.',
+                        'title' => 'تم الحذف الإجباري للمنتجات',
+                        'body' => 'تم الحذف الإجباري للمنتجات بنجاح.',
                     ],
 
                     'error' => [
-                        'title' => 'Products could not be deleted',
-                        'body'  => 'The products cannot be deleted because they are currently in use.',
+                        'title' => 'تعذر حذف المنتجات',
+                        'body' => 'لا يمكن حذف المنتجات لأنها قيد الاستخدام حاليًا.',
                     ],
                 ],
             ],
@@ -190,65 +190,65 @@ return [
     'infolist' => [
         'sections' => [
             'general' => [
-                'title' => 'General',
+                'title' => 'عام',
 
                 'entries' => [
-                    'name'             => 'Name',
-                    'name-placeholder' => 'eg. T-shirt',
-                    'description'      => 'Description',
-                    'tags'             => 'Tags',
+                    'name' => 'الاسم',
+                    'name-placeholder' => 'مثل. تي شيرت',
+                    'description' => 'الوصف',
+                    'tags' => 'العلامات',
                 ],
             ],
 
             'images' => [
-                'title' => 'Images',
+                'title' => 'الصور',
 
                 'entries' => [],
             ],
 
             'settings' => [
-                'title' => 'Settings',
+                'title' => 'الإعدادات',
 
                 'entries' => [
-                    'type'      => 'Type',
-                    'reference' => 'Reference',
-                    'barcode'   => 'Barcode',
-                    'category'  => 'Category',
-                    'company'   => 'Company',
+                    'type' => 'النوع',
+                    'reference' => 'المرجع',
+                    'barcode' => 'الباركود',
+                    'category' => 'الفئة',
+                    'company' => 'الشركة',
                 ],
             ],
 
             'pricing' => [
-                'title' => 'Pricing',
+                'title' => 'التسعير',
 
                 'entries' => [
-                    'price' => 'Price',
-                    'cost'  => 'Cost',
+                    'price' => 'السعر',
+                    'cost' => 'التكلفة',
                 ],
             ],
 
             'inventory' => [
-                'title' => 'Inventory',
+                'title' => 'المخزون',
 
                 'fieldsets' => [
                     'logistics' => [
-                        'title' => 'Logistics',
+                        'title' => 'اللوجستيات',
 
                         'entries' => [
-                            'weight' => 'Weight',
-                            'volume' => 'Volume',
+                            'weight' => 'الوزن',
+                            'volume' => 'الحجم',
                         ],
                     ],
                 ],
             ],
 
             'record-information' => [
-                'title' => 'Record Information',
+                'title' => 'معلومات السجل',
 
                 'entries' => [
-                    'created-at' => 'Created At',
-                    'created-by' => 'Created By',
-                    'updated-at' => 'Updated At',
+                    'created-at' => 'تاريخ الإنشاء',
+                    'created-by' => 'أنشأ بواسطة',
+                    'updated-at' => 'تاريخ التحديث',
                 ],
             ],
         ],

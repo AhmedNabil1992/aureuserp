@@ -4,12 +4,12 @@ return [
     'form' => [
         'sections' => [
             'general' => [
-                'title'  => 'General',
+                'title' => 'عام',
 
                 'fields' => [
-                    'name'             => 'Name',
-                    'name-placeholder' => 'eg. Lamps',
-                    'parent'           => 'Parent',
+                    'name' => 'الاسم',
+                    'name-placeholder' => 'مثال: مصابيح',
+                    'parent' => 'الأب',
                 ],
             ],
         ],
@@ -17,39 +17,39 @@ return [
 
     'table' => [
         'columns' => [
-            'name'        => 'Name',
-            'full-name'   => 'Full Name',
-            'parent-path' => 'Parent Path',
-            'parent'      => 'Parent',
-            'creator'     => 'Creator',
-            'created-at'  => 'Created At',
-            'created-at'  => 'Created At',
-            'updated-at'  => 'Updated At',
+            'name' => 'الاسم',
+            'full-name' => 'الاسم الكامل',
+            'parent-path' => 'مسار الأب',
+            'parent' => 'الأب',
+            'creator' => 'المنشئ',
+            'created-at' => 'تاريخ الإنشاء',
+            'created-at' => 'تاريخ الإنشاء',
+            'updated-at' => 'تاريخ التحديث',
         ],
 
         'groups' => [
-            'parent'     => 'Parent',
-            'creator'    => 'Creator',
-            'created-at' => 'Created At',
-            'updated-at' => 'Updated At',
+            'parent' => 'الأب',
+            'creator' => 'المنشئ',
+            'created-at' => 'تاريخ الإنشاء',
+            'updated-at' => 'تاريخ التحديث',
         ],
 
         'filters' => [
-            'parent'  => 'Parent',
-            'creator' => 'Creator',
+            'parent' => 'الأب',
+            'creator' => 'المنشئ',
         ],
 
         'actions' => [
             'delete' => [
                 'notification' => [
                     'success' => [
-                        'title' => 'Category deleted',
-                        'body'  => 'The Category has been deleted successfully.',
+                        'title' => 'تم حذف الفئة',
+                        'body' => 'تم حذف الفئة بنجاح.',
                     ],
 
                     'error' => [
-                        'title' => 'Category could not be deleted',
-                        'body'  => 'The category cannot be deleted because it is currently in use.',
+                        'title' => 'تعذر حذف الفئة',
+                        'body' => 'لا يمكن حذف الفئة لأنها قيد الاستخدام حاليًا.',
                     ],
                 ],
             ],
@@ -59,13 +59,13 @@ return [
             'delete' => [
                 'notification' => [
                     'success' => [
-                        'title' => 'Categories deleted',
-                        'body'  => 'The categories has been deleted successfully.',
+                        'title' => 'تم حذف الفئات',
+                        'body' => 'تم حذف الفئات بنجاح.',
                     ],
 
                     'error' => [
-                        'title' => 'Categories could not be deleted',
-                        'body'  => 'The categories cannot be deleted because they are currently in use.',
+                        'title' => 'تعذر حذف الفئات',
+                        'body' => 'لا يمكن حذف الفئات لأنها قيد الاستخدام حاليًا.',
                     ],
                 ],
             ],
@@ -75,23 +75,23 @@ return [
     'infolist' => [
         'sections' => [
             'general' => [
-                'title' => 'General Information',
+                'title' => 'معلومات عامة',
 
                 'entries' => [
-                    'name'        => 'Name',
-                    'parent'      => 'Parent Category',
-                    'full_name'   => 'Full Category Name',
-                    'parent_path' => 'Category Path',
+                    'name' => 'الاسم',
+                    'parent' => 'الفئة الأب',
+                    'full_name' => 'الاسم الكامل للفئة',
+                    'parent_path' => 'مسار الفئة',
                 ],
             ],
 
             'record-information' => [
-                'title' => 'Record Information',
+                'title' => 'معلومات السجل',
 
                 'entries' => [
-                    'creator'    => 'Created By',
-                    'created_at' => 'Created At',
-                    'updated_at' => 'Last Updated At',
+                    'creator' => 'أنشئ بواسطة',
+                    'created_at' => 'تاريخ الإنشاء',
+                    'updated_at' => 'آخر تحديث في',
                 ],
             ],
         ],

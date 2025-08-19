@@ -1,11 +1,11 @@
 <?php
 
 return [
-    'title' => 'Holidays',
-    'form'  => [
+    'title' => 'الإجازات',
+    'form' => [
         'placeholders' => [
-            'public-holiday'    => 'Public Holidays',
-            'mandatory-holiday' => 'Mandatory Holidays',
+            'public-holiday' => 'إجازات رسمية',
+            'mandatory-holiday' => 'إجازات إلزامية',
         ],
     ],
 ];

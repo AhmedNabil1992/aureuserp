@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'lost'    => 'Accrued time reset to zero',
-    'all'     => 'All accrued time carried over',
-    'maximum' => 'Carry over with the maximum',
+    'lost' => 'يتم تصفير الوقت المتراكم',
+    'all' => 'يتم ترحيل كل الوقت المتراكم',
+    'maximum' => 'يتم الترحيل مع الحد الأقصى',
 ];

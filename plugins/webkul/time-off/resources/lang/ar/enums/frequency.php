@@ -1,11 +1,11 @@
 <?php
 
 return [
-    'hourly'    => 'Hourly',
-    'daily'     => 'Daily',
-    'weekly'    => 'Weekly',
-    'bimonthly' => 'Twice a month',
-    'monthly'   => 'Monthly',
-    'biyearly'  => 'Twice a year',
-    'yearly'    => 'Yearly',
+    'hourly' => 'ساعي',
+    'daily' => 'يومي',
+    'weekly' => 'أسبوعي',
+    'bimonthly' => 'مرتين في الشهر',
+    'monthly' => 'شهري',
+    'biyearly' => 'مرتين في السنة',
+    'yearly' => 'سنوي',
 ];

@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'radio'  => 'Radio',
-    'select' => 'Select',
-    'color'  => 'Color',
+    'radio' => 'زر راديو',
+    'select' => 'قائمة منسدلة',
+    'color' => 'لون',
 ];

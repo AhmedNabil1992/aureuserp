@@ -24,7 +24,7 @@ class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        set_time_limit(300);
+        set_time_limit(1000);
 
         return $panel
             ->default()
@@ -55,20 +55,20 @@ class AdminPanelProvider extends PanelProvider
                 FilamentShieldPlugin::make()
                     ->gridColumns([
                         'default' => 1,
-                        'sm'      => 1,
-                        'lg'      => 2,
-                        'xl'      => 3,
+                        'sm' => 1,
+                        'lg' => 2,
+                        'xl' => 3,
                     ])
                     ->sectionColumnSpan(1)
                     ->checkboxListColumns([
                         'default' => 1,
-                        'sm'      => 1,
-                        'lg'      => 2,
-                        'xl'      => 3,
+                        'sm' => 1,
+                        'lg' => 2,
+                        'xl' => 3,
                     ])
                     ->resourceCheckboxListColumns([
                         'default' => 1,
-                        'sm'      => 2,
+                        'sm' => 2,
                     ]),
                 PluginManager::make(),
             ])
