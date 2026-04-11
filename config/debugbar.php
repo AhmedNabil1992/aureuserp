@@ -211,11 +211,12 @@ return [
             'precision'     => 0,          // Memory rounding precision
         ],
         'auth' => [
-            'show_name'   => true,   // Also show the users name/email in the debugbar
-            'show_guards' => true, // Show the guards that are used
-        ],
-        'db' => [
-            'with_params'       => true,   // Render SQL with the parameters substituted
+            'show_name'       => true,   // Also show the users name/email in the debugbar
+            'except'          => [
+                'telescope*',
+                'horizon*',
+                'api/*',
+            ],
             'exclude_paths'     => [       // Paths to exclude entirely from the collector
                 //                'vendor/laravel/framework/src/Illuminate/Session', // Exclude sessions queries
             ],

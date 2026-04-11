@@ -1,0 +1,20 @@
+php artisan tinker
+
+$json = json_decode(file_get_contents('countries+states+cities.json'), true);
+
+echo "\n=== مقارنة البيانات ===\n\n";
+
+echo "الملف JSON:\n";
+$json_countries = collect($json)->pluck('name')->count();
+echo "- الدول: $json_countries\n";
+
+$json_states = collect($json)->sum(fn($c) => count($c['states'] ?? []));
+echo "- المحافظات: $json_states\n";
+
+$json_cities = collect($json)->sum(fn($c) => collect($c['states'] ?? [])->sum(fn($s) => count($s['cities'] ?? [])));
+echo "- المدن: $json_cities\n";
+
+echo "\nالداتابيز:\n";
+echo "- الدول: " . \Webkul\Support\Models\Country::count() . "\n";
+echo "- المحافظات: " . \Webkul\Support\Models\State::count() . "\n";
+echo "- المدن: " . DB::table('cities')->count() . "\n";

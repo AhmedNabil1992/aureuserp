@@ -1,0 +1,30 @@
+{
+    "name": "webkul/software",
+    "description": "Software programs and licensing management plugin.",
+    "authors": [
+        {
+            "name": "Aureus ERP",
+            "email": "support@aureuserp.in"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webkul\\Software\\SoftwareServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Webkul\\Software\\": "src/",
+            "Webkul\\Software\\Database\\Factories\\": "database/factories/",
+            "Webkul\\Software\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Webkul\\Software\\Tests\\": "tests/"
+        }
+    }
+}

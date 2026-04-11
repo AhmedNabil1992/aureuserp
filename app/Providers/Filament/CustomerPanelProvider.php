@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Http\Middleware\SetLocale;
+use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
@@ -25,6 +26,7 @@ class CustomerPanelProvider extends PanelProvider
             ->id('customer')
             ->path('/')
             ->homeUrl(url('/'))
+            ->emailVerification()
             ->authPasswordBroker('customers')
             ->profile(isSimple: false)
             ->favicon(asset('images/favicon.ico'))
@@ -54,6 +56,9 @@ class CustomerPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
                 SetLocale::class,
+            ])
+            ->authMiddleware([
+                Authenticate::class,
             ])
             ->authGuard('customer');
     }

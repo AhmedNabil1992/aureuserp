@@ -293,12 +293,12 @@ class ProductResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('price')
                     ->label(__('products::filament/resources/product.table.columns.price'))
-                    ->money()
+                    ->money('EGP')
                     ->suffix(fn (Product $record): string => $record->uom ? ' / '.$record->uom->name : '')
                     ->sortable(),
                 TextColumn::make('cost')
                     ->label(__('products::filament/resources/product.table.columns.cost'))
-                    ->money()
+                    ->money('EGP')
                     ->suffix(fn (Product $record): string => $record->uomPO ? ' / '.$record->uomPO->name : '')
                     ->sortable(),
                 TextColumn::make('category.name')
@@ -489,7 +489,7 @@ class ProductResource extends Resource
                                 ->required(),
                         ])
                         ->action(function (array $data, $records) {
-                            $pdf = PDF::loadView('products::filament.resources.products.actions.print', [
+                            $pdf = Pdf::loadView('products::filament.resources.products.actions.print', [
                                 'records'  => $records,
                                 'quantity' => $data['quantity'],
                                 'format'   => $data['format'],

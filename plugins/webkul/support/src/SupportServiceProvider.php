@@ -63,6 +63,9 @@ class SupportServiceProvider extends PackageServiceProvider
                 '2025_11_14_102615_alter_currency_rates_table',
                 '2026_03_18_000001_alter_unit_of_measures_factor_precision',
                 '2026_04_02_000001_create_calendars_table',
+                '2026_04_10_000002_create_cities_table',
+                '2026_04_10_000003_add_name_ar_to_states_table',
+                '2026_04_11_000004_add_name_ar_to_cities_table',
             ])
             ->runsMigrations()
             ->hasSeeder('Webkul\\Support\\Database\\Seeders\\DatabaseSeeder');
