@@ -22,6 +22,9 @@ use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Webkul\Account\Enums\MoveType;
+use Webkul\Account\Facades\Account as AccountFacade;
+use Webkul\Account\Models\Move as AccountMove;
 use Webkul\Software\Enums\LicensePlan;
 use Webkul\Software\Enums\LicenseStatus;
 use Webkul\Software\Filament\Admin\Clusters\Licensing;
@@ -32,8 +35,11 @@ use Webkul\Software\Filament\Admin\Resources\LicenseResource\RelationManagers\De
 use Webkul\Software\Filament\Admin\Resources\LicenseResource\RelationManagers\SubscriptionsRelationManager;
 use Webkul\Software\Models\License;
 use Webkul\Software\Models\LicenseInvoice;
+use Webkul\Software\Models\LicenseSubscription;
 use Webkul\Software\Models\ProgramEdition;
+use Webkul\Software\Models\ProgramFeature;
 use Webkul\Support\Models\City;
+use Webkul\Support\Models\Company;
 
 class LicenseResource extends Resource
 {
@@ -153,9 +159,20 @@ class LicenseResource extends Resource
                     ])
                     ->action(function (License $record, array $data): void {
                         try {
-                            $invoiceNumber = DB::transaction(function () use ($record, $data): string {
+                            $user = Auth::user();
+
+                            $company = $user?->default_company_id
+                                ? Company::find($user->default_company_id)
+                                : null;
+
+                            if (! $company || ! $company->currency_id) {
+                                throw new \RuntimeException('No default company or currency configured for the current user.');
+                            }
+
+                            $result = DB::transaction(function () use ($record, $data, $company): array {
                                 $edition = ProgramEdition::query()
                                     ->where('program_id', $record->program_id)
+                                    ->with('product')
                                     ->findOrFail((int) $data['edition_id']);
 
                                 $plan = LicensePlan::from((string) $data['license_plan']);
@@ -190,28 +207,91 @@ class LicenseResource extends Resource
                                 ]);
 
                                 $invoiceNumber = 'LIC-'.now()->format('YmdHis').'-'.Str::upper(Str::random(4));
+                                $itemName = ($record->program?->name ?? 'Software License').' - '.$edition->name;
 
-                                LicenseInvoice::query()->create([
-                                    'license_id'     => $record->id,
-                                    'program_id'     => $record->program_id,
-                                    'edition_id'     => $edition->id,
-                                    'license_plan'   => $plan->value,
-                                    'invoice_number' => $invoiceNumber,
-                                    'item_name'      => ($record->program?->name ?? 'Software License').' - '.$edition->name,
-                                    'quantity'       => 1,
-                                    'unit_price'     => $amount,
-                                    'amount'         => $amount,
-                                    'billed_by'      => Auth::id(),
-                                    'billed_at'      => now(),
-                                    'notes'          => 'Generated from LicenseResource billing action.',
+                                // Create accounting invoice (account move)
+                                $accountMove = AccountMove::create([
+                                    'move_type'       => MoveType::OUT_INVOICE,
+                                    'invoice_origin'  => $record->serial_number,
+                                    'date'            => now()->toDateString(),
+                                    'company_id'      => $company->id,
+                                    'currency_id'     => $company->currency_id,
+                                    'partner_id'      => $record->partner_id,
+                                    'creator_id'      => Auth::id(),
+                                    'invoice_user_id' => Auth::id(),
                                 ]);
 
-                                return $invoiceNumber;
+                                $moveLine = $accountMove->lines()->create([
+                                    'name'         => $itemName.' ('.ucfirst($plan->value).')',
+                                    'date'         => $accountMove->date,
+                                    'parent_state' => $accountMove->state,
+                                    'quantity'     => 1,
+                                    'price_unit'   => $amount,
+                                    'currency_id'  => $accountMove->currency_id,
+                                    'product_id'   => $edition->product_id,
+                                    'uom_id'       => $edition->product?->uom_id,
+                                    'creator_id'   => Auth::id(),
+                                ]);
+
+                                // Load subscription-generating features for this program
+                                $subscriptionFeatures = ProgramFeature::query()
+                                    ->where('program_id', $record->program_id)
+                                    ->whereNotNull('service_type')
+                                    ->where('amount', '>', 0)
+                                    ->get();
+
+                                foreach ($subscriptionFeatures as $feature) {
+                                    // Add a move line for each feature
+                                    $accountMove->lines()->create([
+                                        'name'         => $feature->name,
+                                        'date'         => $accountMove->date,
+                                        'parent_state' => $accountMove->state,
+                                        'quantity'     => 1,
+                                        'price_unit'   => (float) $feature->amount,
+                                        'currency_id'  => $accountMove->currency_id,
+                                        'creator_id'   => Auth::id(),
+                                    ]);
+
+                                    // Upsert subscription (replace any existing one for same feature)
+                                    LicenseSubscription::query()->updateOrCreate(
+                                        [
+                                            'license_id' => $record->id,
+                                            'feature_id' => $feature->id,
+                                        ],
+                                        [
+                                            'service_type' => $feature->name,
+                                            'start_date'   => now()->toDateString(),
+                                            'end_date'     => $record->end_date?->toDateString(),
+                                            'is_active'    => true,
+                                        ]
+                                    );
+                                }
+
+                                AccountFacade::computeAccountMove($accountMove);
+
+                                // Create local invoice record linked to the accounting move
+                                $licenseInvoice = LicenseInvoice::query()->create([
+                                    'license_id'      => $record->id,
+                                    'program_id'      => $record->program_id,
+                                    'edition_id'      => $edition->id,
+                                    'license_plan'    => $plan->value,
+                                    'invoice_number'  => $invoiceNumber,
+                                    'item_name'       => $itemName,
+                                    'quantity'        => 1,
+                                    'unit_price'      => $amount,
+                                    'amount'          => $amount,
+                                    'billed_by'       => Auth::id(),
+                                    'billed_at'       => now(),
+                                    'notes'           => 'Generated from LicenseResource billing action.',
+                                    'account_move_id' => $accountMove->id,
+                                ]);
+
+                                return ['invoiceNumber' => $invoiceNumber, 'accountMove' => $accountMove];
                             });
 
                             Notification::make()
                                 ->title('Invoice created successfully')
-                                ->body('Invoice No: '.$invoiceNumber)
+                                ->body('Invoice No: '.$result['invoiceNumber'])
                                 ->success()
                                 ->send();
                         } catch (\Throwable $exception) {

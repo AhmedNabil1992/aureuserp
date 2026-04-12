@@ -57,15 +57,15 @@ class InstallERP extends Command
 
         $this->info('🚀 Starting ERP System Installation...');
 
-        $this->runMigrations();
+        // $this->runMigrations();
 
-        $this->generateRolesAndPermissions();
+        // $this->generateRolesAndPermissions();
 
-        $this->storageLink();
+        // $this->storageLink();
 
-        $this->runSeeder();
+        // $this->runSeeder();
 
-        $this->createAdminUser();
+        // $this->createAdminUser();
 
         $this->markAsInstalled();
 

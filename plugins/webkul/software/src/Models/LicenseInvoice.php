@@ -5,6 +5,7 @@ namespace Webkul\Software\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Webkul\Account\Models\Move as AccountMove;
 use Webkul\Security\Models\User;
 use Webkul\Software\Enums\LicensePlan;
 
@@ -27,6 +28,7 @@ class LicenseInvoice extends Model
         'billed_by',
         'billed_at',
         'notes',
+        'account_move_id',
     ];
 
     protected $casts = [
@@ -55,5 +57,10 @@ class LicenseInvoice extends Model
     public function billedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'billed_by');
+    }
+
+    public function accountMove(): BelongsTo
+    {
+        return $this->belongsTo(AccountMove::class, 'account_move_id');
     }
 }

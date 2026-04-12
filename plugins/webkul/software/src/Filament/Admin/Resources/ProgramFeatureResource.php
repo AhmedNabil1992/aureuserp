@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Webkul\Software\Enums\ServiceType;
 use Webkul\Software\Filament\Admin\Clusters\Catalog;
 use Webkul\Software\Filament\Admin\Resources\ProgramFeatureResource\Pages\ManageProgramFeatures;
 use Webkul\Software\Models\ProgramFeature;
@@ -42,6 +43,13 @@ class ProgramFeatureResource extends Resource
         return $schema->components([
             Select::make('program_id')->relationship('program', 'name')->searchable()->preload()->required(),
             TextInput::make('name')->required()->maxLength(255),
+            Select::make('service_type')
+                ->label('Subscription Type')
+                ->options(collect(ServiceType::cases())->mapWithKeys(fn (ServiceType $case): array => [
+                    $case->value => ucfirst(str_replace('_', ' ', $case->value)),
+                ])->all())
+                ->nullable()
+                ->helperText('When billing, this feature generates an invoice line and a subscription of this type.'),
             TextInput::make('amount')->numeric(),
             Textarea::make('description')->rows(3)->columnSpanFull(),
         ])->columns(2);
@@ -52,6 +60,7 @@ class ProgramFeatureResource extends Resource
         return $table->columns([
             TextColumn::make('program.name')->label('Program')->searchable(),
             TextColumn::make('name')->searchable(),
+            TextColumn::make('service_type')->badge()->label('Subscription Type'),
             TextColumn::make('amount')->numeric(),
             TextColumn::make('updated_at')->dateTime()->sortable(),
         ])->recordActions([

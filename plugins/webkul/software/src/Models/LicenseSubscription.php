@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Webkul\Software\Enums\ServiceType;
 
 class LicenseSubscription extends Model
 {
@@ -16,6 +15,7 @@ class LicenseSubscription extends Model
 
     protected $fillable = [
         'license_id',
+        'feature_id',
         'service_type',
         'start_date',
         'end_date',
@@ -23,10 +23,9 @@ class LicenseSubscription extends Model
     ];
 
     protected $casts = [
-        'service_type' => ServiceType::class,
-        'start_date'   => 'date',
-        'end_date'     => 'date',
-        'is_active'    => 'boolean',
+        'start_date' => 'date',
+        'end_date'   => 'date',
+        'is_active'  => 'boolean',
     ];
 
     public function license(): BelongsTo
@@ -34,9 +33,14 @@ class LicenseSubscription extends Model
         return $this->belongsTo(License::class, 'license_id');
     }
 
-    public function scopeOfType(Builder $query, ServiceType $serviceType): Builder
+    public function feature(): BelongsTo
     {
-        return $query->where('service_type', $serviceType->value);
+        return $this->belongsTo(ProgramFeature::class, 'feature_id');
+    }
+
+    public function scopeOfType(Builder $query, string $serviceType): Builder
+    {
+        return $query->where('service_type', $serviceType);
     }
 
     public function scopeActiveNow(Builder $query): Builder

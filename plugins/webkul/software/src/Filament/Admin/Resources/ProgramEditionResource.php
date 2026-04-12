@@ -12,6 +12,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Webkul\Product\Models\Product;
 use Webkul\Software\Filament\Admin\Clusters\Catalog;
 use Webkul\Software\Filament\Admin\Resources\ProgramEditionResource\Pages\ManageProgramEditions;
 use Webkul\Software\Models\ProgramEdition;
@@ -41,6 +42,17 @@ class ProgramEditionResource extends Resource
         return $schema->components([
             Select::make('program_id')->relationship('program', 'name')->searchable()->preload()->required(),
             TextInput::make('name')->required()->maxLength(100),
+            Select::make('product_id')
+                ->label('Linked Product (Service)')
+                ->options(fn (): array => Product::query()
+                    ->where('type', 'service')
+                    ->orderBy('name')
+                    ->pluck('name', 'id')
+                    ->all())
+                ->searchable()
+                ->preload()
+                ->nullable()
+                ->helperText('Used to generate accounting invoices when billing a license.'),
             TextInput::make('max_devices')->numeric()->minValue(1),
             TextInput::make('license_cost')->numeric(),
             TextInput::make('license_price')->numeric(),

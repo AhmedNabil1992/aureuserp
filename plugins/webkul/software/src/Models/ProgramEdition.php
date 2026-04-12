@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Webkul\Product\Models\Product;
 
 class ProgramEdition extends Model
 {
@@ -15,6 +16,7 @@ class ProgramEdition extends Model
 
     protected $fillable = [
         'program_id',
+        'product_id',
         'name',
         'max_devices',
         'license_cost',
@@ -34,6 +36,11 @@ class ProgramEdition extends Model
     public function program(): BelongsTo
     {
         return $this->belongsTo(Program::class, 'program_id');
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'product_id');
     }
 
     public function licenses(): HasMany

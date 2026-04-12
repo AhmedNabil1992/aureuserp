@@ -17,6 +17,7 @@ class SubscriptionsRelationManager extends RelationManager
     {
         return $table
             ->columns([
+                TextColumn::make('feature.name')->label('Feature')->searchable(),
                 TextColumn::make('service_type')->label('Service')->badge(),
                 TextColumn::make('start_date')->label('Start Date')->date(),
                 TextColumn::make('end_date')->label('End Date')->date(),
