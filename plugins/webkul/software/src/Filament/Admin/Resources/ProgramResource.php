@@ -6,6 +6,7 @@ use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -15,6 +16,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
+use Webkul\Product\Models\Product;
 use Webkul\Software\Filament\Admin\Clusters\Catalog;
 use Webkul\Software\Filament\Admin\Resources\ProgramResource\Pages\ManagePrograms;
 use Webkul\Software\Models\Program;
@@ -58,6 +60,18 @@ class ProgramResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->unique(ignoreRecord: true),
+                Select::make('product_id')
+                    ->label('Base Service Product')
+                    ->options(fn (): array => Product::query()
+                        ->where('type', 'service')
+                        ->whereNull('parent_id')
+                        ->orderBy('name')
+                        ->pluck('name', 'id')
+                        ->all())
+                    ->searchable()
+                    ->preload()
+                    ->nullable()
+                    ->helperText('Main product for this software program.'),
                 Textarea::make('description')
                     ->label('Description')
                     ->rows(3)
@@ -83,6 +97,9 @@ class ProgramResource extends Resource
                     ->sortable(),
                 TextColumn::make('slug')
                     ->label('Slug')
+                    ->searchable(),
+                TextColumn::make('product.name')
+                    ->label('Base Product')
                     ->searchable(),
                 IconColumn::make('is_active')
                     ->label('Active')

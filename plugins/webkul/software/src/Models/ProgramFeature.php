@@ -5,6 +5,7 @@ namespace Webkul\Software\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Webkul\Product\Models\Product;
 use Webkul\Software\Enums\ServiceType;
 
 class ProgramFeature extends Model
@@ -17,6 +18,7 @@ class ProgramFeature extends Model
         'program_id',
         'name',
         'service_type',
+        'product_id',
         'description',
         'amount',
     ];
@@ -29,5 +31,10 @@ class ProgramFeature extends Model
     public function program(): BelongsTo
     {
         return $this->belongsTo(Program::class, 'program_id');
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'product_id');
     }
 }

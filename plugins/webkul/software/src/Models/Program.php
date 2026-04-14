@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Webkul\Product\Models\Product;
 use Webkul\Security\Models\User;
 
 class Program extends Model
@@ -19,6 +20,7 @@ class Program extends Model
         'name',
         'description',
         'slug',
+        'product_id',
         'installation_notes',
         'is_active',
         'creator_id',
@@ -31,6 +33,11 @@ class Program extends Model
     public function editions(): HasMany
     {
         return $this->hasMany(ProgramEdition::class, 'program_id');
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'product_id');
     }
 
     public function features(): HasMany

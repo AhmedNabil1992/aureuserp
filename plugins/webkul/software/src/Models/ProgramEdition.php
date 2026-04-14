@@ -17,6 +17,7 @@ class ProgramEdition extends Model
     protected $fillable = [
         'program_id',
         'product_id',
+        'variant_product_id',
         'name',
         'max_devices',
         'license_cost',
@@ -41,6 +42,11 @@ class ProgramEdition extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function variantProduct(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'variant_product_id');
     }
 
     public function licenses(): HasMany

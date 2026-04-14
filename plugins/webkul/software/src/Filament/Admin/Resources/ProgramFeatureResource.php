@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Webkul\Product\Models\Product;
 use Webkul\Software\Enums\ServiceType;
 use Webkul\Software\Filament\Admin\Clusters\Catalog;
 use Webkul\Software\Filament\Admin\Resources\ProgramFeatureResource\Pages\ManageProgramFeatures;
@@ -50,6 +51,17 @@ class ProgramFeatureResource extends Resource
                 ])->all())
                 ->nullable()
                 ->helperText('When billing, this feature generates an invoice line and a subscription of this type.'),
+            Select::make('product_id')
+                ->label('Service Product')
+                ->options(fn (): array => Product::query()
+                    ->where('type', 'service')
+                    ->orderBy('name')
+                    ->pluck('name', 'id')
+                    ->all())
+                ->searchable()
+                ->preload()
+                ->nullable()
+                ->helperText('Product service line that will be added to the invoice.'),
             TextInput::make('amount')->numeric(),
             Textarea::make('description')->rows(3)->columnSpanFull(),
         ])->columns(2);
@@ -61,6 +73,7 @@ class ProgramFeatureResource extends Resource
             TextColumn::make('program.name')->label('Program')->searchable(),
             TextColumn::make('name')->searchable(),
             TextColumn::make('service_type')->badge()->label('Subscription Type'),
+            TextColumn::make('product.name')->label('Service Product')->searchable(),
             TextColumn::make('amount')->numeric(),
             TextColumn::make('updated_at')->dateTime()->sortable(),
         ])->recordActions([

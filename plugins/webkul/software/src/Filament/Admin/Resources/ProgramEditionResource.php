@@ -9,12 +9,15 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Webkul\Product\Models\Product;
 use Webkul\Software\Filament\Admin\Clusters\Catalog;
 use Webkul\Software\Filament\Admin\Resources\ProgramEditionResource\Pages\ManageProgramEditions;
+use Webkul\Software\Models\Program;
 use Webkul\Software\Models\ProgramEdition;
 
 class ProgramEditionResource extends Resource
@@ -40,10 +43,41 @@ class ProgramEditionResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Select::make('program_id')->relationship('program', 'name')->searchable()->preload()->required(),
+            Select::make('program_id')
+                ->relationship('program', 'name')
+                ->searchable()
+                ->preload()
+                ->required()
+                ->live()
+                ->afterStateUpdated(fn (Set $set): mixed => $set('variant_product_id', null)),
             TextInput::make('name')->required()->maxLength(100),
+            Select::make('variant_product_id')
+                ->label('Linked Variant (Required for billing)')
+                ->options(function (Get $get): array {
+                    $programId = $get('program_id');
+
+                    if (! $programId) {
+                        return [];
+                    }
+
+                    $program = Program::query()->find($programId);
+
+                    if (! $program?->product_id) {
+                        return [];
+                    }
+
+                    return Product::query()
+                        ->where('parent_id', $program->product_id)
+                        ->orderBy('name')
+                        ->pluck('name', 'id')
+                        ->all();
+                })
+                ->searchable()
+                ->preload()
+                ->nullable()
+                ->helperText('Choose the exact product variant that represents this edition.'),
             Select::make('product_id')
-                ->label('Linked Product (Service)')
+                ->label('Legacy Product Link (Optional)')
                 ->options(fn (): array => Product::query()
                     ->where('type', 'service')
                     ->orderBy('name')
@@ -52,7 +86,7 @@ class ProgramEditionResource extends Resource
                 ->searchable()
                 ->preload()
                 ->nullable()
-                ->helperText('Used to generate accounting invoices when billing a license.'),
+                ->helperText('Legacy field kept for backward compatibility.'),
             TextInput::make('max_devices')->numeric()->minValue(1),
             TextInput::make('license_cost')->numeric(),
             TextInput::make('license_price')->numeric(),
@@ -66,6 +100,7 @@ class ProgramEditionResource extends Resource
         return $table->columns([
             TextColumn::make('program.name')->label('Program')->searchable(),
             TextColumn::make('name')->searchable(),
+            TextColumn::make('variantProduct.name')->label('Variant')->searchable(),
             TextColumn::make('max_devices')->numeric(),
             TextColumn::make('license_price')->money('EGP'),
             TextColumn::make('license_cost')->money('EGP'),

@@ -44,6 +44,9 @@ class SoftwareServiceProvider extends PackageServiceProvider
                 '2026_04_12_000022_alter_software_license_invoices_add_account_move_id',
                 '2026_04_12_000023_alter_software_program_features_add_service_type',
                 '2026_04_12_000024_alter_software_license_subscriptions_add_feature_id',
+                '2026_04_13_000025_alter_software_programs_add_product_id',
+                '2026_04_13_000026_alter_software_program_editions_add_variant_product_id',
+                '2026_04_13_000027_alter_software_program_features_add_product_id',
             ])
             ->runsMigrations()
             ->hasInstallCommand(function (InstallCommand $command): void {
