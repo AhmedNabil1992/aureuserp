@@ -1,6 +1,11 @@
 <?php
 
 return [
+    'navigation' => [
+        'title' => 'Products',
+        'group' => 'Products',
+    ],
+
     'global-search' => [
         'reference' => 'Reference',
         'barcode'   => 'Barcode',

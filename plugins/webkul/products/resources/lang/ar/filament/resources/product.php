@@ -1,6 +1,11 @@
 <?php
 
 return [
+    'navigation' => [
+        'title' => 'المنتجات',
+        'group' => 'المنتجات',
+    ],
+
     'form' => [
         'sections' => [
             'general' => [

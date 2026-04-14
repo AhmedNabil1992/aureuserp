@@ -1,12 +1,22 @@
 <?php
 
 use Illuminate\Testing\TestResponse;
+use Webkul\Inventory\Enums\LocationType;
+use Webkul\Inventory\Models\Location;
+use Webkul\Inventory\Models\Product as InventoryProduct;
+use Webkul\Inventory\Models\ProductQuantity;
+use Webkul\Inventory\Models\Warehouse;
+use Webkul\Product\Enums\BomType;
+use Webkul\Product\Enums\ProductType;
+use Webkul\Product\Models\BillOfMaterial;
+use Webkul\Product\Models\BillOfMaterialLine;
 use Webkul\Sale\Enums\OrderState;
 use Webkul\Sale\Models\Order;
 use Webkul\Sale\Models\OrderLine;
 use Webkul\Security\Enums\PermissionType;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
+use Webkul\Support\Models\UOM;
 
 require_once __DIR__.'/../../../../../support/tests/Helpers/SecurityHelper.php';
 require_once __DIR__.'/../../../../../support/tests/Helpers/TestBootstrapHelper.php';
@@ -233,6 +243,197 @@ it('rejects confirming orders that are not draft or sent', function (OrderState 
     'cancelled order' => [OrderState::CANCEL],
     'sale order'      => [OrderState::SALE],
 ]);
+
+it('consumes BOM components from stock when confirming a product sale order', function () {
+    TestBootstrapHelper::ensurePluginInstalled('inventories');
+
+    $user = actingAsSalesOrderApiUser(['update_sale_order']);
+
+    $warehouse = Warehouse::query()->first() ?? Warehouse::factory()->create();
+    $productionLocation = Location::query()->where('type', LocationType::PRODUCTION)->firstOrFail();
+    $uom = UOM::query()->firstOrFail();
+    $company = Company::query()->findOrFail($warehouse->company_id);
+
+    $component = InventoryProduct::factory()->create([
+        'type'       => ProductType::GOODS,
+        'company_id' => $company->id,
+        'uom_id'     => $uom->id,
+        'uom_po_id'  => $uom->id,
+        'is_storable'=> true,
+        'name'       => 'BOM Component '.str()->random(6),
+    ]);
+
+    $finishedProduct = InventoryProduct::factory()->create([
+        'type'       => ProductType::PRODUCT,
+        'company_id' => $company->id,
+        'uom_id'     => $uom->id,
+        'uom_po_id'  => $uom->id,
+        'is_storable'=> true,
+        'name'       => 'Manufactured Product '.str()->random(6),
+    ]);
+
+    $billOfMaterial = BillOfMaterial::create([
+        'product_id'  => $finishedProduct->id,
+        'type'        => BomType::Manufacture,
+        'quantity'    => 1,
+        'uom_id'      => $uom->id,
+        'company_id'  => $company->id,
+        'reference'   => 'BOM-TEST-'.str()->upper(str()->random(6)),
+        'creator_id'  => $user->getKey(),
+    ]);
+
+    BillOfMaterialLine::create([
+        'bill_of_material_id' => $billOfMaterial->id,
+        'component_id'        => $component->id,
+        'quantity'            => 2,
+        'uom_id'              => $uom->id,
+        'sort'                => 1,
+    ]);
+
+    ProductQuantity::create([
+        'product_id'    => $component->id,
+        'location_id'   => $warehouse->lot_stock_location_id,
+        'quantity'      => 10,
+        'company_id'    => $company->id,
+        'creator_id'    => $user->getKey(),
+    ]);
+
+    $order = Order::factory()->withPaymentTerms()->create([
+        'company_id'  => $company->id,
+        'currency_id' => $company->currency_id,
+        'warehouse_id'=> $warehouse->id,
+    ]);
+
+    $orderLine = OrderLine::factory()->create([
+        'order_id'         => $order->id,
+        'company_id'       => $order->company_id,
+        'currency_id'      => $order->currency_id,
+        'order_partner_id' => $order->partner_id,
+        'salesman_id'      => $order->user_id,
+        'state'            => $order->state,
+        'warehouse_id'     => $warehouse->id,
+        'product_id'       => $finishedProduct->id,
+        'product_qty'      => 2,
+        'product_uom_qty'  => 2,
+        'product_uom_id'   => $uom->id,
+        'price_unit'       => 100,
+        'name'             => 'Manufactured product line',
+    ]);
+
+    $this->postJson(salesOrderRoute('confirm', $order->id))
+        ->assertOk()
+        ->assertJsonPath('data.state', OrderState::SALE->value);
+
+    $this->assertDatabaseHas('inventories_operations', [
+        'sale_order_id'           => $order->id,
+        'operation_type_id'       => $warehouse->internal_type_id,
+        'source_location_id'      => $warehouse->lot_stock_location_id,
+        'destination_location_id' => $productionLocation->id,
+        'state'                   => 'done',
+    ]);
+
+    $this->assertDatabaseHas('inventories_moves', [
+        'sale_order_line_id' => $orderLine->id,
+        'product_id'         => $component->id,
+        'state'              => 'done',
+    ]);
+
+    $this->assertDatabaseHas('inventories_product_quantities', [
+        'product_id'  => $component->id,
+        'location_id' => $warehouse->lot_stock_location_id,
+        'quantity'    => 6.0,
+    ]);
+
+    $this->assertDatabaseHas('inventories_product_quantities', [
+        'product_id'  => $component->id,
+        'location_id' => $productionLocation->id,
+        'quantity'    => 4.0,
+    ]);
+});
+
+it('rejects confirming a product sale order when BOM components are short on stock', function () {
+    TestBootstrapHelper::ensurePluginInstalled('inventories');
+
+    $user = actingAsSalesOrderApiUser(['update_sale_order']);
+
+    $warehouse = Warehouse::query()->first() ?? Warehouse::factory()->create();
+    $uom = UOM::query()->firstOrFail();
+    $company = Company::query()->findOrFail($warehouse->company_id);
+
+    $component = InventoryProduct::factory()->create([
+        'type'        => ProductType::GOODS,
+        'company_id'  => $company->id,
+        'uom_id'      => $uom->id,
+        'uom_po_id'   => $uom->id,
+        'is_storable' => true,
+        'name'        => 'Short Component '.str()->random(6),
+    ]);
+
+    $finishedProduct = InventoryProduct::factory()->create([
+        'type'        => ProductType::PRODUCT,
+        'company_id'  => $company->id,
+        'uom_id'      => $uom->id,
+        'uom_po_id'   => $uom->id,
+        'is_storable' => true,
+        'name'        => 'Short Manufactured '.str()->random(6),
+    ]);
+
+    $billOfMaterial = BillOfMaterial::create([
+        'product_id' => $finishedProduct->id,
+        'type'       => BomType::Manufacture,
+        'quantity'   => 1,
+        'uom_id'     => $uom->id,
+        'company_id' => $company->id,
+        'creator_id' => $user->getKey(),
+    ]);
+
+    BillOfMaterialLine::create([
+        'bill_of_material_id' => $billOfMaterial->id,
+        'component_id'        => $component->id,
+        'quantity'            => 3,
+        'uom_id'              => $uom->id,
+        'sort'                => 1,
+    ]);
+
+    ProductQuantity::create([
+        'product_id'  => $component->id,
+        'location_id' => $warehouse->lot_stock_location_id,
+        'quantity'    => 2,
+        'company_id'  => $company->id,
+        'creator_id'  => $user->getKey(),
+    ]);
+
+    $order = Order::factory()->withPaymentTerms()->create([
+        'company_id'   => $company->id,
+        'currency_id'  => $company->currency_id,
+        'warehouse_id' => $warehouse->id,
+    ]);
+
+    OrderLine::factory()->create([
+        'order_id'         => $order->id,
+        'company_id'       => $order->company_id,
+        'currency_id'      => $order->currency_id,
+        'order_partner_id' => $order->partner_id,
+        'salesman_id'      => $order->user_id,
+        'state'            => $order->state,
+        'warehouse_id'     => $warehouse->id,
+        'product_id'       => $finishedProduct->id,
+        'product_qty'      => 1,
+        'product_uom_qty'  => 1,
+        'product_uom_id'   => $uom->id,
+        'price_unit'       => 100,
+        'name'             => 'Short stock line',
+    ]);
+
+    $this->postJson(salesOrderRoute('confirm', $order->id))
+        ->assertUnprocessable()
+        ->assertJsonPath('message', "Not enough stock to consume BOM components for 'Short stock line'.");
+
+    $this->assertDatabaseHas('sales_orders', [
+        'id'    => $order->id,
+        'state' => OrderState::DRAFT->value,
+    ]);
+});
 
 it('soft deletes an order for authorized users', function () {
     actingAsSalesOrderApiUser(['delete_sale_order']);

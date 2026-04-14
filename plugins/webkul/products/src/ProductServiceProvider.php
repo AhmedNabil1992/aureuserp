@@ -36,6 +36,9 @@ class ProductServiceProvider extends PackageServiceProvider
                 '2025_02_18_112837_create_products_product_price_lists_table',
                 '2025_02_21_053249 _create_products_product_combinations_table',
                 '2025_07_28_080116_alter_products_products_table',
+                '2026_04_14_000001_create_products_bill_of_materials_table',
+                '2026_04_14_000002_create_products_bill_of_material_lines_table',
+                '2026_04_14_000003_add_source_location_to_products_bill_of_materials_table',
             ])
             ->hasSeeder('Webkul\\Product\\Database\Seeders\\DatabaseSeeder')
             ->runsMigrations()

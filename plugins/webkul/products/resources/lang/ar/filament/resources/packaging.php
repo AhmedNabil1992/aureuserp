@@ -1,6 +1,10 @@
 <?php
 
 return [
+    'navigation' => [
+        'title' => 'التغليفات',
+    ],
+
     'form' => [
         'name'    => 'الاسم',
         'barcode' => 'الباركود',

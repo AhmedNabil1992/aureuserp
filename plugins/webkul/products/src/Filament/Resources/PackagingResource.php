@@ -27,14 +27,26 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
-use Illuminate\Support\Facades\Auth;
+use Webkul\Product\Filament\Resources\PackagingResource\Pages\ManagePackagings;
 use Webkul\Product\Models\Packaging;
 
 class PackagingResource extends Resource
 {
     protected static ?string $model = Packaging::class;
 
-    protected static bool $shouldRegisterNavigation = false;
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-gift';
+
+    protected static bool $shouldRegisterNavigation = true;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('products::filament/resources/packaging.navigation.title');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.product');
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -167,7 +179,7 @@ class PackagingResource extends Resource
                         ->label(__('products::filament/resources/packaging.table.bulk-actions.print.label'))
                         ->icon('heroicon-o-printer')
                         ->action(function ($records) {
-                            $pdf = PDF::loadView('products::filament.resources.packagings.actions.print', [
+                            $pdf = Pdf::loadView('products::filament.resources.packagings.actions.print', [
                                 'records' => $records,
                             ]);
 
@@ -267,5 +279,12 @@ class PackagingResource extends Resource
                     ->collapsible()
                     ->columns(2),
             ]);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ManagePackagings::route('/'),
+        ];
     }
 }

@@ -1,6 +1,10 @@
 <?php
 
 return [
+    'navigation' => [
+        'title' => 'الفئات',
+    ],
+
     'form' => [
         'sections' => [
             'general' => [

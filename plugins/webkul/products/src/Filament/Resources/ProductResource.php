@@ -24,6 +24,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\FusedGroup;
@@ -54,6 +55,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Product\Enums\ProductType;
+use Webkul\Product\Filament\Resources\ProductResource\Pages\CreateProduct;
+use Webkul\Product\Filament\Resources\ProductResource\Pages\EditProduct;
+use Webkul\Product\Filament\Resources\ProductResource\Pages\ListProducts;
+use Webkul\Product\Filament\Resources\ProductResource\Pages\ManageAttributes;
+use Webkul\Product\Filament\Resources\ProductResource\Pages\ManageVariants;
+use Webkul\Product\Filament\Resources\ProductResource\Pages\ViewProduct;
 use Webkul\Product\Models\Category;
 use Webkul\Product\Models\Product;
 use Webkul\Support\Models\UOM;
@@ -62,13 +69,25 @@ class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
 
-    protected static bool $shouldRegisterNavigation = false;
+    protected static bool $shouldRegisterNavigation = true;
+
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'name';
 
     protected static bool $isGloballySearchable = false;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-shopping-bag';
+
+    public static function getNavigationLabel(): string
+    {
+        return __('products::filament/resources/product.navigation.title');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.product');
+    }
 
     public static function getGloballySearchableAttributes(): array
     {
@@ -660,5 +679,27 @@ class ProductResource extends Resource
                     ->columnSpan(['lg' => 1]),
             ])
             ->columns(3);
+    }
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            ViewProduct::class,
+            EditProduct::class,
+            ManageAttributes::class,
+            ManageVariants::class,
+        ]);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index'      => ListProducts::route('/'),
+            'create'     => CreateProduct::route('/create'),
+            'view'       => ViewProduct::route('/{record}'),
+            'edit'       => EditProduct::route('/{record}/edit'),
+            'attributes' => ManageAttributes::route('/{record}/attributes'),
+            'variants'   => ManageVariants::route('/{record}/variants'),
+        ];
     }
 }

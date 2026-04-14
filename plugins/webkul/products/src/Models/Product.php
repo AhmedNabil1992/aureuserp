@@ -161,6 +161,16 @@ class Product extends Model implements Sortable
         return $this->hasMany(PriceRuleItem::class);
     }
 
+    public function billOfMaterials(): HasMany
+    {
+        return $this->hasMany(BillOfMaterial::class);
+    }
+
+    public function componentBillOfMaterialLines(): HasMany
+    {
+        return $this->hasMany(BillOfMaterialLine::class, 'component_id');
+    }
+
     public function getDisplayNameAttribute(): string
     {
         return $this->name;

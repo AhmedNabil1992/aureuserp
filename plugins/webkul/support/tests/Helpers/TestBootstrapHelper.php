@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 
 class TestBootstrapHelper
@@ -54,15 +55,43 @@ class TestBootstrapHelper
             return;
         }
 
-        Artisan::call('migrate:fresh', ['--force' => true]);
+        static::ensureSafeTestingDatabase();
+
+        Artisan::call('migrate', ['--force' => true]);
 
         Artisan::call('erp:install', [
-            '--force'          => true,
             '--admin-name'     => 'Test Admin',
             '--admin-email'    => 'admin@example.com',
             '--admin-password' => 'admin123',
         ]);
 
         static::$isERPInstalled = true;
+    }
+
+    private static function ensureSafeTestingDatabase(): void
+    {
+        if (! app()->runningUnitTests() && app()->environment('testing') !== true) {
+            throw new RuntimeException('Tests are blocked: APP_ENV must be testing or PHPUnit/Pest must be running.');
+        }
+
+        $connectionName = (string) Config::get('database.default');
+        $connection = (array) Config::get("database.connections.{$connectionName}", []);
+        $database = (string) ($connection['database'] ?? '');
+
+        $isSafeSqliteMemory = $connectionName === 'sqlite' && in_array($database, [':memory:', ''], true);
+
+        $normalizedDatabase = strtolower(str_replace('\\', '/', $database));
+        $isSafeNamedTestDatabase = str_contains($normalizedDatabase, 'test')
+            || str_contains($normalizedDatabase, 'testing');
+
+        if ($isSafeSqliteMemory || $isSafeNamedTestDatabase) {
+            return;
+        }
+
+        throw new RuntimeException(sprintf(
+            'Tests are blocked for safety. Active DB connection [%s] with database [%s] is not an isolated testing database.',
+            $connectionName,
+            $database === '' ? '(empty)' : $database
+        ));
     }
 }

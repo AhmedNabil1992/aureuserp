@@ -4,6 +4,7 @@ namespace Webkul\Sale;
 
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Webkul\Account\Enums as AccountEnums;
 use Webkul\Account\Enums\InvoicePolicy;
 use Webkul\Account\Facades\Account as AccountFacade;
@@ -19,6 +20,8 @@ use Webkul\Inventory\Models\Rule;
 use Webkul\Inventory\Models\Warehouse;
 use Webkul\Partner\Models\Partner;
 use Webkul\PluginManager\Package;
+use Webkul\Product\Enums\ProductType;
+use Webkul\Product\Models\BillOfMaterial;
 use Webkul\Sale\Enums\AdvancedPayment;
 use Webkul\Sale\Enums\InvoiceStatus;
 use Webkul\Sale\Enums\OrderDeliveryStatus;
@@ -62,17 +65,22 @@ class SaleManager
 
     public function confirmSaleOrder(Order $record): Order
     {
-        $this->applyPullRules($record);
+        return DB::transaction(function () use ($record): Order {
+            $record = $this->computeWarehouseId($record->refresh());
+            $record->save();
+            $record->refresh();
 
-        $record->update([
-            'state'          => OrderState::SALE,
-            'invoice_status' => InvoiceStatus::TO_INVOICE,
-            'locked'         => $this->quotationAndOrderSettings->enable_lock_confirm_sales,
-        ]);
+            $this->applyPullRules($record);
+            $this->consumeBillOfMaterials($record);
 
-        $record = $this->computeSaleOrder($record);
+            $record->update([
+                'state'          => OrderState::SALE,
+                'invoice_status' => InvoiceStatus::TO_INVOICE,
+                'locked'         => $this->quotationAndOrderSettings->enable_lock_confirm_sales,
+            ]);
 
-        return $record;
+            return $this->computeSaleOrder($record->refresh());
+        });
     }
 
     public function backToQuotation(Order $record): Order
@@ -975,6 +983,183 @@ class SaleManager
         foreach ($rules as $ruleData) {
             $this->createPullOperation($record, $ruleData['rule'], $ruleData['moves']);
         }
+    }
+
+    protected function consumeBillOfMaterials(Order $record): void
+    {
+        if (! Package::isPluginInstalled('inventories')) {
+            return;
+        }
+
+        $warehouse = $record->warehouse;
+
+        if (! $warehouse) {
+            throw new Exception('No warehouse has been resolved for this order.');
+        }
+
+        if (! $warehouse->internal_type_id || ! $warehouse->lot_stock_location_id) {
+            throw new Exception("Warehouse '{$warehouse->name}' is missing the internal operation type or stock location required for BOM consumption.");
+        }
+
+        $productionLocation = $this->resolveProductionLocation($record);
+
+        foreach ($record->lines as $line) {
+            if ($line->product?->type !== ProductType::PRODUCT) {
+                continue;
+            }
+
+            $billOfMaterial = $this->resolveBillOfMaterial($line);
+
+            if (! $billOfMaterial || $billOfMaterial->lines->isEmpty()) {
+                continue;
+            }
+
+            if ((float) $billOfMaterial->quantity <= 0) {
+                throw new Exception("Bill of materials '{$billOfMaterial->reference}' must have a quantity greater than zero.");
+            }
+
+            $sourceLocation = $this->resolveBomSourceLocation($record, $warehouse, $billOfMaterial);
+
+            $operation = InventoryOperation::create([
+                'state'                   => InventoryEnums\OperationState::DRAFT,
+                'origin'                  => $record->name.' / BOM / '.$line->name,
+                'partner_id'              => $record->partner_id,
+                'operation_type_id'       => $warehouse->internal_type_id,
+                'source_location_id'      => $sourceLocation->id,
+                'destination_location_id' => $productionLocation->id,
+                'scheduled_at'            => now(),
+                'company_id'              => $record->company_id,
+                'sale_order_id'           => $record->id,
+                'user_id'                 => Auth::id(),
+                'creator_id'              => Auth::id(),
+            ]);
+
+            $producedQuantity = $line->uom->computeQuantity(
+                $line->product_uom_qty,
+                $billOfMaterial->uom ?? $line->product->uom,
+                true,
+                'HALF-UP'
+            );
+
+            $scale = $producedQuantity / (float) $billOfMaterial->quantity;
+
+            foreach ($billOfMaterial->lines as $billOfMaterialLine) {
+                $component = $billOfMaterialLine->component;
+
+                if (! $component) {
+                    throw new Exception('A BOM line references a missing component product.');
+                }
+
+                $moveUom = $billOfMaterialLine->uom ?? $component->uom;
+
+                if (! $moveUom || ! $component->uom) {
+                    throw new Exception("Component '{$component->name}' is missing a unit of measure required for BOM consumption.");
+                }
+
+                $moveUomQuantity = round((float) $billOfMaterialLine->quantity * $scale, 4);
+
+                if ($moveUomQuantity <= 0) {
+                    continue;
+                }
+
+                $productQuantity = $moveUom->computeQuantity($moveUomQuantity, $component->uom, true, 'HALF-UP');
+
+                $operation->moves()->create([
+                    'name'                    => $component->name,
+                    'reference'               => $operation->name,
+                    'state'                   => InventoryEnums\MoveState::DRAFT,
+                    'product_id'              => $component->id,
+                    'product_qty'             => $productQuantity,
+                    'product_uom_qty'         => $moveUomQuantity,
+                    'quantity'                => $moveUomQuantity,
+                    'uom_id'                  => $moveUom->id,
+                    'origin'                  => $record->name,
+                    'scheduled_at'            => $operation->scheduled_at,
+                    'source_location_id'      => $sourceLocation->id,
+                    'destination_location_id' => $productionLocation->id,
+                    'final_location_id'       => $productionLocation->id,
+                    'company_id'              => $record->company_id,
+                    'operation_type_id'       => $warehouse->internal_type_id,
+                    'warehouse_id'            => $warehouse->id,
+                    'procure_method'          => InventoryEnums\ProcureMethod::MAKE_TO_STOCK,
+                    'sale_order_line_id'      => $line->id,
+                ]);
+            }
+
+            $operation->refresh();
+            $operation = InventoryFacade::computeTransfer($operation);
+
+            foreach ($operation->moves as $move) {
+                if (
+                    $move->state !== InventoryEnums\MoveState::ASSIGNED
+                    || abs((float) $move->quantity - (float) $move->product_uom_qty) > 0.0001
+                ) {
+                    throw new Exception("Not enough stock to consume BOM components for '{$line->name}'.");
+                }
+            }
+
+            InventoryFacade::validateTransfer($operation);
+        }
+    }
+
+    protected function resolveBillOfMaterial(OrderLine $line): ?BillOfMaterial
+    {
+        return $line->product?->billOfMaterials()
+            ->with(['uom', 'lines.component.uom', 'lines.uom'])
+            ->where(function ($query) use ($line): void {
+                $query->where('company_id', $line->company_id)
+                    ->orWhereNull('company_id');
+            })
+            ->orderByRaw('CASE WHEN company_id = ? THEN 0 WHEN company_id IS NULL THEN 1 ELSE 2 END', [$line->company_id])
+            ->orderBy('id')
+            ->first();
+    }
+
+    protected function resolveProductionLocation(Order $record): Location
+    {
+        $location = Location::query()
+            ->where('type', InventoryEnums\LocationType::PRODUCTION)
+            ->where(function ($query) use ($record): void {
+                $query->where('company_id', $record->company_id)
+                    ->orWhereNull('company_id');
+            })
+            ->orderByRaw('CASE WHEN company_id = ? THEN 0 ELSE 1 END', [$record->company_id])
+            ->first();
+
+        if (! $location) {
+            throw new Exception('No production location is configured for BOM consumption.');
+        }
+
+        return $location;
+    }
+
+    protected function resolveBomSourceLocation(Order $record, Warehouse $warehouse, BillOfMaterial $billOfMaterial): Location
+    {
+        if ($billOfMaterial->source_location_id) {
+            $location = Location::query()->find($billOfMaterial->source_location_id);
+
+            if (! $location) {
+                throw new Exception('The selected BOM source location no longer exists.');
+            }
+
+            if (
+                $location->type !== InventoryEnums\LocationType::INTERNAL
+                || $location->is_scrap
+                || ($location->company_id && $location->company_id !== $record->company_id)
+            ) {
+                throw new Exception('The selected BOM source location is not a valid internal location for this order company.');
+            }
+
+            return $location;
+        }
+
+        $location = Location::query()->find($warehouse->lot_stock_location_id);
+
+        if (! $location) {
+            throw new Exception("Warehouse '{$warehouse->name}' has no valid stock location for BOM consumption.");
+        }
+
+        return $location;
     }
 
     protected function cancelInventoryOperation(Order $record): void

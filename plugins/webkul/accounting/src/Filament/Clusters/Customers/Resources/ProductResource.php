@@ -19,7 +19,7 @@ class ProductResource extends BaseProductResource
 
     protected static ?string $cluster = Customers::class;
 
-    protected static bool $shouldRegisterNavigation = true;
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static bool $isGloballySearchable = true;
 

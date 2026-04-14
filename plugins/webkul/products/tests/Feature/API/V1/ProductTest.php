@@ -273,6 +273,25 @@ it('creates a product', function () {
     ]);
 });
 
+it('creates a product with product type', function () {
+    actingAsProductsProductApiUser(['create_product_product']);
+
+    $payload = productsProductPayload([
+        'type' => ProductType::PRODUCT->value,
+    ]);
+
+    $response = $this->postJson(productsProductRoute('store'), $payload)
+        ->assertCreated()
+        ->assertJsonPath('data.type', ProductType::PRODUCT->value);
+
+    $id = $response->json('data.id');
+
+    $this->assertDatabaseHas('products_products', [
+        'id'   => $id,
+        'type' => ProductType::PRODUCT->value,
+    ]);
+});
+
 it('creates a product with optional fields', function () {
     actingAsProductsProductApiUser(['create_product_product']);
 

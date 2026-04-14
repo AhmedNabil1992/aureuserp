@@ -24,7 +24,7 @@ class ProductResource extends BaseProductResource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-shopping-bag';
 
-    protected static bool $shouldRegisterNavigation = true;
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static bool $isGloballySearchable = true;
 

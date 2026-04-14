@@ -1,6 +1,7 @@
 <?php
 
 use Webkul\Product\Filament\Resources\AttributeResource;
+use Webkul\Product\Filament\Resources\BillOfMaterialResource;
 use Webkul\Product\Filament\Resources\CategoryResource;
 use Webkul\Product\Filament\Resources\PackagingResource;
 use Webkul\Product\Filament\Resources\PriceListResource;
@@ -15,11 +16,12 @@ $reorder = ['reorder'];
 return [
     'resources' => [
         'manage' => [
-            CategoryResource::class => [...$basic, ...$delete],
-            AttributeResource::class => [...$basic, ...$delete, ...$restore, ...$forceDelete, ...$reorder],
-            PackagingResource::class => [...$basic, ...$delete, ...$reorder],
-            PriceListResource::class => [...$basic, ...$delete, ...$reorder],
-            ProductResource::class => [...$basic, ...$delete, ...$restore, ...$forceDelete, ...$reorder],
+            CategoryResource::class       => [...$basic, ...$delete],
+            AttributeResource::class      => [...$basic, ...$delete, ...$restore, ...$forceDelete, ...$reorder],
+            BillOfMaterialResource::class => [...$basic, ...$delete],
+            PackagingResource::class      => [...$basic, ...$delete, ...$reorder],
+            PriceListResource::class      => [...$basic, ...$delete, ...$reorder],
+            ProductResource::class        => [...$basic, ...$delete, ...$restore, ...$forceDelete, ...$reorder],
         ],
     ],
 ];

@@ -7,10 +7,35 @@
 1. تعريف **وصفة إنتاج (Bill of Materials)** لكل منتج مركب — كمية كل خامة مطلوبة لتصنيع وحدة واحدة.
 2. **خصم المخزون تلقائياً** من الخامات عند تأكيد أمر البيع (state → `sale`).
 3. **نقل إدارة المنتجات** من قائمة Purchase وSales إلى navigation group جديدة خاصة بـ Manufacturing.
+4. **توسيع نوع الصنف عند الإنشاء** ليشمل: `Goods` و `Services` و `Product` (بدلاً من `Goods/Services` فقط).
 
 ---
 
 ## قاعدة البيانات
+
+## تحديث إضافي مطلوب الآن: نوع الصنف Product
+
+الحالة الحالية حسب المتطلب:
+
+- إنشاء الصنف يدعم `Goods` و `Services` فقط.
+
+المطلوب إضافته:
+
+- دعم خيار ثالث `Product` في كل نقاط إنشاء/تعديل الصنف.
+
+تنفيذه يكون عبر:
+
+1. مراجعة عمود النوع في جدول المنتجات:
+    - إذا كان ENUM ثابت، نضيف Migration لتوسيع القيم لتشمل `product`.
+    - إذا كان String/غير مقيّد، نحدّث الـ validation والخيارات فقط.
+2. تحديث الـ Enum/constant المسؤولة عن الأنواع داخل Plugin المنتجات/المخزون.
+3. تحديث حقول الـ Select في Filament Forms (Create/Edit) لتعرض `Goods`, `Services`, `Product`.
+4. تحديث الترجمة Labels في ملفات اللغة.
+5. تحديث Filters/Tabs التي تعتمد على النوع حتى لا تستبعد `Product`.
+6. إضافة اختبارات تغطي:
+    - إنشاء صنف بنوع `product`.
+    - تعديل صنف إلى/من `product`.
+    - ظهور الصنف في القوائم والفلاتر الصحيحة.
 
 ### جدول 1: `manufacturing_bill_of_materials`
 
@@ -308,6 +333,15 @@ public static function shouldRegisterNavigation(): bool
 // إضافة نفس الـ method
 ```
 
+### Product/Inventory — دعم النوع Product
+
+ملفات متوقع تعديلها (تُراجع أثناء التنفيذ الفعلي):
+
+- Enum أو class الأنواع في Plugin المنتجات.
+- Resource/Form الخاص بإنشاء وتعديل المنتج داخل Manufacturing Products.
+- أي Request/Rule يقيّد النوع إلى `goods|services` فقط.
+- أي Tabs/Filters تعتمد على النوع الحالي.
+
 ---
 
 ## تسلسل التنفيذ
@@ -328,9 +362,11 @@ public static function shouldRegisterNavigation(): bool
 13. BillOfMaterialPolicy
 14. config/filament-shield.php
 15. Translation files (en)
-16. تعديل Purchase Cluster
-17. تعديل Sales Cluster
-18. composer dump-autoload + php artisan manufacturing:install
+16. إضافة دعم نوع `Product` (DB + Enum + Forms + Validation + Filters)
+17. اختبارات نوع الصنف `Product`
+18. تعديل Purchase Cluster
+19. تعديل Sales Cluster
+20. composer dump-autoload + php artisan manufacturing:install
 ```
 
 ---
@@ -372,6 +408,16 @@ manufacturing
 - تحذير نقص المخزون قبل البيع
 - أوامر التصنيع (Manufacturing Orders) — مرحلة لاحقة
 - dossiers الجودة والتتبع بالـ Serial/Lot لكل مكون
+
+---
+
+## نواقص مهمة قبل البدء بالتنفيذ
+
+- [ ] تحديد المصدر الرسمي لأنواع الصنف (Enum واحد فقط) لتجنب تكرار القيم في أكثر من مكان.
+- [ ] التأكد من التوافق الخلفي للبيانات الحالية إذا تم تعديل ENUM في قاعدة البيانات.
+- [ ] التأكد أن سياسات/صلاحيات إنشاء المنتج لا تتأثر بإضافة النوع الجديد.
+- [ ] التأكد أن أي تكامل API يعيد ويقبل `product` ضمن القيم المسموح بها.
+- [ ] إضافة smoke test سريع لمسار: إنشاء صنف Product ثم ربطه داخل BOM.
 
 ---
 

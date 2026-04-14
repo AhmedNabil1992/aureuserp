@@ -39,6 +39,11 @@ class ListProducts extends ListRecords
                 ->favorite()
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('type', ProductType::SERVICE)),
 
+            'product_products' => PresetView::make(__('products::filament/resources/product/pages/list-products.tabs.product'))
+                ->icon('heroicon-s-cube')
+                ->favorite()
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('type', ProductType::PRODUCT)),
+
             'favorites_products' => PresetView::make(__('products::filament/resources/product/pages/list-products.tabs.favorites'))
                 ->icon('heroicon-s-star')
                 ->favorite()
