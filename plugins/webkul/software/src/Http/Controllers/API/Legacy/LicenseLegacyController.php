@@ -13,7 +13,6 @@ use Webkul\Software\Http\Requests\API\Legacy\InsertLicenseRequest;
 use Webkul\Software\Http\Requests\API\Legacy\LicenseInfoRequest;
 use Webkul\Software\Models\License;
 use Webkul\Software\Models\LicenseDevice;
-use Webkul\Software\Models\ProgramEdition;
 use Webkul\Software\Services\LegacyLicenseKeyGenerator;
 use Webkul\Support\Models\City;
 
@@ -24,35 +23,6 @@ class LicenseLegacyController extends Controller
         $data = $request->validated();
 
         $programId = (int) $data['ProductID'];
-
-        $editionId = $data['EditionID']
-            ?? ProgramEdition::query()
-                ->where('program_id', $programId)
-                ->whereRaw('LOWER(name) = ?', ['standard'])
-                ->value('id')
-            ?? ProgramEdition::query()
-                ->where('program_id', $programId)
-                ->orderBy('id')
-                ->value('id');
-
-        if (! $editionId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Edition not found for selected product.',
-            ], 422);
-        }
-
-        $editionBelongsToProgram = ProgramEdition::query()
-            ->whereKey($editionId)
-            ->where('program_id', $programId)
-            ->exists();
-
-        if (! $editionBelongsToProgram) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Edition does not belong to selected product.',
-            ], 422);
-        }
 
         $stateId = $data['GoverID'] ?? null;
         $cityId = $data['CityID'] ?? null;
@@ -78,11 +48,11 @@ class LicenseLegacyController extends Controller
         }
 
         try {
-            $licenseId = DB::transaction(function () use ($data, $programId, $editionId, $stateId, $cityId): int {
+            $licenseId = DB::transaction(function () use ($data, $programId, $stateId, $cityId): int {
                 $license = License::query()->create([
                     'serial_number'  => $this->generateSerialNumber(),
                     'program_id'     => $programId,
-                    'edition_id'     => $editionId,
+                    'edition_id'     => null,
                     'partner_id'     => (int) $data['ClientID'],
                     'state_id'       => $stateId,
                     'city_id'        => $cityId,
@@ -90,7 +60,6 @@ class LicenseLegacyController extends Controller
                     'company_name'   => $data['CompanyName'],
                     'status'         => LicenseStatus::Pending->value,
                     'is_active'      => false,
-                    'server_ip'      => $data['ServerIP'] ?? null,
                     'requested_at'   => now(),
                 ]);
 

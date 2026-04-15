@@ -49,10 +49,8 @@ class InsertLicenseRequest extends FormRequest
             'GoverID'     => ['nullable', 'integer', 'exists:states,id'],
             'CityID'      => ['nullable', 'integer', 'exists:cities,id'],
             'Address'     => ['nullable', 'string', 'max:255'],
-            'EditionID'   => ['nullable', 'integer', 'exists:software_program_editions,id'],
             'LicenseType' => ['nullable', 'string'],
             'Period'      => ['nullable', 'integer', 'min:1'],
-            'ServerIP'    => ['nullable', 'string', 'max:45'],
         ];
     }
 

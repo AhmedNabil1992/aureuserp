@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
             EmployeeCategorySeeder::class,
             DepartureReasonSeeder::class,
             ActivityPlanTemplateSeeder::class,
-            EmployeeSeeder::class,
+            // EmployeeSeeder::class,
             DepartmentSeeder::class,
         ]);
     }

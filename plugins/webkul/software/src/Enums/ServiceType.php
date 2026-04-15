@@ -8,5 +8,5 @@ enum ServiceType: string
 
     case Mail = 'mail';
 
-    case Remote = 'remote';
+    case FollowUp = 'follow_up';
 }

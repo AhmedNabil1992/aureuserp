@@ -7,6 +7,9 @@ use Webkul\PluginManager\Console\Commands\InstallCommand;
 use Webkul\PluginManager\Console\Commands\UninstallCommand;
 use Webkul\PluginManager\Package;
 use Webkul\PluginManager\PackageServiceProvider;
+use Webkul\Software\Services\LicenseInvoiceManager;
+use Webkul\Software\Services\LicenseManager;
+use Webkul\Software\Services\SubscriptionManager;
 
 class SoftwareServiceProvider extends PackageServiceProvider
 {
@@ -16,6 +19,8 @@ class SoftwareServiceProvider extends PackageServiceProvider
 
     public function configureCustomPackage(Package $package): void
     {
+        $this->registerServices();
+
         $package->name(static::$name)
             ->hasViews()
             ->hasTranslations()
@@ -47,6 +52,7 @@ class SoftwareServiceProvider extends PackageServiceProvider
                 '2026_04_13_000025_alter_software_programs_add_product_id',
                 '2026_04_13_000026_alter_software_program_editions_add_variant_product_id',
                 '2026_04_13_000027_alter_software_program_features_add_product_id',
+                '2026_04_15_000028_alter_software_licenses_make_edition_nullable',
             ])
             ->runsMigrations()
             ->hasInstallCommand(function (InstallCommand $command): void {
@@ -67,5 +73,12 @@ class SoftwareServiceProvider extends PackageServiceProvider
         Panel::configureUsing(function (Panel $panel): void {
             $panel->plugin(SoftwarePlugin::make());
         });
+    }
+
+    private function registerServices(): void
+    {
+        $this->app->singleton(LicenseInvoiceManager::class);
+        $this->app->singleton(SubscriptionManager::class);
+        $this->app->singleton(LicenseManager::class);
     }
 }

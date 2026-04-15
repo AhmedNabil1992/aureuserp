@@ -17,6 +17,6 @@
       Psy\Exception\ParseErrorException::fromParseError(Object(PhpParser\Error))
 
   2   vendor\psy\psysh\src\CodeCleaner.php:273
-      Psy\CodeCleaner::parse("<?php dump(Webkul\Software\Models\ProgramEdition::query()-,name','product:id,name,parent_id,uom_id')-,'program_id','product_id','name'])-;
+      Psy\CodeCleaner::parse("<?php dump(\DB::table('roles')-,'name')-;
 ")
 
