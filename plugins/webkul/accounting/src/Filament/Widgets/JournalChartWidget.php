@@ -88,6 +88,19 @@ class JournalChartWidget extends Component
                         ->sum('amount_residual'),
                     'formatted_amount' => money($amount),
                 ],
+                'paid' => [
+                    'label' => 'Paid',
+                    'url'   => $this->getUrl('index', ['activeTableView' => 'paid']),
+                    'value' => (clone $baseQuery)
+                        ->where('state', MoveState::POSTED)
+                        ->where('payment_state', PaymentState::PAID)
+                        ->count(),
+                    'amount' => $amount = (clone $baseQuery)
+                        ->where('state', MoveState::POSTED)
+                        ->where('payment_state', PaymentState::PAID)
+                        ->sum('amount_total'),
+                    'formatted_amount' => money($amount),
+                ],
             ];
         } elseif ($type === JournalType::PURCHASE) {
             $data['stats'] = [

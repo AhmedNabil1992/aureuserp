@@ -3,13 +3,11 @@
 namespace App\Providers\Filament;
 
 use App\Http\Middleware\SetLocale;
-use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Support\Enums\Width;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -19,18 +17,15 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-class CustomerPanelProvider extends PanelProvider
+class WebsitePanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->id('customer')
-            ->path('portal')
-            ->homeUrl(url('/portal/dashboard'))
-            ->login()
-            ->emailVerification()
+            ->id('website')
+            ->path('/')
+            ->homeUrl(url('/'))
             ->authPasswordBroker('customers')
-            ->profile(isSimple: false)
             ->favicon(asset('images/favicon.ico'))
             ->brandLogo(asset('images/logo.svg'))
             ->darkMode(false)
@@ -38,7 +33,7 @@ class CustomerPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Blue,
             ])
-            ->maxContentWidth(Width::Full)
+            ->topNavigation()
             ->renderHook(
                 PanelsRenderHook::USER_MENU_BEFORE,
                 fn () => view('filament.components.language-switcher'),
@@ -58,9 +53,6 @@ class CustomerPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
                 SetLocale::class,
-            ])
-            ->authMiddleware([
-                Authenticate::class,
             ])
             ->authGuard('customer');
     }

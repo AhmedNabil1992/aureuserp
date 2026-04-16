@@ -3,10 +3,13 @@
 namespace Webkul\Product;
 
 use Filament\Panel;
+use Illuminate\Support\Facades\Event;
+use Webkul\Account\Events\MoveConfirmed;
 use Webkul\PluginManager\Console\Commands\InstallCommand;
 use Webkul\PluginManager\Console\Commands\UninstallCommand;
 use Webkul\PluginManager\Package;
 use Webkul\PluginManager\PackageServiceProvider;
+use Webkul\Product\Listeners\DeductComponentsOnInvoiceConfirmed;
 
 class ProductServiceProvider extends PackageServiceProvider
 {
@@ -56,7 +59,7 @@ class ProductServiceProvider extends PackageServiceProvider
 
     public function packageBooted(): void
     {
-        //
+        Event::listen(MoveConfirmed::class, DeductComponentsOnInvoiceConfirmed::class);
     }
 
     public function packageRegistered(): void

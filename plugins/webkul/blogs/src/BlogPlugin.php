@@ -25,7 +25,7 @@ class BlogPlugin implements Plugin
         }
 
         $panel
-            ->when($panel->getId() == 'customer', function (Panel $panel) {
+            ->when($panel->getId() == 'website', function (Panel $panel) {
                 $panel
                     ->discoverResources(
                         in: __DIR__.'/Filament/Customer/Resources',

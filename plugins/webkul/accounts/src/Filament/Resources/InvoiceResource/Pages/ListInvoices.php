@@ -67,6 +67,12 @@ class ListInvoices extends ListRecords
                     $query->where('state', MoveState::POSTED)
                         ->where('payment_state', PaymentState::IN_PAYMENT);
                 }),
+            'paid' => PresetView::make('Paid')
+                ->icon('heroicon-s-check-circle')
+                ->modifyQueryUsing(function (Builder $query) {
+                    $query->where('state', MoveState::POSTED)
+                        ->where('payment_state', PaymentState::PAID);
+                }),
             'overdue' => PresetView::make(__('accounts::filament/resources/invoice/pages/list-invoice.tabs.overdue'))
                 ->icon('heroicon-s-banknotes')
                 ->modifyQueryUsing(function (Builder $query) {

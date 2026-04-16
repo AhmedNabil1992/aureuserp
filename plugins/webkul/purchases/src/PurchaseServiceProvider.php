@@ -4,12 +4,15 @@ namespace Webkul\Purchase;
 
 use Filament\Panel;
 use Illuminate\Foundation\AliasLoader;
+use Illuminate\Support\Facades\Event;
 use Livewire\Livewire;
+use Webkul\Account\Events\MoveConfirmed;
 use Webkul\PluginManager\Console\Commands\InstallCommand;
 use Webkul\PluginManager\Console\Commands\UninstallCommand;
 use Webkul\PluginManager\Package;
 use Webkul\PluginManager\PackageServiceProvider;
 use Webkul\Purchase\Facades\PurchaseOrder as PurchaseOrderFacade;
+use Webkul\Purchase\Listeners\CreateReceiptOnBillConfirmed;
 use Webkul\Purchase\Livewire\Customer\ListProducts;
 use Webkul\Purchase\Livewire\OrderSummary;
 
@@ -40,7 +43,7 @@ class PurchaseServiceProvider extends PackageServiceProvider
                 '2025_03_17_111610_add_purchases_columns_to_inventories_moves_table_from_purchases',
                 '2025_03_17_115707_create_purchases_order_operations_table_from_purchases',
                 '2026_03_11_103115_alter_purchases_order_lines_table',
-                '2026_03_13_181105_alter_purchases_orders_table'
+                '2026_03_13_181105_alter_purchases_orders_table',
             ])
             ->runsMigrations()
             ->hasSettings([
@@ -67,6 +70,8 @@ class PurchaseServiceProvider extends PackageServiceProvider
         Livewire::component('list-products', ListProducts::class);
 
         // \Webkul\Account\Models\Move::observe(\Webkul\Purchase\Observers\AccountMoveObserver::class);
+
+        Event::listen(MoveConfirmed::class, CreateReceiptOnBillConfirmed::class);
     }
 
     public function packageRegistered(): void
