@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
             FiscalPositionTaxSeeder::class,
             FullReconcileSeeder::class,
             IncotermSeeder::class,
-            // JournalSeeder::class,
+            JournalSeeder::class,
             MoveLineSeeder::class,
             MoveSeeder::class,
             PartialReconcileSeeder::class,
