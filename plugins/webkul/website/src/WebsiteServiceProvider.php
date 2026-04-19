@@ -23,6 +23,7 @@ class WebsiteServiceProvider extends PackageServiceProvider
         $package->name(static::$name)
             ->hasViews()
             ->hasTranslations()
+            ->hasRoute('api')
             ->hasMigrations([
                 '2025_03_10_094011_create_website_pages_table',
                 '2025_03_10_064655_alter_partners_partners_table',
@@ -46,6 +47,10 @@ class WebsiteServiceProvider extends PackageServiceProvider
     public function packageBooted(): void
     {
         $this->registerCustomCss();
+
+        if (! app()->routesAreCached() && ! Route::has('customer.api.v1.website.auth.register')) {
+            $this->loadRoutesFrom(__DIR__.'/../routes/api.php');
+        }
 
         if (! Package::isPluginInstalled(self::$name)) {
             Route::get('/', function () {

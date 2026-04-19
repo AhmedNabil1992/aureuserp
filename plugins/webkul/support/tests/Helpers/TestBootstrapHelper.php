@@ -60,9 +60,10 @@ class TestBootstrapHelper
         Artisan::call('migrate', ['--force' => true]);
 
         Artisan::call('erp:install', [
-            '--admin-name'     => 'Test Admin',
-            '--admin-email'    => 'admin@example.com',
-            '--admin-password' => 'admin123',
+            '--no-interaction'   => true,
+            '--admin-name'       => 'Test Admin',
+            '--admin-email'      => 'admin@example.com',
+            '--admin-password'   => 'admin123',
         ]);
 
         static::$isERPInstalled = true;

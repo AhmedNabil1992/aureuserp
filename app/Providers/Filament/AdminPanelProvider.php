@@ -105,6 +105,9 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Marketing')
                     ->icon('heroicon-o-megaphone'),
                 NavigationGroup::make()
+                    ->label('Wi-Fi')
+                    ->icon('heroicon-o-wifi'),
+                NavigationGroup::make()
                     ->label(__('admin.navigation.website'))
                     ->icon('icon-website'),
                 NavigationGroup::make()

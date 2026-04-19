@@ -2,10 +2,14 @@
 
 namespace Webkul\Website\Models;
 
+use Laravel\Sanctum\HasApiTokens;
 use Webkul\Partner\Models\Partner as BasePartner;
+use Webkul\Website\Database\Factories\PartnerFactory;
 
 class Partner extends BasePartner
 {
+    use HasApiTokens;
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -34,5 +38,10 @@ class Partner extends BasePartner
         ]);
 
         parent::__construct($attributes);
+    }
+
+    protected static function newFactory(): PartnerFactory
+    {
+        return PartnerFactory::new();
     }
 }

@@ -1,0 +1,30 @@
+{
+    "name": "webkul/wifi",
+    "description": "Wi-Fi cloud radius and voucher management plugin.",
+    "authors": [
+        {
+            "name": "Aureus ERP",
+            "email": "support@aureuserp.in"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webkul\\Wifi\\WifiServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Webkul\\Wifi\\": "src/",
+            "Webkul\\Wifi\\Database\\Factories\\": "database/factories/",
+            "Webkul\\Wifi\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Webkul\\Wifi\\Tests\\": "tests/"
+        }
+    }
+}

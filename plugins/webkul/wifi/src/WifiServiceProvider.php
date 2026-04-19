@@ -1,6 +1,6 @@
 <?php
 
-namespace Webkul\Lead;
+namespace Webkul\Wifi;
 
 use Filament\Panel;
 use Webkul\PluginManager\Console\Commands\InstallCommand;
@@ -8,38 +8,37 @@ use Webkul\PluginManager\Console\Commands\UninstallCommand;
 use Webkul\PluginManager\Package;
 use Webkul\PluginManager\PackageServiceProvider;
 
-class LeadServiceProvider extends PackageServiceProvider
+class WifiServiceProvider extends PackageServiceProvider
 {
-    public static string $name = 'leads';
+    public static string $name = 'wifi';
 
-    public static string $viewNamespace = 'leads';
+    public static string $viewNamespace = 'wifi';
 
     public function configureCustomPackage(Package $package): void
     {
         $package->name(static::$name)
             ->hasViews()
             ->hasTranslations()
+            ->hasDependencies(['accounts'])
             ->hasMigrations([
-                '2026_04_19_000001_create_leads_leads_table',
-                '2026_04_19_000002_create_leads_interactions_table',
-                '2026_04_19_151348_add_service_id_to_leads_leads_table',
+                '2026_04_19_200001_create_wifi_packages_table',
+                '2026_04_19_200002_create_wifi_purchases_table',
+                '2026_04_19_200003_create_wifi_voucher_batches_table',
             ])
             ->runsMigrations()
-            ->hasSettings([])
-            ->runsSettings()
-            ->hasInstallCommand(function (InstallCommand $command) {
+            ->hasInstallCommand(function (InstallCommand $command): void {
                 $command
                     ->installDependencies()
                     ->runsMigrations();
             })
-            ->hasUninstallCommand(function (UninstallCommand $command) {})
-            ->icon('heroicon-o-user-group');
+            ->hasUninstallCommand(function (UninstallCommand $command): void {})
+            ->icon('heroicon-o-wifi');
     }
 
     public function packageRegistered(): void
     {
         Panel::configureUsing(function (Panel $panel): void {
-            $panel->plugin(LeadPlugin::make());
+            $panel->plugin(WifiPlugin::make());
         });
     }
 }

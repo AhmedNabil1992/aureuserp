@@ -33,6 +33,7 @@ use Webkul\TableViews\TableViewsServiceProvider;
 use Webkul\TimeOff\TimeOffServiceProvider;
 use Webkul\Timesheet\TimesheetServiceProvider;
 use Webkul\Website\WebsiteServiceProvider;
+use Webkul\Wifi\WifiServiceProvider;
 
 return [
     AppServiceProvider::class,
@@ -67,5 +68,6 @@ return [
     FullCalendarServiceProvider::class,
     TimesheetServiceProvider::class,
     WebsiteServiceProvider::class,
+    WifiServiceProvider::class,
     PluginManagerServiceProvider::class,
 ];
