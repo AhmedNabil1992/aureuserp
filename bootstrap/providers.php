@@ -7,6 +7,7 @@ use App\Providers\Filament\WebsitePanelProvider;
 use Webkul\Account\AccountServiceProvider;
 use Webkul\Accounting\AccountingServiceProvider;
 use Webkul\Analytic\AnalyticServiceProvider;
+use Webkul\Article\ArticleServiceProvider;
 use Webkul\Blog\BlogServiceProvider;
 use Webkul\Chatter\ChatterServiceProvider;
 use Webkul\Contact\ContactServiceProvider;
@@ -15,6 +16,8 @@ use Webkul\Field\FieldServiceProvider;
 use Webkul\FullCalendar\FullCalendarServiceProvider;
 use Webkul\Inventory\InventoryServiceProvider;
 use Webkul\Invoice\InvoiceServiceProvider;
+use Webkul\Lead\LeadServiceProvider;
+use Webkul\Marketing\MarketingServiceProvider;
 use Webkul\Partner\PartnerServiceProvider;
 use Webkul\Payment\PaymentServiceProvider;
 use Webkul\PluginManager\PluginManagerServiceProvider;
@@ -39,7 +42,10 @@ return [
     AccountingServiceProvider::class,
     AccountServiceProvider::class,
     AnalyticServiceProvider::class,
+    ArticleServiceProvider::class,
     BlogServiceProvider::class,
+    LeadServiceProvider::class,
+    MarketingServiceProvider::class,
     ChatterServiceProvider::class,
     ContactServiceProvider::class,
     EmployeeServiceProvider::class,

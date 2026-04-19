@@ -1,0 +1,30 @@
+{
+    "name": "webkul/leads",
+    "description": "Leads and interaction management",
+    "authors": [
+        {
+            "name": "Aureus ERP",
+            "email": "support@aureuserp.in"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webkul\\Lead\\LeadServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Webkul\\Lead\\": "src/",
+            "Webkul\\Lead\\Database\\Factories\\": "database/factories/",
+            "Webkul\\Lead\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Webkul\\Lead\\Tests\\": "tests/"
+        }
+    }
+}

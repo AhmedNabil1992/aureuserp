@@ -1,0 +1,30 @@
+{
+    "name": "webkul/articles",
+    "description": "Manage articles and knowledge base for admins and customers",
+    "authors": [
+        {
+            "name": "Aureus ERP",
+            "email": "support@aureuserp.in"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webkul\\Article\\ArticleServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Webkul\\Article\\": "src/",
+            "Webkul\\Article\\Database\\Factories\\": "database/factories/",
+            "Webkul\\Article\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Webkul\\Article\\Tests\\": "tests/"
+        }
+    }
+}

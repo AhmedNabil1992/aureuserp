@@ -19,6 +19,7 @@
         "flowframe/laravel-trend": "^0.3.0",
         "guava/filament-icon-picker": "^4.0",
         "knuckleswtf/scribe": "^5.6",
+        "kreait/laravel-firebase": "^7.1",
         "laravel/framework": "^11.9",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",

@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+@source "../../plugins/**/*.blade.php";
+@source "../../plugins/**/*.php";
+
 /* ==========================================================================
    RTL/LTR Support - Global Styles
    ========================================================================== */
@@ -167,22 +170,26 @@
 }
 
 /* Padding/Margin logical properties override */
-[dir="rtl"] .ps-4, [dir="rtl"] .pl-4 {
+[dir="rtl"] .ps-4,
+[dir="rtl"] .pl-4 {
     padding-left: 0;
     padding-right: 1rem;
 }
 
-[dir="rtl"] .pe-4, [dir="rtl"] .pr-4 {
+[dir="rtl"] .pe-4,
+[dir="rtl"] .pr-4 {
     padding-right: 0;
     padding-left: 1rem;
 }
 
-[dir="rtl"] .ms-4, [dir="rtl"] .ml-4 {
+[dir="rtl"] .ms-4,
+[dir="rtl"] .ml-4 {
     margin-left: 0;
     margin-right: 1rem;
 }
 
-[dir="rtl"] .me-4, [dir="rtl"] .mr-4 {
+[dir="rtl"] .me-4,
+[dir="rtl"] .mr-4 {
     margin-right: 0;
     margin-left: 1rem;
 }
@@ -209,8 +216,8 @@
     flex-direction: row-reverse;
 }
 
-[dir="rtl"] .fi-btn > span + svg,
-[dir="rtl"] .fi-btn > svg + span {
+[dir="rtl"] .fi-btn>span+svg,
+[dir="rtl"] .fi-btn>svg+span {
     margin-left: 0;
     margin-right: 0.5rem;
 }
@@ -302,4 +309,98 @@
 [dir="rtl"] input[type="number"] {
     direction: ltr;
     text-align: left;
+}
+
+/* ==========================================================================
+   Ticket Chat Panel — force consistent LTR bubble positioning
+   Chat bubbles must always be positionally meaningful (admin = right,
+   customer = left) regardless of the page's RTL/LTR direction.
+   ========================================================================== */
+
+.ticket-chat-ltr {
+    direction: ltr;
+}
+
+.ticket-chat-ltr .flex-row {
+    flex-direction: row !important;
+}
+
+.ticket-chat-ltr .flex-row-reverse {
+    flex-direction: row-reverse !important;
+}
+
+.ticket-chat-ltr .ml-auto {
+    margin-left: auto !important;
+    margin-right: 0 !important;
+}
+
+.ticket-chat-ltr .mr-auto {
+    margin-right: auto !important;
+    margin-left: 0 !important;
+}
+
+.ticket-chat-ltr .text-right {
+    text-align: right !important;
+}
+
+.ticket-chat-ltr .text-left {
+    text-align: left !important;
+}
+
+/* Active Tickets Sidebar */
+.ticket-nav-item {
+    display: block;
+    border-radius: 0.75rem;
+    padding: 0.625rem 0.75rem;
+    transition: all 0.15s ease;
+    border-width: 1px;
+    border-color: transparent;
+    text-decoration: none;
+}
+
+.ticket-nav-item:hover {
+    background-color: rgb(249 250 251);
+    border-color: rgb(243 244 246);
+}
+
+.ticket-nav-item[data-current="true"] {
+    background-color: rgb(239 246 255);
+    border-color: rgb(147 197 253);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.dark .ticket-nav-item:hover {
+    background-color: rgba(55, 65, 81, 0.5);
+    border-color: rgba(55, 65, 81, 0.8);
+}
+
+.dark .ticket-nav-item[data-current="true"] {
+    background-color: rgba(30, 58, 138, 0.25);
+    border-color: rgba(59, 130, 246, 0.45);
+}
+
+.ticket-unread-dot {
+    display: none;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: #3b82f6;
+    flex-shrink: 0;
+    animation: ticket-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.ticket-nav-item[data-unread="true"] .ticket-unread-dot {
+    display: inline-block;
+}
+
+@keyframes ticket-pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
 }

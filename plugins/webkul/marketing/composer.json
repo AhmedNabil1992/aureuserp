@@ -1,0 +1,30 @@
+{
+    "name": "webkul/marketing",
+    "description": "Marketing campaigns and ad spend tracking",
+    "authors": [
+        {
+            "name": "Aureus ERP",
+            "email": "support@aureuserp.in"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webkul\\Marketing\\MarketingServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Webkul\\Marketing\\": "src/",
+            "Webkul\\Marketing\\Database\\Factories\\": "database/factories/",
+            "Webkul\\Marketing\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Webkul\\Marketing\\Tests\\": "tests/"
+        }
+    }
+}

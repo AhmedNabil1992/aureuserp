@@ -14,6 +14,7 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Support\Enums\Width;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -95,6 +96,15 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Software')
                     ->icon('heroicon-o-cpu-chip'),
                 NavigationGroup::make()
+                    ->label('Articles')
+                    ->icon('heroicon-o-book-open'),
+                NavigationGroup::make()
+                    ->label('Leads')
+                    ->icon('heroicon-o-user-group'),
+                NavigationGroup::make()
+                    ->label('Marketing')
+                    ->icon('heroicon-o-megaphone'),
+                NavigationGroup::make()
                     ->label(__('admin.navigation.website'))
                     ->icon('icon-website'),
                 NavigationGroup::make()
@@ -143,6 +153,10 @@ class AdminPanelProvider extends PanelProvider
             ->multiFactorAuthentication([
                 AppAuthentication::make()
                     ->recoverable(),
-            ]);
+            ])
+            ->renderHook(
+                PanelsRenderHook::USER_MENU_BEFORE,
+                fn () => view('filament.components.language-switcher'),
+            );
     }
 }

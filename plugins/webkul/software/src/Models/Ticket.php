@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webkul\Partner\Models\Partner;
 use Webkul\Security\Models\User;
@@ -94,5 +95,10 @@ class Ticket extends Model
     {
         return $this->belongsToMany(User::class, 'software_ticket_assignees', 'ticket_id', 'user_id')
             ->withTimestamps();
+    }
+
+    public function attachments(): MorphMany
+    {
+        return $this->morphMany(TicketAttachment::class, 'attachable');
     }
 }

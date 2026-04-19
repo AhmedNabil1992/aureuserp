@@ -3,13 +3,17 @@
 namespace Webkul\Software;
 
 use Filament\Panel;
+use Livewire\Livewire;
 use Webkul\PluginManager\Console\Commands\InstallCommand;
 use Webkul\PluginManager\Console\Commands\UninstallCommand;
 use Webkul\PluginManager\Package;
 use Webkul\PluginManager\PackageServiceProvider;
+use Webkul\Software\Livewire\OpenTicketsSidebar;
+use Webkul\Software\Livewire\TicketConversationPanel;
 use Webkul\Software\Services\LicenseInvoiceManager;
 use Webkul\Software\Services\LicenseManager;
 use Webkul\Software\Services\SubscriptionManager;
+use Webkul\Software\Services\TicketService;
 
 class SoftwareServiceProvider extends PackageServiceProvider
 {
@@ -53,6 +57,7 @@ class SoftwareServiceProvider extends PackageServiceProvider
                 '2026_04_13_000026_alter_software_program_editions_add_variant_product_id',
                 '2026_04_13_000027_alter_software_program_features_add_product_id',
                 '2026_04_15_000028_alter_software_licenses_make_edition_nullable',
+                '2026_04_19_000029_create_software_ticket_attachments_table',
             ])
             ->runsMigrations()
             ->hasInstallCommand(function (InstallCommand $command): void {
@@ -65,7 +70,8 @@ class SoftwareServiceProvider extends PackageServiceProvider
 
     public function packageBooted(): void
     {
-        //
+        Livewire::component('software-ticket-conversation-panel', TicketConversationPanel::class);
+        Livewire::component('software-open-tickets-sidebar', OpenTicketsSidebar::class);
     }
 
     public function packageRegistered(): void
@@ -80,5 +86,6 @@ class SoftwareServiceProvider extends PackageServiceProvider
         $this->app->singleton(LicenseInvoiceManager::class);
         $this->app->singleton(SubscriptionManager::class);
         $this->app->singleton(LicenseManager::class);
+        $this->app->singleton(TicketService::class);
     }
 }
