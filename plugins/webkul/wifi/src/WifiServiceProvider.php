@@ -19,11 +19,13 @@ class WifiServiceProvider extends PackageServiceProvider
         $package->name(static::$name)
             ->hasViews()
             ->hasTranslations()
-            ->hasDependencies(['accounts'])
+            ->hasDependencies(['accounts', 'partners'])
             ->hasMigrations([
                 '2026_04_19_200001_create_wifi_packages_table',
                 '2026_04_19_200002_create_wifi_purchases_table',
                 '2026_04_19_200003_create_wifi_voucher_batches_table',
+                '2026_04_20_000101_create_wifi_partner_clouds_table',
+                '2026_04_20_000201_alter_wifi_packages_add_currency_id',
             ])
             ->runsMigrations()
             ->hasInstallCommand(function (InstallCommand $command): void {

@@ -193,10 +193,14 @@ class PaymentResource extends Resource
                                             ->relationship(
                                                 'journal',
                                                 'name',
-                                                modifyQueryUsing: fn (Builder $query) => $query->whereIn('type', [JournalType::BANK, JournalType::CASH, JournalType::CREDIT_CARD]),
+                                                modifyQueryUsing: fn (Builder $query) => $query
+                                                    ->where('type', JournalType::BANK)
+                                                    ->where('responsible_user_id', Auth::id()),
                                             )
                                             ->default(function () {
-                                                $journal = Journal::whereIn('type', [JournalType::BANK, JournalType::CASH, JournalType::CREDIT_CARD])->first();
+                                                $journal = Journal::where('type', JournalType::BANK)
+                                                    ->where('responsible_user_id', Auth::id())
+                                                    ->first();
 
                                                 return $journal?->id;
                                             })
@@ -306,12 +310,12 @@ class PaymentResource extends Resource
                     ->label(__('accounts::filament/resources/payment.table.columns.amount-currency'))
                     ->placeholder('-')
                     ->sortable()
-                    ->money(fn (Payment $record) => $record->company?->currency_code, true),
+                    ->money(fn (Payment $record) => $record->currency?->name ?? $record->company?->currency_code, true),
                 TextColumn::make('amount')
                     ->label(__('accounts::filament/resources/payment.table.columns.amount'))
                     ->placeholder('-')
                     ->sortable()
-                    ->money(fn (Payment $record) => $record->company?->currency_code, true),
+                    ->money(fn (Payment $record) => $record->currency?->name ?? $record->company?->currency_code, true),
                 TextColumn::make('state')
                     ->label(__('accounts::filament/resources/payment.table.columns.state'))
                     ->placeholder('-')

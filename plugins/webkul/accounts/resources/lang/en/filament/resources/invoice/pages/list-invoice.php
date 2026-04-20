@@ -11,6 +11,7 @@ return [
         'to-check'    => 'To Check',
         'to-pay'      => 'To Pay',
         'in-payment'  => 'In Payment',
+        'paid'        => 'Paid',
         'unpaid'      => 'Unpaid',
         'overdue'     => 'Overdue',
     ],

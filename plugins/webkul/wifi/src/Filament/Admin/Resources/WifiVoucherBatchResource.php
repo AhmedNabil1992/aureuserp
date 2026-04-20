@@ -16,6 +16,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Webkul\Wifi\Enums\WifiPackageType;
 use Webkul\Wifi\Filament\Admin\Resources\WifiVoucherBatchResource\Pages\ManageWifiVoucherBatches;
 use Webkul\Wifi\Models\Cloud;
 use Webkul\Wifi\Models\DynamicClient;
@@ -56,10 +57,14 @@ class WifiVoucherBatchResource extends Resource
                     ->preload()
                     ->live()
                     ->afterStateUpdated(function (Set $set, $state): void {
-                        $purchase = WifiPurchase::query()->find($state);
+                        $purchase = WifiPurchase::query()->with('package')->find($state);
 
                         if ($purchase) {
                             $set('cloud_id', $purchase->cloud_id);
+
+                            $isUnlimitedPackage = ($purchase->package?->package_type?->value) === WifiPackageType::Unlimited->value;
+
+                            $set('never_expire', $isUnlimitedPackage);
                         }
                     })
                     ->required(),
@@ -99,6 +104,7 @@ class WifiVoucherBatchResource extends Resource
                     ->required(),
                 Toggle::make('never_expire')
                     ->label('Never Expire')
+                    ->helperText('Auto-filled from package type. You can still override it if needed.')
                     ->default(false),
                 TextInput::make('caption')
                     ->label('Caption')

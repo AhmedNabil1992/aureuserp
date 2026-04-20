@@ -115,7 +115,7 @@ class LeadResource extends Resource
                                     ->label(__('leads::filament/resources/lead.form.sections.general.fields.service-type'))
                                     ->options(
                                         Product::query()
-                                            ->where('type', ProductType::Service)
+                                            ->where('type', ProductType::SERVICE)
                                             ->pluck('name', 'id')
                                     )
                                     ->searchable()

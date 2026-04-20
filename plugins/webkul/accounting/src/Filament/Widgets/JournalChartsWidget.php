@@ -3,6 +3,7 @@
 namespace Webkul\Accounting\Filament\Widgets;
 
 use Filament\Widgets\Widget;
+use Webkul\Account\Enums\JournalType;
 use Webkul\Account\Models\Journal;
 
 class JournalChartsWidget extends Widget
@@ -15,7 +16,11 @@ class JournalChartsWidget extends Widget
 
     public function getJournals()
     {
-        return Journal::where('show_on_dashboard', true)
+        return Journal::query()
+            ->where(function ($query): void {
+                $query->where('show_on_dashboard', true)
+                    ->orWhere('type', JournalType::BANK);
+            })
             ->orderBy('id', 'asc')
             ->when($this->activeTab !== 'all', function ($query) {
                 $query->where('type', $this->activeTab);

@@ -74,9 +74,11 @@ return [
             'title' => 'General Information',
 
             'fields' => [
-                'name'    => 'Name',
-                'type'    => 'Type',
-                'company' => 'Company',
+                'name'                              => 'Name',
+                'type'                              => 'Type',
+                'company'                           => 'Company',
+                'responsible-user'                  => 'Responsible User',
+                'responsible-user-helper-text'      => 'The user responsible for this journal/cashbox. Payments will be filtered by this assignment.',
             ],
         ],
     ],

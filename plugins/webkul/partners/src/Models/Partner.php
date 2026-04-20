@@ -32,6 +32,7 @@ class Partner extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     protected $fillable = [
         'account_type',
+        'is_dealer',
         'sub_type',
         'name',
         'avatar',
@@ -60,6 +61,7 @@ class Partner extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     protected $casts = [
         'account_type' => AccountType::class,
+        'is_dealer'    => 'boolean',
         'is_active'    => 'boolean',
     ];
 

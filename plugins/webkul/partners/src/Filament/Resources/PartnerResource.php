@@ -17,6 +17,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
@@ -307,6 +308,10 @@ class PartnerResource extends Resource
 
                                 Fieldset::make('Others')
                                     ->schema([
+                                        Toggle::make('is_dealer')
+                                            ->label('Distributor (Dealer)')
+                                            ->helperText('Enable this for customers that should receive dealer pricing in Wi-Fi purchases.')
+                                            ->inline(false),
                                         TextInput::make('company_registry')
                                             ->label(__('partners::filament/resources/partner.form.tabs.sales-purchase.fields.company-id'))
                                             ->maxLength(255)

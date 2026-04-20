@@ -17,6 +17,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Webkul\Product\Enums\ProductType;
 use Webkul\Product\Models\Product;
+use Webkul\Support\Models\Currency;
 use Webkul\Wifi\Enums\WifiPackageType;
 use Webkul\Wifi\Filament\Admin\Resources\WifiPackageResource\Pages\ManageWifiPackages;
 use Webkul\Wifi\Models\WifiPackage;
@@ -49,12 +50,24 @@ class WifiPackageResource extends Resource
                         ->orderBy('name')
                         ->pluck('name', 'id')
                         ->all())
+                    ->default(fn (): ?int => Product::query()
+                        ->where('type', ProductType::SERVICE->value)
+                        ->where('name', 'Wi-Fi Voucher')
+                        ->value('id'))
+                    ->helperText('Recommended: keep all Wi-Fi packages linked to a single service product (Wi-Fi Voucher).')
                     ->searchable()
                     ->preload()
                     ->required(),
                 Select::make('package_type')
                     ->label('Package Type')
                     ->options(WifiPackageType::class)
+                    ->helperText('Use Unlimited for open validity packages and Limited for time-bound packages.')
+                    ->required(),
+                Select::make('currency_id')
+                    ->label('Currency')
+                    ->options(fn (): array => Currency::query()->orderBy('name')->pluck('name', 'id')->all())
+                    ->searchable()
+                    ->preload()
                     ->required(),
                 TextInput::make('quantity')
                     ->label('Cards Per Unit')
@@ -93,14 +106,17 @@ class WifiPackageResource extends Resource
                     ->sortable(),
                 TextColumn::make('package_type')
                     ->badge(),
+                TextColumn::make('currency.name')
+                    ->label('Currency')
+                    ->sortable(),
                 TextColumn::make('quantity')
                     ->label('Cards Per Unit')
                     ->sortable(),
                 TextColumn::make('amount')
-                    ->numeric(decimalPlaces: 2)
+                    ->money(fn (WifiPackage $record): ?string => $record->currency?->name, true)
                     ->sortable(),
                 TextColumn::make('dealer_amount')
-                    ->numeric(decimalPlaces: 2)
+                    ->money(fn (WifiPackage $record): ?string => $record->currency?->name, true)
                     ->sortable(),
                 IconColumn::make('is_active')
                     ->label('Active')

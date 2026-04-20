@@ -34,6 +34,7 @@ class Journal extends Model implements Sortable
         'loss_account_id',
         'bank_account_id',
         'creator_id',
+        'responsible_user_id',
         'color',
         'access_token',
         'code',
@@ -72,6 +73,11 @@ class Journal extends Model implements Sortable
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_id');
+    }
+
+    public function responsibleUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'responsible_user_id');
     }
 
     public function currency()
@@ -203,7 +209,7 @@ class Journal extends Model implements Sortable
             ];
         })->toArray();
     }
-    
+
     protected static function boot()
     {
         parent::boot();

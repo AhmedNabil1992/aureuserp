@@ -878,6 +878,9 @@ class Move extends Model implements Sortable
             ->get();
 
         foreach ($outstandingLines as $line) {
+            $paymentId = $line->move->origin_payment_id ?: $line->payment_id;
+            $paymentName = $line->move->originPayment?->name;
+
             if ($line->currency_id == $this->currency_id) {
                 $amount = abs($line->amount_residual_currency);
             } else {
@@ -896,14 +899,14 @@ class Move extends Model implements Sortable
             $paymentVals['outstanding'] = true;
 
             $paymentVals['lines'][] = [
-                'journal_name'       => $line->ref ?: $line->move->name,
+                'journal_name'       => $paymentName ?: ($line->ref ?: $line->move->name),
                 'amount'             => $amount,
                 'currency'           => $this->currency,
                 'id'                 => $line->id,
                 'move_id'            => $line->move_id,
                 'move_type'          => $line->move->move_type,
                 'date'               => $line->date->toDateString(),
-                'account_payment_id' => $line->payment_id,
+                'account_payment_id' => $paymentId,
             ];
         }
 
@@ -926,11 +929,13 @@ class Move extends Model implements Sortable
 
         foreach ($reconciledPartials as $reconciledPartial) {
             $counterpartLine = $reconciledPartial['line'];
+            $paymentId = $counterpartLine->move->origin_payment_id ?: $counterpartLine->payment_id;
+            $paymentName = $counterpartLine->move->originPayment?->name;
 
             if ($counterpartLine->move->ref) {
-                $reconciliationRef = sprintf('%s (%s)', $counterpartLine->move->name, $counterpartLine->move->ref);
+                $reconciliationRef = sprintf('%s (%s)', $paymentName ?: $counterpartLine->move->name, $counterpartLine->move->ref);
             } else {
-                $reconciliationRef = $counterpartLine->move->name;
+                $reconciliationRef = $paymentName ?: $counterpartLine->move->name;
             }
 
             if ($counterpartLine->amount_currency && $counterpartLine->currency_id != $counterpartLine->company->currency_id) {
@@ -952,7 +957,7 @@ class Move extends Model implements Sortable
                     : $reconciledPartial['currency']->id,
                 'date'                    => $counterpartLine->date,
                 'partial_id'              => $reconciledPartial['partial_id'],
-                'account_payment_id'      => $counterpartLine->payment_id,
+                'account_payment_id'      => $paymentId,
                 'payment_method_name'     => $counterpartLine->payment?->paymentMethodLine->name,
                 'move_id'                 => $counterpartLine->move_id,
                 'move_type'               => $counterpartLine->move->move_type,

@@ -43,6 +43,7 @@ use Webkul\Account\Filament\Resources\JournalResource\Pages\EditJournal;
 use Webkul\Account\Filament\Resources\JournalResource\Pages\ListJournals;
 use Webkul\Account\Filament\Resources\JournalResource\Pages\ViewJournal;
 use Webkul\Account\Models\Journal;
+use Webkul\Security\Models\User;
 use Webkul\Support\Filament\Forms\Components\Repeater;
 use Webkul\Support\Filament\Forms\Components\Repeater\TableColumn;
 use Webkul\Support\Filament\Infolists\Components\RepeatableEntry;
@@ -370,6 +371,18 @@ class JournalResource extends Resource
                                                     ->options(fn () => Company::pluck('name', 'id'))
                                                     ->default(Auth::user()->default_company_id)
                                                     ->required(),
+                                                Select::make('responsible_user_id')
+                                                    ->label(__('accounts::filament/resources/journal.form.general.fields.responsible-user'))
+                                                    ->helperText(__('accounts::filament/resources/journal.form.general.fields.responsible-user-helper-text'))
+                                                    ->options(fn (): array => User::query()->orderBy('name')->pluck('name', 'id')->all())
+                                                    ->searchable()
+                                                    ->preload()
+                                                    ->nullable()
+                                                    ->visible(fn (Get $get): bool => in_array($get('type'), [
+                                                        JournalType::BANK,
+                                                        JournalType::CASH,
+                                                        JournalType::CREDIT_CARD,
+                                                    ])),
                                             ]),
                                     ]),
                             ])

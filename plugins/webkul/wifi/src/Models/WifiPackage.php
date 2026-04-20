@@ -10,6 +10,7 @@ use Illuminate\Validation\ValidationException;
 use Webkul\Product\Enums\ProductType;
 use Webkul\Product\Models\Product;
 use Webkul\Security\Models\User;
+use Webkul\Support\Models\Currency;
 use Webkul\Wifi\Enums\WifiPackageType;
 
 class WifiPackage extends Model
@@ -18,6 +19,7 @@ class WifiPackage extends Model
 
     protected $fillable = [
         'product_id',
+        'currency_id',
         'description',
         'package_type',
         'quantity',
@@ -30,17 +32,23 @@ class WifiPackage extends Model
     public function casts(): array
     {
         return [
-            'package_type'  => WifiPackageType::class,
-            'quantity'      => 'integer',
-            'amount'        => 'decimal:4',
-            'dealer_amount' => 'decimal:4',
-            'is_active'     => 'boolean',
+            'package_type'   => WifiPackageType::class,
+            'currency_id'    => 'integer',
+            'quantity'       => 'integer',
+            'amount'         => 'decimal:4',
+            'dealer_amount'  => 'decimal:4',
+            'is_active'      => 'boolean',
         ];
     }
 
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class, 'currency_id');
     }
 
     public function purchases(): HasMany
@@ -76,6 +84,12 @@ class WifiPackage extends Model
             if (($package->amount ?? 0) < 0 || (($package->dealer_amount ?? 0) < 0)) {
                 throw ValidationException::withMessages([
                     'amount' => 'Amounts must be greater than or equal to zero.',
+                ]);
+            }
+
+            if (! $package->currency_id) {
+                throw ValidationException::withMessages([
+                    'currency_id' => 'Please select a currency for this package.',
                 ]);
             }
 

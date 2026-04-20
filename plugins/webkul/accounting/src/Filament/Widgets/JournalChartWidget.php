@@ -39,14 +39,14 @@ class JournalChartWidget extends Component
         if ($type === JournalType::SALE) {
             $data['stats'] = [
                 'to_validate' => [
-                    'label'            => 'To Validate',
+                    'label'            => __('accounting::filament/widgets/journal-chart-widget.stats.to-validate'),
                     'url'              => $this->getUrl('index', ['activeTableView' => 'draft']),
                     'value'            => (clone $baseQuery)->where('state', MoveState::DRAFT)->count(),
                     'amount'           => $amount = (clone $baseQuery)->where('state', MoveState::DRAFT)->sum('amount_total'),
                     'formatted_amount' => money($amount),
                 ],
                 'unpaid' => [
-                    'label' => 'Unpaid',
+                    'label' => __('accounting::filament/widgets/journal-chart-widget.stats.unpaid'),
                     'url'   => $this->getUrl('index', ['activeTableView' => 'unpaid']),
                     'value' => (clone $baseQuery)
                         ->where('state', MoveState::POSTED)
@@ -61,7 +61,7 @@ class JournalChartWidget extends Component
                     'formatted_amount' => money($amount),
                 ],
                 'late' => [
-                    'label' => 'Late',
+                    'label' => __('accounting::filament/widgets/journal-chart-widget.stats.late'),
                     'url'   => $this->getUrl('index', ['activeTableView' => 'overdue']),
                     'value' => (clone $baseQuery)
                         ->where('state', MoveState::POSTED)
@@ -76,7 +76,7 @@ class JournalChartWidget extends Component
                     'formatted_amount' => money($amount),
                 ],
                 'to_pay' => [
-                    'label' => 'To Pay',
+                    'label' => __('accounting::filament/widgets/journal-chart-widget.stats.to-pay'),
                     'url'   => $this->getUrl('index', ['activeTableView' => 'to_pay']),
                     'value' => (clone $baseQuery)
                         ->where('state', MoveState::POSTED)
@@ -89,7 +89,7 @@ class JournalChartWidget extends Component
                     'formatted_amount' => money($amount),
                 ],
                 'paid' => [
-                    'label' => 'Paid',
+                    'label' => __('accounting::filament/widgets/journal-chart-widget.stats.paid'),
                     'url'   => $this->getUrl('index', ['activeTableView' => 'paid']),
                     'value' => (clone $baseQuery)
                         ->where('state', MoveState::POSTED)
@@ -105,14 +105,14 @@ class JournalChartWidget extends Component
         } elseif ($type === JournalType::PURCHASE) {
             $data['stats'] = [
                 'to_validate' => [
-                    'label'            => 'To Validate',
+                    'label'            => __('accounting::filament/widgets/journal-chart-widget.stats.to-validate'),
                     'url'              => $this->getUrl('index', ['activeTableView' => 'draft']),
                     'value'            => (clone $baseQuery)->where('state', MoveState::DRAFT)->count(),
                     'amount'           => $amount = (clone $baseQuery)->where('state', MoveState::DRAFT)->sum('amount_total'),
                     'formatted_amount' => money($amount),
                 ],
                 'late' => [
-                    'label' => 'Late',
+                    'label' => __('accounting::filament/widgets/journal-chart-widget.stats.late'),
                     'url'   => $this->getUrl('index', ['activeTableView' => 'overdue']),
                     'value' => (clone $baseQuery)
                         ->where('state', MoveState::POSTED)
@@ -127,7 +127,7 @@ class JournalChartWidget extends Component
                     'formatted_amount' => money($amount),
                 ],
                 'to_pay' => [
-                    'label' => 'To Pay',
+                    'label' => __('accounting::filament/widgets/journal-chart-widget.stats.to-pay'),
                     'url'   => $this->getUrl('index', ['activeTableView' => 'to_pay']),
                     'value' => (clone $baseQuery)
                         ->where('state', MoveState::POSTED)
@@ -143,14 +143,14 @@ class JournalChartWidget extends Component
         } elseif ($type === JournalType::GENERAL) {
             $data['stats'] = [
                 'entries_count' => [
-                    'label' => 'Entries',
+                    'label' => __('accounting::filament/widgets/journal-chart-widget.stats.entries'),
                     'value' => (clone $baseQuery)->count(),
                 ],
             ];
         } else {
             $data['stats'] = [
                 'payments' => [
-                    'label'  => 'Payments',
+                    'label'  => __('accounting::filament/widgets/journal-chart-widget.stats.payments'),
                     'url'    => $this->getUrl('index'),
                     'value'  => null,
                     'amount' => $amount = (clone $baseQuery)
@@ -180,10 +180,10 @@ class JournalChartWidget extends Component
     private function getActions(): array
     {
         return match ($this->journal->type) {
-            JournalType::GENERAL  => [['label' => 'New Entry',   'url' => $this->getUrl('create')]],
-            JournalType::SALE     => [['label' => 'New Invoice', 'url' => $this->getUrl('create')]],
-            JournalType::PURCHASE => [['label' => 'New Bill',    'url' => $this->getUrl('create')]],
-            default               => [['label' => 'New Payment', 'url' => $this->getUrl('create')]],
+            JournalType::GENERAL  => [['label' => __('accounting::filament/widgets/journal-chart-widget.actions.new-entry'), 'url' => $this->getUrl('create')]],
+            JournalType::SALE     => [['label' => __('accounting::filament/widgets/journal-chart-widget.actions.new-invoice'), 'url' => $this->getUrl('create')]],
+            JournalType::PURCHASE => [['label' => __('accounting::filament/widgets/journal-chart-widget.actions.new-bill'), 'url' => $this->getUrl('create')]],
+            default               => [['label' => __('accounting::filament/widgets/journal-chart-widget.actions.new-payment'), 'url' => $this->getUrl('create')]],
         };
     }
 
@@ -235,7 +235,7 @@ class JournalChartWidget extends Component
             'labels'   => $labels,
             'datasets' => [
                 [
-                    'label'       => 'Balance',
+                    'label'       => __('accounting::filament/widgets/journal-chart-widget.chart.balance'),
                     'data'        => $balances,
                     'borderColor' => '#3b82f6',
                     'tension'     => 0.3,
@@ -262,12 +262,12 @@ class JournalChartWidget extends Component
         $futureWeekEnd = $now->copy()->addWeeks(2)->endOfWeek(Carbon::SATURDAY);
 
         $labels = [
-            'Overdue',
+            __('accounting::filament/widgets/journal-chart-widget.chart.overdue'),
             $prevWeekStart->format('d M').' - '.$prevWeekEnd->format('d M'),
-            'This Week',
+            __('accounting::filament/widgets/journal-chart-widget.chart.this-week'),
             $nextWeekStart->format('d M').' - '.$nextWeekEnd->format('d M'),
             $futureWeekStart->format('d M').' - '.$futureWeekEnd->format('d M'),
-            'Not Due',
+            __('accounting::filament/widgets/journal-chart-widget.chart.not-due'),
         ];
 
         $late = array_fill(0, 6, 0);
@@ -306,11 +306,11 @@ class JournalChartWidget extends Component
             'labels'   => $labels,
             'datasets' => [
                 [
-                    'label'           => 'Overdue',
+                    'label'           => __('accounting::filament/widgets/journal-chart-widget.chart.overdue'),
                     'data'            => $late,
                     'backgroundColor' => '#ef4444',
                 ], [
-                    'label'           => 'On Time',
+                    'label'           => __('accounting::filament/widgets/journal-chart-widget.chart.on-time'),
                     'data'            => $onTime,
                     'backgroundColor' => '#22c55e',
                 ],

@@ -3,23 +3,21 @@
 namespace Webkul\Wifi\Filament\Admin\Resources;
 
 use BackedEnum;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Models\MoveLine;
+use Webkul\Partner\Models\Partner;
+use Webkul\Support\Models\Currency;
 use Webkul\Wifi\Filament\Admin\Resources\WifiPurchaseResource\Pages\ManageWifiPurchases;
 use Webkul\Wifi\Models\Cloud;
 use Webkul\Wifi\Models\WifiPackage;
+use Webkul\Wifi\Models\WifiPartnerCloud;
 use Webkul\Wifi\Models\WifiPurchase;
 
 class WifiPurchaseResource extends Resource
@@ -43,6 +41,36 @@ class WifiPurchaseResource extends Resource
     {
         return $schema
             ->components([
+                Select::make('partner_id')
+                    ->label('Customer')
+                    ->options(fn (): array => Partner::query()->orderBy('name')->pluck('name', 'id')->all())
+                    ->searchable()
+                    ->preload()
+                    ->live()
+                    ->helperText(function (Get $get): string {
+                        $partnerId = $get('partner_id');
+
+                        if (! $partnerId) {
+                            return 'Select a customer first to display available credit.';
+                        }
+
+                        return sprintf('Available customer credit: %s', static::resolvePartnerAvailableCreditLabel((int) $partnerId));
+                    })
+                    ->afterStateUpdated(function (Set $set, $state): void {
+                        $cloudIds = WifiPartnerCloud::query()
+                            ->where('partner_id', $state)
+                            ->pluck('cloud_id')
+                            ->values();
+
+                        if ($cloudIds->count() === 1) {
+                            $set('cloud_id', $cloudIds->first());
+
+                            return;
+                        }
+
+                        $set('cloud_id', null);
+                    })
+                    ->required(),
                 Select::make('wifi_package_id')
                     ->label('Wi-Fi Package')
                     ->options(fn (): array => WifiPackage::query()
@@ -53,35 +81,35 @@ class WifiPurchaseResource extends Resource
                         ->all())
                     ->searchable()
                     ->preload()
-                    ->live()
-                    ->afterStateUpdated(fn (Get $get, Set $set, $state) => $set('quantity', static::resolveSuggestedQuantity($state, $get('move_line_id'))))
-                    ->required(),
-                Select::make('move_line_id')
-                    ->label('Invoice Line')
-                    ->searchable()
-                    ->getSearchResultsUsing(fn (string $search): array => static::getMoveLineSearchResults($search))
-                    ->getOptionLabelUsing(fn ($value): ?string => static::getMoveLineLabel($value))
-                    ->live()
-                    ->afterStateUpdated(fn (Get $get, Set $set, $state) => $set('quantity', static::resolveSuggestedQuantity($get('wifi_package_id'), $state)))
                     ->required(),
                 Select::make('cloud_id')
                     ->label('Cloud')
-                    ->options(fn (): array => Cloud::query()->orderBy('name')->pluck('name', 'id')->all())
+                    ->helperText('If the customer has one assigned cloud, it will be selected automatically.')
+                    ->options(function (Get $get): array {
+                        $partnerId = $get('partner_id');
+
+                        if (! $partnerId) {
+                            return [];
+                        }
+
+                        $cloudIds = WifiPartnerCloud::query()
+                            ->where('partner_id', $partnerId)
+                            ->pluck('cloud_id')
+                            ->all();
+
+                        if (empty($cloudIds)) {
+                            return [];
+                        }
+
+                        return Cloud::query()
+                            ->whereIn('id', $cloudIds)
+                            ->orderBy('name')
+                            ->pluck('name', 'id')
+                            ->all();
+                    })
                     ->searchable()
-                    ->preload(),
-                TextInput::make('quantity')
-                    ->label('Purchased Cards')
-                    ->numeric()
-                    ->integer()
-                    ->minValue(1)
+                    ->preload()
                     ->required(),
-                TextInput::make('remaining_quantity')
-                    ->label('Remaining Cards')
-                    ->disabled()
-                    ->dehydrated(false),
-                Toggle::make('is_default')
-                    ->label('Default Purchase')
-                    ->default(false),
             ])
             ->columns(2);
     }
@@ -111,17 +139,9 @@ class WifiPurchaseResource extends Resource
                 TextColumn::make('remaining_quantity')
                     ->label('Remaining')
                     ->sortable(),
-                IconColumn::make('is_default')
-                    ->label('Default')
-                    ->boolean(),
             ])
-            ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
-            ])
-            ->toolbarActions([
-                DeleteBulkAction::make(),
-            ]);
+            ->recordActions([])
+            ->toolbarActions([]);
     }
 
     public static function getPages(): array
@@ -131,57 +151,43 @@ class WifiPurchaseResource extends Resource
         ];
     }
 
-    protected static function resolveSuggestedQuantity($packageId, $moveLineId): ?int
+    protected static function resolvePartnerAvailableCreditLabel(int $partnerId): string
     {
-        if (! $packageId || ! $moveLineId) {
-            return null;
+        $creditRows = MoveLine::query()
+            ->where('partner_id', $partnerId)
+            ->where('parent_state', MoveState::POSTED)
+            ->where('reconciled', false)
+            ->where('amount_residual', '<', 0)
+            ->whereHas('account', fn ($query) => $query->where('account_type', 'asset_receivable'))
+            ->selectRaw('currency_id, SUM(CASE WHEN amount_residual_currency != 0 THEN amount_residual_currency ELSE amount_residual END) as residual_total')
+            ->groupBy('currency_id')
+            ->get();
+
+        if ($creditRows->isEmpty()) {
+            return '0.00';
         }
 
-        $package = WifiPackage::query()->find($packageId);
-        $moveLine = MoveLine::query()->find($moveLineId);
+        $currencyNames = Currency::query()
+            ->whereIn('id', $creditRows->pluck('currency_id')->filter()->all())
+            ->pluck('name', 'id');
 
-        if (! $package || ! $moveLine) {
-            return null;
-        }
+        $formattedCredits = $creditRows
+            ->filter(fn ($row): bool => (float) $row->residual_total < 0)
+            ->map(function ($row) use ($currencyNames): string {
+                $currencyName = $currencyNames->get($row->currency_id);
 
-        return max(1, (int) round(((float) $moveLine->quantity) * $package->quantity));
-    }
+                if ($currencyName) {
+                    return money(abs((float) $row->residual_total), $currencyName);
+                }
 
-    protected static function getMoveLineSearchResults(string $search): array
-    {
-        return MoveLine::query()
-            ->with(['move.partner', 'product'])
-            ->whereNotNull('product_id')
-            ->where(function ($query) use ($search): void {
-                $query
-                    ->where('name', 'like', "%{$search}%")
-                    ->orWhere('reference', 'like', "%{$search}%")
-                    ->orWhere('id', 'like', "%{$search}%");
+                return number_format(abs((float) $row->residual_total), 2);
             })
-            ->orderByDesc('id')
-            ->limit(50)
-            ->get()
-            ->mapWithKeys(fn (MoveLine $moveLine): array => [$moveLine->id => static::formatMoveLineLabel($moveLine)])
-            ->all();
-    }
+            ->values();
 
-    protected static function getMoveLineLabel($value): ?string
-    {
-        if (! $value) {
-            return null;
+        if ($formattedCredits->isEmpty()) {
+            return '0.00';
         }
 
-        $moveLine = MoveLine::query()->with(['move.partner', 'product'])->find($value);
-
-        return $moveLine ? static::formatMoveLineLabel($moveLine) : null;
-    }
-
-    protected static function formatMoveLineLabel(MoveLine $moveLine): string
-    {
-        $invoice = $moveLine->move?->name ?? 'Draft';
-        $partner = $moveLine->move?->partner?->name ?? 'No customer';
-        $product = $moveLine->product?->name ?? 'No product';
-
-        return sprintf('#%d | %s | %s | %s | qty: %s', $moveLine->id, $invoice, $partner, $product, $moveLine->quantity);
+        return $formattedCredits->implode(' + ');
     }
 }
