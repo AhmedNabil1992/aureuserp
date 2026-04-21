@@ -17,6 +17,6 @@ class Operations extends Cluster
 
     public static function getNavigationGroup(): string
     {
-        return __('inventories::filament/clusters/operations.navigation.group');
+        return __('admin.navigation.inventory');
     }
 }

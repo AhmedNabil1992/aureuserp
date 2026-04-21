@@ -45,7 +45,7 @@ class CategoryResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return __('articles::filament/admin/resources/category.navigation.group');
+        return __('admin.navigation.articles');
     }
 
     public static function getNavigationIcon(): string

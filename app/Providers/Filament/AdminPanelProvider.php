@@ -93,19 +93,19 @@ class AdminPanelProvider extends PanelProvider
                     ->label(__('admin.navigation.recruitment'))
                     ->icon('icon-recruitments'),
                 NavigationGroup::make()
-                    ->label('Software')
+                    ->label(__('admin.navigation.software'))
                     ->icon('heroicon-o-cpu-chip'),
                 NavigationGroup::make()
-                    ->label('Articles')
+                    ->label(__('admin.navigation.articles'))
                     ->icon('heroicon-o-book-open'),
                 NavigationGroup::make()
-                    ->label('Leads')
+                    ->label(__('admin.navigation.leads'))
                     ->icon('heroicon-o-user-group'),
                 NavigationGroup::make()
-                    ->label('Marketing')
+                    ->label(__('admin.navigation.marketing'))
                     ->icon('heroicon-o-megaphone'),
                 NavigationGroup::make()
-                    ->label('Wi-Fi')
+                    ->label(__('admin.navigation.wifi'))
                     ->icon('heroicon-o-wifi'),
                 NavigationGroup::make()
                     ->label(__('admin.navigation.website'))

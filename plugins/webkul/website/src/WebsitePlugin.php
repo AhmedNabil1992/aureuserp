@@ -103,7 +103,7 @@ class WebsitePlugin implements Plugin
                         NavigationItem::make('settings')
                             ->label(fn () => __('website::filament/app.navigation.settings.label'))
                             ->url(fn () => ManageContacts::getUrl())
-                            ->group(fn () => __('website::filament/app.navigation.settings.group'))
+                            ->group(fn () => __('admin.navigation.website'))
                             ->sort(5)
                             ->visible(fn () => ManageContacts::canAccess()),
                     ]);

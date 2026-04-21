@@ -21,6 +21,6 @@ class Management extends Cluster
 
     public static function getNavigationGroup(): string
     {
-        return __('time-off::filament/clusters/management.navigation.group');
+        return __('admin.navigation.time-off');
     }
 }

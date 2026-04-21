@@ -21,6 +21,6 @@ class Configurations extends Cluster
 
     public static function getNavigationGroup(): string
     {
-        return __('recruitments::filament/clusters/configurations.navigation.group');
+        return __('admin.navigation.recruitment');
     }
 }

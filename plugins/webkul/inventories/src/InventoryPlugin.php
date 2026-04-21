@@ -49,7 +49,7 @@ class InventoryPlugin implements Plugin
                         NavigationItem::make('settings')
                             ->label(fn () => __('inventories::app.navigation.settings.label'))
                             ->url(fn () => ManageOperations::getUrl())
-                            ->group('Inventory')
+                            ->group(fn () => __('admin.navigation.inventory'))
                             ->sort(4)
                             ->visible(fn () => ManageOperations::canAccess()),
                     ]);

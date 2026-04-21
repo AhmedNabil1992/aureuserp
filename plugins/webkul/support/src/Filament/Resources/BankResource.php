@@ -32,7 +32,7 @@ class BankResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return __('support::filament/resources/bank.navigation.group');
+        return __('admin.navigation.setting');
     }
 
     public static function getNavigationLabel(): string

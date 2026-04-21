@@ -49,7 +49,7 @@ class ProjectPlugin implements Plugin
                         NavigationItem::make('settings')
                             ->label(fn () => __('projects::app.navigation.settings.label'))
                             ->url(fn () => ManageTasks::getUrl())
-                            ->group('Project')
+                            ->group(fn () => __('admin.navigation.project'))
                             ->sort(3)
                             ->visible(fn () => ManageTasks::canAccess()),
                     ]);

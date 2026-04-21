@@ -76,7 +76,7 @@ class ProjectResource extends Resource
 
     protected static ?string $slug = 'project/projects';
 
-    protected static ?\Filament\Pages\Enums\SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     protected static ?string $recordTitleAttribute = 'name';
 
@@ -87,7 +87,7 @@ class ProjectResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return __('projects::filament/resources/project.navigation.group');
+        return __('admin.navigation.project');
     }
 
     public static function getGloballySearchableAttributes(): array

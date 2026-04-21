@@ -28,13 +28,16 @@ class WifiPurchaseResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-receipt-percent';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Wi-Fi';
-
     protected static ?int $navigationSort = 4;
+
+    public static function getNavigationGroup(): string
+    {
+        return __('admin.navigation.wifi');
+    }
 
     public static function getNavigationLabel(): string
     {
-        return 'Purchases';
+        return __('wifi::filament/resources/wifi_purchase.navigation.title');
     }
 
     public static function form(Schema $schema): Schema
@@ -42,7 +45,7 @@ class WifiPurchaseResource extends Resource
         return $schema
             ->components([
                 Select::make('partner_id')
-                    ->label('Customer')
+                    ->label(__('wifi::filament/resources/wifi_purchase.form.sections.general.fields.partner_id'))
                     ->options(fn (): array => Partner::query()->orderBy('name')->pluck('name', 'id')->all())
                     ->searchable()
                     ->preload()
@@ -51,10 +54,10 @@ class WifiPurchaseResource extends Resource
                         $partnerId = $get('partner_id');
 
                         if (! $partnerId) {
-                            return 'Select a customer first to display available credit.';
+                            return __('wifi::filament/resources/wifi_purchase.form.sections.general.helper.partner_id');
                         }
 
-                        return sprintf('Available customer credit: %s', static::resolvePartnerAvailableCreditLabel((int) $partnerId));
+                        return sprintf(__('wifi::filament/resources/wifi_purchase.form.sections.general.helper.partner_id'), static::resolvePartnerAvailableCreditLabel((int) $partnerId));
                     })
                     ->afterStateUpdated(function (Set $set, $state): void {
                         $cloudIds = WifiPartnerCloud::query()
@@ -72,7 +75,7 @@ class WifiPurchaseResource extends Resource
                     })
                     ->required(),
                 Select::make('wifi_package_id')
-                    ->label('Wi-Fi Package')
+                    ->label(__('wifi::filament/resources/wifi_purchase.form.sections.general.fields.wifi_package_id'))
                     ->options(fn (): array => WifiPackage::query()
                         ->with('product')
                         ->orderBy('id', 'desc')
@@ -83,8 +86,8 @@ class WifiPurchaseResource extends Resource
                     ->preload()
                     ->required(),
                 Select::make('cloud_id')
-                    ->label('Cloud')
-                    ->helperText('If the customer has one assigned cloud, it will be selected automatically.')
+                    ->label(__('wifi::filament/resources/wifi_purchase.form.sections.general.fields.cloud_id'))
+                    ->helperText(__('wifi::filament/resources/wifi_purchase.form.sections.general.helper.cloud_id'))
                     ->options(function (Get $get): array {
                         $partnerId = $get('partner_id');
 
@@ -119,25 +122,25 @@ class WifiPurchaseResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('package.product.name')
-                    ->label('Service Product')
+                    ->label(__('wifi::filament/resources/wifi_purchase.table.columns.service_product'))
                     ->searchable(),
                 TextColumn::make('invoiceLine.move.name')
-                    ->label('Invoice')
+                    ->label(__('wifi::filament/resources/wifi_purchase.table.columns.invoice'))
                     ->searchable(),
                 TextColumn::make('invoiceLine.move.partner.name')
-                    ->label('Customer')
+                    ->label(__('wifi::filament/resources/wifi_purchase.table.columns.partner'))
                     ->searchable(),
                 TextColumn::make('cloud.name')
-                    ->label('Cloud')
+                    ->label(__('wifi::filament/resources/wifi_purchase.table.columns.cloud'))
                     ->searchable(),
                 TextColumn::make('quantity')
-                    ->label('Cards')
+                    ->label(__('wifi::filament/resources/wifi_purchase.table.columns.quantity'))
                     ->sortable(),
                 TextColumn::make('generated_quantity')
-                    ->label('Generated')
+                    ->label(__('wifi::filament/resources/wifi_purchase.table.columns.generated_quantity'))
                     ->sortable(),
                 TextColumn::make('remaining_quantity')
-                    ->label('Remaining')
+                    ->label(__('wifi::filament/resources/wifi_purchase.table.columns.remaining_quantity'))
                     ->sortable(),
             ])
             ->recordActions([])

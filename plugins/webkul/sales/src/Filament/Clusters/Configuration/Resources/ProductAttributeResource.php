@@ -24,7 +24,7 @@ class ProductAttributeResource extends BaseProductAttributeResource
 
     public static function getNavigationGroup(): string
     {
-        return __('sales::filament/clusters/configurations/resources/product-attribute.navigation.group');
+        return __('admin.navigation.sale');
     }
 
     public static function getNavigationLabel(): string

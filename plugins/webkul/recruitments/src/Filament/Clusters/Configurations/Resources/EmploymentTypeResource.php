@@ -17,7 +17,7 @@ class EmploymentTypeResource extends BaseEmploymentTypeResource
 
     public static function getNavigationGroup(): string
     {
-        return __('recruitments::filament/clusters/configurations/resources/employment-type.navigation.group');
+        return __('admin.navigation.recruitment');
     }
 
     public static function getPages(): array

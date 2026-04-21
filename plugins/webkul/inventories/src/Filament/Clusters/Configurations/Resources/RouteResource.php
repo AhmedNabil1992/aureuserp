@@ -74,7 +74,7 @@ class RouteResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return __('inventories::filament/clusters/configurations/resources/route.navigation.group');
+        return __('admin.navigation.inventory');
     }
 
     public static function getNavigationLabel(): string

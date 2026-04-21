@@ -62,7 +62,7 @@ class JobPositionResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return __('employees::filament/clusters/configurations/resources/job-position.navigation.group');
+        return __('admin.navigation.employee');
     }
 
     public static function getNavigationLabel(): string

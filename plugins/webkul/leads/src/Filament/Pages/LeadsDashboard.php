@@ -30,7 +30,7 @@ class LeadsDashboard extends BaseDashboard
 
     public static function getNavigationGroup(): string
     {
-        return __('leads::filament/pages/dashboard.navigation.group');
+        return __('admin.navigation.leads');
     }
 
     public static function getNavigationIcon(): string|BackedEnum|null

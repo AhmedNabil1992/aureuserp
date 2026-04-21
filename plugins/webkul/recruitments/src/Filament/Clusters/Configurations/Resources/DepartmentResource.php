@@ -23,11 +23,11 @@ class DepartmentResource extends BaseDepartmentResource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-building-office-2';
 
-    protected static ?\Filament\Pages\Enums\SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Start;
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Start;
 
     public static function getNavigationGroup(): string
     {
-        return __('recruitments::filament/clusters/configurations/resources/department.navigation.group');
+        return __('admin.navigation.recruitment');
     }
 
     public static function getSlug(?Panel $panel = null): string

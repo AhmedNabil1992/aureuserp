@@ -3,6 +3,7 @@
 namespace Webkul\Wifi\Filament\Admin\Resources;
 
 use BackedEnum;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -30,13 +31,16 @@ class WifiPackageResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Wi-Fi';
-
     protected static ?int $navigationSort = 3;
+
+    public static function getNavigationGroup(): string
+    {
+        return __('admin.navigation.wifi');
+    }
 
     public static function getNavigationLabel(): string
     {
-        return 'Packages';
+        return __('wifi::filament/resources/wifi_package.navigation.title');
     }
 
     public static function form(Schema $schema): Schema
@@ -44,7 +48,7 @@ class WifiPackageResource extends Resource
         return $schema
             ->components([
                 Select::make('product_id')
-                    ->label('Service Product')
+                    ->label(__('wifi::filament/resources/wifi_package.form.sections.general.fields.product_id'))
                     ->options(fn (): array => Product::query()
                         ->where('type', ProductType::SERVICE->value)
                         ->orderBy('name')
@@ -54,42 +58,42 @@ class WifiPackageResource extends Resource
                         ->where('type', ProductType::SERVICE->value)
                         ->where('name', 'Wi-Fi Voucher')
                         ->value('id'))
-                    ->helperText('Recommended: keep all Wi-Fi packages linked to a single service product (Wi-Fi Voucher).')
+                    ->helperText(__('wifi::filament/resources/wifi_package.form.sections.general.fields.product_id_helper_text'))
                     ->searchable()
                     ->preload()
                     ->required(),
                 Select::make('package_type')
-                    ->label('Package Type')
+                    ->label(__('wifi::filament/resources/wifi_package.form.sections.general.fields.package_type'))
                     ->options(WifiPackageType::class)
-                    ->helperText('Use Unlimited for open validity packages and Limited for time-bound packages.')
+                    ->helperText(__('wifi::filament/resources/wifi_package.form.sections.general.fields.package_type_helper_text'))
                     ->required(),
                 Select::make('currency_id')
-                    ->label('Currency')
+                    ->label(__('wifi::filament/resources/wifi_package.form.sections.general.fields.currency_id'))
                     ->options(fn (): array => Currency::query()->orderBy('name')->pluck('name', 'id')->all())
                     ->searchable()
                     ->preload()
                     ->required(),
                 TextInput::make('quantity')
-                    ->label('Cards Per Unit')
+                    ->label(__('wifi::filament/resources/wifi_package.form.sections.general.fields.quantity'))
                     ->numeric()
                     ->integer()
                     ->minValue(1)
                     ->required(),
                 TextInput::make('amount')
-                    ->label('Sell Amount')
+                    ->label(__('wifi::filament/resources/wifi_package.form.sections.general.fields.amount'))
                     ->numeric()
                     ->minValue(0)
                     ->default(0)
                     ->required(),
                 TextInput::make('dealer_amount')
-                    ->label('Dealer Amount')
+                    ->label(__('wifi::filament/resources/wifi_package.form.sections.general.fields.dealer_amount'))
                     ->numeric()
                     ->minValue(0),
                 Toggle::make('is_active')
-                    ->label('Active')
+                    ->label(__('wifi::filament/resources/wifi_package.form.sections.general.fields.is_active'))
                     ->default(true),
                 Textarea::make('description')
-                    ->label('Description')
+                    ->label(__('wifi::filament/resources/wifi_package.form.sections.general.fields.description'))
                     ->rows(3)
                     ->columnSpanFull(),
             ])
@@ -101,33 +105,39 @@ class WifiPackageResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('product.name')
-                    ->label('Service Product')
+                    ->label(__('wifi::filament/resources/wifi_package.table.columns.product'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('package_type')
+                    ->label(__('wifi::filament/resources/wifi_package.table.columns.package_type'))
                     ->badge(),
                 TextColumn::make('currency.name')
-                    ->label('Currency')
+                    ->label(__('wifi::filament/resources/wifi_package.table.columns.currency'))
                     ->sortable(),
                 TextColumn::make('quantity')
-                    ->label('Cards Per Unit')
+                    ->label(__('wifi::filament/resources/wifi_package.table.columns.quantity'))
                     ->sortable(),
                 TextColumn::make('amount')
+                    ->label(__('wifi::filament/resources/wifi_package.table.columns.amount'))
                     ->money(fn (WifiPackage $record): ?string => $record->currency?->name, true)
                     ->sortable(),
                 TextColumn::make('dealer_amount')
+                    ->label(__('wifi::filament/resources/wifi_package.table.columns.dealer_amount'))
                     ->money(fn (WifiPackage $record): ?string => $record->currency?->name, true)
                     ->sortable(),
                 IconColumn::make('is_active')
-                    ->label('Active')
+                    ->label(__('wifi::filament/resources/wifi_package.table.columns.is_active'))
                     ->boolean(),
                 TextColumn::make('updated_at')
+                    ->label(__('wifi::filament/resources/wifi_package.table.columns.updated_at'))
                     ->since()
                     ->sortable(),
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                ActionGroup::make([
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ]),
             ])
             ->toolbarActions([
                 DeleteBulkAction::make(),

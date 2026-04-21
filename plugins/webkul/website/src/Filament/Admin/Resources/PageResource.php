@@ -47,7 +47,7 @@ class PageResource extends Resource
 
     protected static ?string $slug = 'website/pages';
 
-    protected static ?\Filament\Pages\Enums\SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     protected static ?string $recordTitleAttribute = 'title';
 
@@ -58,7 +58,7 @@ class PageResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return __('website::filament/admin/resources/page.navigation.group');
+        return __('admin.navigation.website');
     }
 
     public static function form(Schema $schema): Schema

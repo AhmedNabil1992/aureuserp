@@ -14,7 +14,7 @@ class ManageWifiPartnerClouds extends ManageRecords
     {
         return [
             CreateAction::make()
-                ->label('New Mapping')
+                ->label(__('wifi::filament/resources/wifi_partner_cloud.form.buttons.new-mapping'))
                 ->icon('heroicon-o-plus-circle'),
         ];
     }

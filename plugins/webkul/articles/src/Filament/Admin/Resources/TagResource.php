@@ -42,7 +42,7 @@ class TagResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return __('articles::filament/admin/resources/tag.navigation.group');
+        return __('admin.navigation.articles');
     }
 
     public static function getNavigationIcon(): string

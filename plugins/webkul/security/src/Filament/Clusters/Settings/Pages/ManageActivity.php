@@ -28,7 +28,7 @@ class ManageActivity extends SettingsPage
 
     public static function getNavigationGroup(): string
     {
-        return __('security::filament/clusters/manage-activity.group');
+        return __('admin.navigation.setting');
     }
 
     public function getBreadcrumbs(): array

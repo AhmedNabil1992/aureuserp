@@ -26,7 +26,7 @@ class Overview extends Page
 
     public static function getNavigationGroup(): string
     {
-        return __('accounting::filament/pages/overview.navigation.group');
+        return __('admin.navigation.accounting');
     }
 
     protected function getHeaderWidgets(): array

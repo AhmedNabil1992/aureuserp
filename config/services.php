@@ -50,4 +50,11 @@ return [
         'app_id'              => env('FIREBASE_WEB_APP_ID'),
     ],
 
+    'wifi_voucher' => [
+        'endpoint'          => env('WIFI_VOUCHER_API_ENDPOINT', 'https://cloud.etech-valley.com/cake4/rd_cake/vouchers/add.json'),
+        'token'             => env('WIFI_VOUCHER_API_TOKEN'),
+        'language'          => env('WIFI_VOUCHER_API_LANGUAGE', '4_4'),
+        'download_base_url' => env('WIFI_VOUCHER_DOWNLOAD_BASE_URL', 'https://etech-valley.com/voucher'),
+    ],
+
 ];

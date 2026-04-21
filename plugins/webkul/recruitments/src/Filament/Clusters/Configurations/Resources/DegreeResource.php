@@ -35,7 +35,7 @@ class DegreeResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return __('recruitments::filament/clusters/configurations/resources/degree.navigation.group');
+        return __('admin.navigation.recruitment');
     }
 
     public static function getNavigationLabel(): string

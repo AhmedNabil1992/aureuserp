@@ -24,7 +24,7 @@ class PartnerResource extends BasePartnerResource
 
     protected static bool $shouldRegisterNavigation = true;
 
-    protected static ?\Filament\Pages\Enums\SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getNavigationLabel(): string
     {
@@ -33,7 +33,7 @@ class PartnerResource extends BasePartnerResource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('contacts::filament/resources/partner.navigation.group');
+        return __('admin.navigation.contact');
     }
 
     public static function getRecordSubNavigation(Page $page): array

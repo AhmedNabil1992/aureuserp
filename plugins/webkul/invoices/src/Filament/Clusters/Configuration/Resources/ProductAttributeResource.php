@@ -24,7 +24,7 @@ class ProductAttributeResource extends AttributeResource
 
     public static function getNavigationGroup(): string
     {
-        return __('invoices::filament/clusters/configurations/resources/product-attribute.navigation.group');
+        return __('admin.navigation.invoice');
     }
 
     public static function getNavigationLabel(): string

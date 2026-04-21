@@ -68,7 +68,7 @@ class UserResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return __('security::filament/resources/user.navigation.group');
+        return __('admin.navigation.setting');
     }
 
     public static function getGloballySearchableAttributes(): array

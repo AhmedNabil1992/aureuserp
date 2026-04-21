@@ -40,7 +40,7 @@ class Dashboard extends BaseDashboard
 
     public static function getNavigationGroup(): string
     {
-        return __('projects::filament/pages/dashboard.navigation.group');
+        return __('admin.navigation.dashboard');
     }
 
     public static function getNavigationIcon(): string|BackedEnum|Htmlable|null

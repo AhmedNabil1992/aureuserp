@@ -32,7 +32,7 @@ class CurrencyResource extends BaseCurrencyResource
 
     public static function getNavigationGroup(): string
     {
-        return __('invoices::filament/clusters/configurations/resources/currency.navigation.group');
+        return __('admin.navigation.invoice');
     }
 
     public static function getPages(): array

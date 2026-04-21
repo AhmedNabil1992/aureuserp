@@ -49,7 +49,7 @@ class SalePlugin implements Plugin
                         NavigationItem::make('settings')
                             ->label(fn () => __('sales::app.navigation.settings.label'))
                             ->url(fn () => ManageProducts::getUrl())
-                            ->group('Sales')
+                            ->group(fn () => __('admin.navigation.sale'))
                             ->sort(4)
                             ->visible(fn () => ManageProducts::canAccess()),
                     ]);

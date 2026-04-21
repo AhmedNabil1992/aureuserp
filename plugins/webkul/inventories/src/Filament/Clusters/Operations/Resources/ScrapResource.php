@@ -79,7 +79,7 @@ class ScrapResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return __('inventories::filament/clusters/operations/resources/scrap.navigation.group');
+        return __('admin.navigation.inventory');
     }
 
     public static function form(Schema $schema): Schema

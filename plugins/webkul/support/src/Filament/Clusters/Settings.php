@@ -15,6 +15,6 @@ class Settings extends Cluster
 
     public static function getNavigationGroup(): string
     {
-        return __('support::filament/clusters/settings/pages/settings.navigation.group');
+        return __('admin.navigation.setting');
     }
 }

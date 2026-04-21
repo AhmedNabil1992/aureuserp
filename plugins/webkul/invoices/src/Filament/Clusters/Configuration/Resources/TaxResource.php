@@ -34,7 +34,7 @@ class TaxResource extends BaseTaxResource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('invoices::filament/clusters/configurations/resources/tax.navigation.group');
+        return __('admin.navigation.invoice');
     }
 
     public static function getPages(): array

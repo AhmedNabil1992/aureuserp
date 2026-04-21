@@ -34,12 +34,12 @@ class WebsiteDashboard extends BaseDashboard
 
     public static function getNavigationLabel(): string
     {
-        return 'Website';
+        return __('admin.navigation.website');
     }
 
     public static function getNavigationGroup(): string
     {
-        return 'Dashboard';
+        return __('admin.navigation.dashboard');
     }
 
     public function filtersForm(Schema $form): Schema

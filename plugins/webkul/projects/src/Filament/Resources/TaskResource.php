@@ -83,7 +83,7 @@ class TaskResource extends Resource
 
     protected static ?string $slug = 'project/tasks';
 
-    protected static ?\Filament\Pages\Enums\SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     protected static ?string $recordTitleAttribute = 'title';
 
@@ -94,7 +94,7 @@ class TaskResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return __('projects::filament/resources/task.navigation.group');
+        return __('admin.navigation.project');
     }
 
     public static function getGloballySearchableAttributes(): array

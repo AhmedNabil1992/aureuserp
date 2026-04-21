@@ -38,7 +38,7 @@ class ActivityPlanResource extends BaseActivityPlanResource
 
     public static function getNavigationGroup(): string
     {
-        return __('recruitments::filament/clusters/configurations/resources/activity-plan.navigation.group');
+        return __('admin.navigation.recruitment');
     }
 
     public static function table(Table $table): Table

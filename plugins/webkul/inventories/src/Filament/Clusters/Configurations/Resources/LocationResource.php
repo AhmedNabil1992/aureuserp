@@ -77,7 +77,7 @@ class LocationResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return __('inventories::filament/clusters/configurations/resources/location.navigation.group');
+        return __('admin.navigation.inventory');
     }
 
     public static function getNavigationLabel(): string
@@ -311,7 +311,7 @@ class LocationResource extends Resource
                         ->label(__('inventories::filament/clusters/configurations/resources/location.table.bulk-actions.print.label'))
                         ->icon('heroicon-o-printer')
                         ->action(function ($records) {
-                            $pdf = PDF::loadView('inventories::filament.clusters.configurations.locations.actions.print', [
+                            $pdf = Pdf::loadView('inventories::filament.clusters.configurations.locations.actions.print', [
                                 'records' => $records,
                             ]);
 

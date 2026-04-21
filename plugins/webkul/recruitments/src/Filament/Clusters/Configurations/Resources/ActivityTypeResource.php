@@ -24,7 +24,7 @@ class ActivityTypeResource extends BaseActivityTypeResource
 
     public static function getNavigationGroup(): string
     {
-        return __('recruitments::filament/clusters/configurations/resources/activity-type.navigation.group');
+        return __('admin.navigation.recruitment');
     }
 
     public static function getPages(): array

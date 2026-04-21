@@ -17,6 +17,6 @@ class Accounting extends Cluster
 
     public static function getNavigationGroup(): string
     {
-        return __('accounting::filament/clusters/accounting.navigation.group');
+        return __('admin.navigation.accounting');
     }
 }

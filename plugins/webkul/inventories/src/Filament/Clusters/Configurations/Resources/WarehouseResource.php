@@ -67,7 +67,7 @@ class WarehouseResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return __('inventories::filament/clusters/configurations/resources/warehouse.navigation.group');
+        return __('admin.navigation.inventory');
     }
 
     public static function getNavigationLabel(): string

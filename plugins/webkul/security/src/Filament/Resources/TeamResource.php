@@ -32,7 +32,7 @@ class TeamResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return __('security::filament/resources/team.navigation.group');
+        return __('admin.navigation.setting');
     }
 
     public static function form(Schema $schema): Schema

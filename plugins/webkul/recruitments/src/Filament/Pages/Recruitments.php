@@ -38,7 +38,7 @@ class Recruitments extends BaseDashboard
 
     public static function getNavigationGroup(): string
     {
-        return __('recruitments::filament/pages/recruitment.navigation.group');
+        return __('admin.navigation.dashboard');
     }
 
     public static function getNavigationIcon(): string|BackedEnum|Htmlable|null

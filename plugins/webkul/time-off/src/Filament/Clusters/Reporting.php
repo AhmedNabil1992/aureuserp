@@ -21,6 +21,6 @@ class Reporting extends Cluster
 
     public static function getNavigationGroup(): string
     {
-        return __('time-off::filament/clusters/reporting.navigation.group');
+        return __('admin.navigation.time-off');
     }
 }

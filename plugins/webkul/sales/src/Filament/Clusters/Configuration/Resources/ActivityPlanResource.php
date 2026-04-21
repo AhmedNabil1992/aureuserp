@@ -56,7 +56,7 @@ class ActivityPlanResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('sales::filament/clusters/configurations/resources/activity-plan.navigation.group');
+        return __('admin.navigation.sale');
     }
 
     public static function form(Schema $schema): Schema

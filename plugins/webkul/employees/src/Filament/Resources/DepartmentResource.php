@@ -53,7 +53,7 @@ class DepartmentResource extends Resource
 
     protected static ?string $model = Department::class;
 
-    protected static ?\Filament\Pages\Enums\SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     protected static ?string $recordTitleAttribute = 'name';
 
@@ -64,7 +64,7 @@ class DepartmentResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return __('employees::filament/resources/department.navigation.group');
+        return __('admin.navigation.employee');
     }
 
     public static function getGloballySearchableAttributes(): array

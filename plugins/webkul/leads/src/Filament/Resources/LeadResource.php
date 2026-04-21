@@ -62,7 +62,7 @@ class LeadResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return __('leads::filament/resources/lead.navigation.group');
+        return __('admin.navigation.leads');
     }
 
     public static function getNavigationIcon(): string

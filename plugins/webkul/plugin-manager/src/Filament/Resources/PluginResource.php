@@ -39,7 +39,7 @@ class PluginResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return __('plugin-manager::filament/resources/plugin.navigation.group');
+        return __('admin.navigation.plugin');
     }
 
     public static function getModelLabel(): string

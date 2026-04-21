@@ -13,7 +13,9 @@ class ManageWifiPackages extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make()->label('New Package')->icon('heroicon-o-plus-circle'),
+            CreateAction::make()
+                ->label(__('wifi::filament/resources/wifi_package.form.buttons.new-package'))
+                ->icon('heroicon-o-plus-circle'),
         ];
     }
 }

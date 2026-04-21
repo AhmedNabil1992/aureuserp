@@ -27,7 +27,7 @@ class ManageCurrency extends SettingsPage
 
     public static function getNavigationGroup(): string
     {
-        return __('security::filament/clusters/manage-currency.group');
+        return __('admin.navigation.setting');
     }
 
     public function getBreadcrumbs(): array

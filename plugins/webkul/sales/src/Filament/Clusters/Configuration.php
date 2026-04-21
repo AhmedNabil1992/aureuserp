@@ -17,6 +17,6 @@ class Configuration extends Cluster
 
     public static function getNavigationGroup(): string
     {
-        return __('sales::filament/clusters/configurations.navigation.group');
+        return __('admin.navigation.sale');
     }
 }

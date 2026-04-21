@@ -17,7 +17,7 @@ class Products extends Cluster
 
     public static function getNavigationGroup(): string
     {
-        return __('purchases::filament/admin/clusters/products.navigation.group');
+        return __('admin.navigation.purchase');
     }
 
     public static function shouldRegisterNavigation(): bool

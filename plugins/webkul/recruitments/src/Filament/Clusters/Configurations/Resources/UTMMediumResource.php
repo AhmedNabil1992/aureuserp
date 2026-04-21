@@ -36,7 +36,7 @@ class UTMMediumResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return __('recruitments::filament/clusters/configurations/resources/utm-medium.navigation.group');
+        return __('admin.navigation.recruitment');
     }
 
     public static function getNavigationLabel(): string

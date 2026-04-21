@@ -28,7 +28,7 @@ class ReplenishmentResource extends Resource
 
     protected static ?string $cluster = Operations::class;
 
-    protected static ?\Filament\Pages\Enums\SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getNavigationLabel(): string
     {
@@ -37,7 +37,7 @@ class ReplenishmentResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return __('inventories::filament/clusters/operations/resources/replenishment.navigation.group');
+        return __('admin.navigation.inventory');
     }
 
     public static function form(Schema $schema): Schema

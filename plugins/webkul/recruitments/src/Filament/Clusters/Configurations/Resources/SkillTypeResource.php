@@ -17,7 +17,7 @@ class SkillTypeResource extends BaseSkillTypeResource
 
     public static function getNavigationGroup(): string
     {
-        return __('recruitments::filament/clusters/configurations/resources/skill-type.navigation.group');
+        return __('admin.navigation.recruitment');
     }
 
     public static function getPages(): array

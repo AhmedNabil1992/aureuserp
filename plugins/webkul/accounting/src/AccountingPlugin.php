@@ -48,7 +48,7 @@ class AccountingPlugin implements Plugin
                         NavigationItem::make('settings')
                             ->label(fn () => __('accounting::app.navigation.settings.label'))
                             ->url(fn () => ManageProducts::getUrl())
-                            ->group(fn () => __('accounting::app.navigation.settings.group'))
+                            ->group(fn () => __('admin.navigation.accounting'))
                             ->sort(7)
                             ->visible(fn () => ManageProducts::canAccess()),
                     ]);

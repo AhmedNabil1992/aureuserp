@@ -57,7 +57,7 @@ class CampaignResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return __('marketing::filament/resources/campaign.navigation.group');
+        return __('admin.navigation.marketing');
     }
 
     public static function getNavigationIcon(): string

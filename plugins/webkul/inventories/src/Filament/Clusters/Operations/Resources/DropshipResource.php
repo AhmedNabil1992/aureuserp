@@ -61,7 +61,7 @@ class DropshipResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return __('inventories::filament/clusters/operations/resources/dropship.navigation.group');
+        return __('admin.navigation.inventory');
     }
 
     public static function getGloballySearchableAttributes(): array

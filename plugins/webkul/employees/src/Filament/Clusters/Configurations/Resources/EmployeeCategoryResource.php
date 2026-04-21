@@ -43,7 +43,7 @@ class EmployeeCategoryResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return __('employees::filament/clusters/configurations/resources/employee-category.navigation.group');
+        return __('admin.navigation.employee');
     }
 
     public static function getNavigationLabel(): string

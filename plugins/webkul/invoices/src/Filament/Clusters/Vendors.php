@@ -15,6 +15,6 @@ class Vendors extends Cluster
 
     public static function getNavigationGroup(): string
     {
-        return __('invoices::filament/clusters/vendors.navigation.group');
+        return __('admin.navigation.invoice');
     }
 }

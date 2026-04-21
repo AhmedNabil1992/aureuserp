@@ -2,6 +2,6 @@
 
 return [
     'navigation' => [
-        'group' => 'الشبكة',
+        'group' => 'شبكة واي فاي',
     ],
 ];

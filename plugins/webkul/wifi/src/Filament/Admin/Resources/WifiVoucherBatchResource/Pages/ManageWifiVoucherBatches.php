@@ -13,7 +13,9 @@ class ManageWifiVoucherBatches extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make()->label('New Batch')->icon('heroicon-o-plus-circle'),
+            CreateAction::make()
+                ->label(__('wifi::filament/resources/wifi_voucher_batch.form.sections.general.buttons.new_batch'))
+                ->icon('heroicon-o-plus-circle'),
         ];
     }
 }

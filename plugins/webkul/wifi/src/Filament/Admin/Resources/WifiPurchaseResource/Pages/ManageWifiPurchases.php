@@ -29,7 +29,7 @@ class ManageWifiPurchases extends ManageRecords
     {
         return [
             CreateAction::make()
-                ->label('New Purchase')
+                ->label(__('wifi::filament/resources/wifi_purchase.form.buttons.new-purchase'))
                 ->icon('heroicon-o-plus-circle')
                 ->mutateDataUsing(function (array $data): array {
                     $package = WifiPackage::query()->with('product')->find($data['wifi_package_id'] ?? null);
@@ -37,25 +37,25 @@ class ManageWifiPurchases extends ManageRecords
 
                     if (! $package) {
                         throw ValidationException::withMessages([
-                            'wifi_package_id' => 'Please select a valid Wi-Fi package.',
+                            'wifi_package_id' => __('wifi::filament/resources/wifi_purchase.messages.select_package'),
                         ]);
                     }
 
                     if (! $partner) {
                         throw ValidationException::withMessages([
-                            'partner_id' => 'Please select a valid customer.',
+                            'partner_id' => __('wifi::filament/resources/wifi_purchase.messages.select_customer'),
                         ]);
                     }
 
                     if (! $package->currency_id) {
                         throw ValidationException::withMessages([
-                            'wifi_package_id' => 'The selected package has no currency. Please update the package first.',
+                            'wifi_package_id' => __('wifi::filament/resources/wifi_purchase.messages.package_currency'),
                         ]);
                     }
 
                     if (blank($data['cloud_id'] ?? null)) {
                         throw ValidationException::withMessages([
-                            'cloud_id' => 'Please select a cloud for this customer.',
+                            'cloud_id' => __('wifi::filament/resources/wifi_purchase.messages.select_cloud'),
                         ]);
                     }
 
@@ -66,7 +66,7 @@ class ManageWifiPurchases extends ManageRecords
 
                     if (! $hasCloudMapping) {
                         throw ValidationException::withMessages([
-                            'cloud_id' => 'The selected cloud is not assigned to this customer.',
+                            'cloud_id' => __('wifi::filament/resources/wifi_purchase.messages.cloud_assigned'),
                         ]);
                     }
 
@@ -89,7 +89,7 @@ class ManageWifiPurchases extends ManageRecords
 
                     if (! $journal) {
                         throw ValidationException::withMessages([
-                            'wifi_package_id' => 'No sales journal found. Please configure at least one sales journal first.',
+                            'wifi_package_id' => __('wifi::filament/resources/wifi_purchase.messages.no_sales'),
                         ]);
                     }
 
@@ -97,7 +97,7 @@ class ManageWifiPurchases extends ManageRecords
 
                     if (! $currencyId) {
                         throw ValidationException::withMessages([
-                            'wifi_package_id' => 'The selected package has no currency configured.',
+                            'wifi_package_id' => __('wifi::filament/resources/wifi_purchase.messages.package_currency'),
                         ]);
                     }
 

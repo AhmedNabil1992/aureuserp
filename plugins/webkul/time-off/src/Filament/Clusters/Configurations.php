@@ -21,6 +21,6 @@ class Configurations extends Cluster
 
     public static function getNavigationGroup(): string
     {
-        return __('time-off::filament/clusters/configuration.navigation.group');
+        return __('admin.navigation.time-off');
     }
 }

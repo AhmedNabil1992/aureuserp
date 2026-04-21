@@ -46,7 +46,7 @@ class PackagingResource extends BasePackagingResource
 
     public static function getNavigationGroup(): string
     {
-        return __('inventories::filament/clusters/configurations/resources/packaging.navigation.group');
+        return __('admin.navigation.inventory');
     }
 
     public static function getNavigationLabel(): string

@@ -38,7 +38,7 @@ class SoftwareDashboard extends BaseDashboard
 
     public static function getNavigationGroup(): string
     {
-        return 'Dashboard';
+        return __('admin.navigation.dashboard');
     }
 
     public static function getNavigationIcon(): string|BackedEnum|Htmlable|null

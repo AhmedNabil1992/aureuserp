@@ -21,6 +21,6 @@ class Overview extends Cluster
 
     public static function getNavigationGroup(): string
     {
-        return __('time-off::filament/clusters/overview.navigation.group');
+        return __('admin.navigation.time-off');
     }
 }

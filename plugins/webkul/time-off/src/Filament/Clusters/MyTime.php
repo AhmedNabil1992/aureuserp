@@ -21,6 +21,6 @@ class MyTime extends Cluster
 
     public static function getNavigationGroup(): string
     {
-        return __('time-off::filament/clusters/my-time.navigation.group');
+        return __('admin.navigation.time-off');
     }
 }

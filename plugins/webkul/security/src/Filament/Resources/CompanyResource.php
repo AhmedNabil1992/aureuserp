@@ -70,7 +70,7 @@ class CompanyResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return __('security::filament/resources/company.navigation.group');
+        return __('admin.navigation.setting');
     }
 
     public static function getGloballySearchableAttributes(): array

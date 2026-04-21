@@ -14,7 +14,7 @@ class ListClouds extends ListRecords
     {
         return [
             Actions\Action::make('refresh')
-                ->label('Refresh')
+                ->label(__('wifi::filament/resources/cloud.navigation.refresh'))
                 ->action(fn () => null),
         ];
     }

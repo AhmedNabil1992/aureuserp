@@ -15,6 +15,6 @@ class ToInvoice extends Cluster
 
     public static function getNavigationGroup(): string
     {
-        return __('sales::filament/clusters/to-invoice.navigation.group');
+        return __('admin.navigation.sale');
     }
 }

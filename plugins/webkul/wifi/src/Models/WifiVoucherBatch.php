@@ -17,8 +17,11 @@ class WifiVoucherBatch extends Model
         'wifi_purchase_id',
         'cloud_id',
         'realm_id',
-        'dynamic_client_id',
         'nasidentifier',
+        'profile_id',
+        'days_valid',
+        'hours_valid',
+        'minutes_valid',
         'batch_code',
         'quantity',
         'never_expire',
@@ -31,7 +34,10 @@ class WifiVoucherBatch extends Model
         return [
             'cloud_id'          => 'integer',
             'realm_id'          => 'integer',
-            'dynamic_client_id' => 'integer',
+            'profile_id'        => 'integer',
+            'days_valid'        => 'integer',
+            'hours_valid'       => 'integer',
+            'minutes_valid'     => 'integer',
             'quantity'          => 'integer',
             'never_expire'      => 'boolean',
         ];
@@ -52,9 +58,14 @@ class WifiVoucherBatch extends Model
         return $this->belongsTo(Realm::class, 'realm_id', 'id');
     }
 
-    public function dynamicClient(): BelongsTo
+    public function profile(): BelongsTo
     {
-        return $this->belongsTo(DynamicClient::class, 'dynamic_client_id', 'id');
+        return $this->belongsTo(Profile::class, 'profile_id', 'id');
+    }
+
+    public function accessPoint(): BelongsTo
+    {
+        return $this->belongsTo(DynamicClient::class, 'nasidentifier', 'nasidentifier');
     }
 
     public function creator(): BelongsTo
@@ -75,7 +86,7 @@ class WifiVoucherBatch extends Model
         });
 
         static::saving(function (self $batch): void {
-            $batch->loadMissing(['purchase', 'dynamicClient']);
+            $batch->loadMissing(['purchase']);
 
             if (! $batch->purchase) {
                 throw ValidationException::withMessages([
@@ -97,8 +108,10 @@ class WifiVoucherBatch extends Model
 
             $batch->cloud_id ??= $batch->purchase->cloud_id;
 
-            if ($batch->dynamic_client_id && blank($batch->nasidentifier)) {
-                $batch->nasidentifier = $batch->dynamicClient?->nasidentifier;
+            if (filled($batch->nasidentifier) && ! DynamicClient::query()->where('nasidentifier', $batch->nasidentifier)->exists()) {
+                throw ValidationException::withMessages([
+                    'nasidentifier' => 'Selected access point does not exist.',
+                ]);
             }
 
             $availableQuantity = (int) $batch->purchase->remaining_quantity;

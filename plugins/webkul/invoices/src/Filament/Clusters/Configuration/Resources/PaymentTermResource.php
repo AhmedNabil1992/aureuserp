@@ -34,7 +34,7 @@ class PaymentTermResource extends BasePaymentTermResource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('invoices::filament/clusters/configurations/resources/payment-term.navigation.group');
+        return __('admin.navigation.invoice');
     }
 
     public static function getRecordSubNavigation(Page $page): array

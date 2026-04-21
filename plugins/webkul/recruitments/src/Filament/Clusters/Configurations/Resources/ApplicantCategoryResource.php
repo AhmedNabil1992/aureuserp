@@ -38,7 +38,7 @@ class ApplicantCategoryResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return __('recruitments::filament/clusters/configurations/resources/applicant-category.navigation.group');
+        return __('admin.navigation.recruitment');
     }
 
     public static function getNavigationLabel(): string

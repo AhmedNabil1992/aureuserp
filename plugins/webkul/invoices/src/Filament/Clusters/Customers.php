@@ -15,6 +15,6 @@ class Customers extends Cluster
 
     public static function getNavigationGroup(): string
     {
-        return __('invoices::filament/clusters/customers.navigation.group');
+        return __('admin.navigation.invoice');
     }
 }

@@ -31,7 +31,7 @@ class ProgramFeatureResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return 'Software';
+        return __('admin.navigation.software');
     }
 
     public static function getNavigationLabel(): string

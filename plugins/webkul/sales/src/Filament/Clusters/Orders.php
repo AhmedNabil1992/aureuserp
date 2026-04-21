@@ -15,6 +15,6 @@ class Orders extends Cluster
 
     public static function getNavigationGroup(): string
     {
-        return __('sales::filament/clusters/orders.navigation.group');
+        return __('admin.navigation.sale');
     }
 }

@@ -13,8 +13,11 @@ return new class extends Migration
             $table->foreignId('wifi_purchase_id')->constrained('wifi_purchases')->cascadeOnDelete();
             $table->unsignedBigInteger('cloud_id')->nullable();
             $table->unsignedBigInteger('realm_id')->nullable();
-            $table->unsignedBigInteger('dynamic_client_id')->nullable();
             $table->string('nasidentifier')->nullable();
+            $table->unsignedBigInteger('profile_id')->nullable();
+            $table->unsignedInteger('days_valid')->default(0);
+            $table->unsignedInteger('hours_valid')->default(0);
+            $table->unsignedInteger('minutes_valid')->default(0);
             $table->string('batch_code')->unique();
             $table->unsignedInteger('quantity');
             $table->boolean('never_expire')->default(false);

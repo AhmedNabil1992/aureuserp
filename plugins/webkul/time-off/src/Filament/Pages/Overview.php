@@ -38,7 +38,7 @@ class Overview extends BaseDashboard
 
     public static function getNavigationGroup(): ?string
     {
-        return __('time-off::filament/pages/overview.navigation.group');
+        return __('admin.navigation.time-off');
     }
 
     public function getWidgets(): array

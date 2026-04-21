@@ -24,13 +24,16 @@ class WifiPartnerCloudResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-link';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Wi-Fi';
-
     protected static ?int $navigationSort = 2;
+
+    public static function getNavigationGroup(): string
+    {
+        return __('admin.navigation.wifi');
+    }
 
     public static function getNavigationLabel(): string
     {
-        return 'Customer Clouds';
+        return __('wifi::filament/resources/wifi_partner_cloud.navigation.title');
     }
 
     public static function form(Schema $schema): Schema
@@ -38,13 +41,13 @@ class WifiPartnerCloudResource extends Resource
         return $schema
             ->components([
                 Select::make('partner_id')
-                    ->label('Customer')
+                    ->label(__('wifi::filament/resources/wifi_partner_cloud.form.sections.general.fields.partner_id'))
                     ->options(fn (): array => Partner::query()->orderBy('name')->pluck('name', 'id')->all())
                     ->searchable()
                     ->preload()
                     ->required(),
                 Select::make('cloud_id')
-                    ->label('Cloud')
+                    ->label(__('wifi::filament/resources/wifi_partner_cloud.form.sections.general.fields.cloud_id'))
                     ->options(fn (): array => Cloud::query()->orderBy('name')->pluck('name', 'id')->all())
                     ->searchable()
                     ->preload()
@@ -58,15 +61,15 @@ class WifiPartnerCloudResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('partner.name')
-                    ->label('Customer')
+                    ->label(__('wifi::filament/resources/wifi_partner_cloud.table.columns.partner'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('cloud.name')
-                    ->label('Cloud')
+                    ->label(__('wifi::filament/resources/wifi_partner_cloud.table.columns.cloud'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('cloud_id')
-                    ->label('Cloud Number')
+                    ->label(__('wifi::filament/resources/wifi_partner_cloud.table.columns.cloud_number'))
                     ->sortable(),
             ])
             ->recordActions([

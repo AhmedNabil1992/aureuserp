@@ -17,6 +17,6 @@ class Support extends Cluster
 
     public static function getNavigationGroup(): string
     {
-        return 'Software';
+        return __('admin.navigation.software');
     }
 }

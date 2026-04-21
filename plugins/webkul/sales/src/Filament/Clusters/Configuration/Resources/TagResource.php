@@ -43,7 +43,7 @@ class TagResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('sales::filament/clusters/configurations/resources/tag.navigation.group');
+        return __('admin.navigation.sale');
     }
 
     public static function form(Schema $schema): Schema

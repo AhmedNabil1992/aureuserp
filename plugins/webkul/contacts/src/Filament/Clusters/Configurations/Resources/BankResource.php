@@ -21,7 +21,7 @@ class BankResource extends BaseBankResource
 
     public static function getNavigationGroup(): string
     {
-        return __('contacts::filament/clusters/configurations/resources/bank.navigation.group');
+        return __('admin.navigation.contact');
     }
 
     public static function getNavigationLabel(): string
