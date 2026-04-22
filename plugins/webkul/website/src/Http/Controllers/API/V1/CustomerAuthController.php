@@ -15,6 +15,7 @@ use Knuckles\Scribe\Attributes\ResponseFromApiResource;
 use Knuckles\Scribe\Attributes\Subgroup;
 use Knuckles\Scribe\Attributes\Unauthenticated;
 use Laravel\Sanctum\PersonalAccessToken;
+use Webkul\Support\Models\City;
 use Webkul\Website\Http\Requests\CustomerLoginRequest;
 use Webkul\Website\Http\Requests\CustomerRegisterRequest;
 use Webkul\Website\Http\Resources\V1\CustomerResource;
@@ -31,12 +32,18 @@ class CustomerAuthController extends Controller
     public function register(CustomerRegisterRequest $request): JsonResponse
     {
         $data = $request->validated();
+        $cityName = City::query()->whereKey($data['city_id'])->value('name');
 
         $customer = Partner::create([
-            'name'      => $data['name'],
-            'email'     => $data['email'],
-            'password'  => $data['password'],
-            'is_active' => true,
+            'name'       => $data['name'],
+            'email'      => $data['email'],
+            'phone'      => $data['phone'],
+            'country_id' => $data['country_id'],
+            'state_id'   => $data['state_id'],
+            'city'       => $cityName,
+            'street1'    => $data['street1'],
+            'password'   => $data['password'],
+            'is_active'  => true,
         ]);
 
         $token = $customer->createToken($data['device_name'] ?? 'customer-mobile')->plainTextToken;

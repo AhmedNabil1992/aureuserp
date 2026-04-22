@@ -8,6 +8,9 @@
 - `POST /customer/api/v1/auth/login`
 - `GET /customer/api/v1/auth/me`
 - `POST /customer/api/v1/auth/logout`
+- `GET /customer/api/v1/auth/locations/countries`
+- `GET /customer/api/v1/auth/locations/states?country_id={id}`
+- `GET /customer/api/v1/auth/locations/cities?state_id={id}`
 
 استخدم الهيدر التالي في أي endpoint محمي:
 
@@ -25,6 +28,11 @@ Content-Type: application/json
 {
     "name": "Ahmed Ali",
     "email": "customer@example.com",
+    "phone": "+201001234567",
+    "country_id": 65,
+    "state_id": 1524,
+    "city_id": 32012,
+    "street1": "Nasr City - Street 10",
     "password": "password123",
     "password_confirmation": "password123",
     "device_name": "flutter-android"
@@ -42,8 +50,12 @@ Content-Type: application/json
         "id": 1,
         "name": "Ahmed Ali",
         "email": "customer@example.com",
-        "phone": null,
+        "phone": "+201001234567",
         "mobile": null,
+        "country_id": 65,
+        "state_id": 1524,
+        "city": "Cairo",
+        "street1": "Nasr City - Street 10",
         "avatar_url": null,
         "is_active": true,
         "email_verified_at": null,
@@ -78,6 +90,10 @@ Content-Type: application/json
         "email": "customer@example.com",
         "phone": null,
         "mobile": null,
+        "country_id": 65,
+        "state_id": 1524,
+        "city": "Cairo",
+        "street1": "Nasr City - Street 10",
         "avatar_url": null,
         "is_active": true,
         "email_verified_at": null,
@@ -116,6 +132,10 @@ Content-Type: application/json
         "email": "customer@example.com",
         "phone": null,
         "mobile": null,
+        "country_id": 65,
+        "state_id": 1524,
+        "city": "Cairo",
+        "street1": "Nasr City - Street 10",
         "avatar_url": null,
         "is_active": true,
         "email_verified_at": null,
@@ -135,18 +155,88 @@ Content-Type: application/json
 
 ### Success Response `200`
 
-```json
+````json
 {
     "message": "Logout successful."
 }
+
+## 5) Countries List
+
+### Request
+
+- Method: `GET`
+- URL: `/customer/api/v1/auth/locations/countries`
+
+### Success Response `200`
+
+```json
+{
+    "data": [
+        {
+            "id": 65,
+            "name": "Egypt",
+            "code": "EG",
+            "phone_code": "20"
+        }
+    ]
+}
+````
+
+## 6) States List By Country
+
+### Request
+
+- Method: `GET`
+- URL: `/customer/api/v1/auth/locations/states?country_id=65`
+
+### Success Response `200`
+
+```json
+{
+    "data": [
+        {
+            "id": 1524,
+            "name": "Cairo",
+            "code": "C",
+            "country_id": 65
+        }
+    ]
+}
+```
+
+## 7) Cities List By State
+
+### Request
+
+- Method: `GET`
+- URL: `/customer/api/v1/auth/locations/cities?state_id=1524`
+
+### Success Response `200`
+
+```json
+{
+    "data": [
+        {
+            "id": 32012,
+            "name": "Nasr City",
+            "state_id": 1524
+        }
+    ]
+}
+```
+
 ```
 
 ## Flutter Flow
 
 1. عند التسجيل أو الدخول، خزّن قيمة `token` في `flutter_secure_storage`.
-2. أرسل الـ token في `Authorization` لكل request محمي.
-3. بعد فتح التطبيق، استدعِ `/customer/api/v1/auth/me` للتأكد من أن الجلسة ما زالت صالحة.
-4. عند تسجيل الخروج، استدعِ `/customer/api/v1/auth/logout` ثم احذف الـ token محلياً.
+2. قبل شاشة التسجيل، حمّل `countries`.
+3. بعد اختيار الدولة (country)، حمّل `states` باستخدام `country_id`.
+4. بعد اختيار المحافظة/الولاية (state)، حمّل `cities` باستخدام `state_id`.
+5. أرسل `country_id`, `state_id`, `city_id` في register.
+6. أرسل الـ token في `Authorization` لكل request محمي.
+7. بعد فتح التطبيق، استدعِ `/customer/api/v1/auth/me` للتأكد من أن الجلسة ما زالت صالحة.
+8. عند تسجيل الخروج، استدعِ `/customer/api/v1/auth/logout` ثم احذف الـ token محلياً.
 
 ## Suggested Dart Models
 
@@ -164,6 +254,10 @@ Content-Type: application/json
 - `email`
 - `phone`
 - `mobile`
+- `country_id`
+- `state_id`
+- `city`
+- `street1`
 - `avatar_url`
 - `is_active`
 - `email_verified_at`
@@ -175,3 +269,4 @@ Content-Type: application/json
 - الـ API الحالية موجهة للأساسيات فقط: register, login, me, logout.
 - باقي customer endpoints في Flutter يمكن ربطها لاحقاً على نفس نمط `Bearer token`.
 - إذا كان التطبيق سيستخدم refresh/session strategy مختلفة لاحقاً، يمكن إضافة endpoint خاص بتجديد التوكنات في المرحلة التالية.
+```
