@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
                 CurrencySeeder::class,
                 CountrySeeder::class,
                 StateSeeder::class,
+                CitySeeder::class,
                 CompanySeeder::class,
                 ActivityTypeSeeder::class,
                 ActivityPlanSeeder::class,

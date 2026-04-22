@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Webkul\Support\Http\Controllers\API\V1\BankController;
+use Webkul\Support\Http\Controllers\API\V1\CityController;
 use Webkul\Support\Http\Controllers\API\V1\CountryController;
 use Webkul\Support\Http\Controllers\API\V1\CurrencyController;
 use Webkul\Support\Http\Controllers\API\V1\CurrencyRateController;
@@ -19,6 +20,8 @@ Route::name('admin.api.v1.support.')->prefix('admin/api/v1/support')->middleware
     Route::apiResource('countries', CountryController::class)->only(['index', 'show']);
 
     Route::apiResource('states', StateController::class);
+
+    Route::apiResource('cities', CityController::class)->only(['index', 'show']);
 
     Route::apiResource('uom-categories', UOMCategoryController::class);
 
