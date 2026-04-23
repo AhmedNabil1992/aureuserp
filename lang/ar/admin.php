@@ -3,14 +3,14 @@
 return [
     'navigation' => [
         'dashboard'     => 'Dashboard',
-        'contact'       => 'Contacts',
+        'contact'       => 'Contact',
         'sale'          => 'Sales',
-        'purchase'      => 'Purchases',
+        'purchase'      => 'Purchase',
         'invoice'       => 'Invoices',
         'accounting'    => 'Accounting',
         'inventory'     => 'Inventory',
         'product'       => 'Products',
-        'project'       => 'Projects',
+        'project'       => 'Project',
         'employee'      => 'Employees',
         'time-off'      => 'Time Off',
         'recruitment'   => 'Recruitments',
