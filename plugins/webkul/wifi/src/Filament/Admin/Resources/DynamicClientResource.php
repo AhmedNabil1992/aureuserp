@@ -6,6 +6,7 @@ use Filament\Actions\ActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -39,11 +40,9 @@ class DynamicClientResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            TextInput::make('cloud.name')
+            Placeholder::make('cloud_name')
                 ->label(__('wifi::filament/resources/dynamic_client.table.columns.cloud'))
-                ->disabled()
-                ->dehydrated()
-                ->numeric(),
+                ->content(fn (?DynamicClient $record): string => $record?->cloud?->name ?? '-'),
             TextInput::make('name')
                 ->label(__('wifi::filament/resources/dynamic_client.table.columns.name'))
                 ->disabled()
@@ -118,8 +117,9 @@ class DynamicClientResource extends Resource
                         return 'secondary'; // gray
                     })
                     ->since()->dateTimeTooltip()->weight(FontWeight::Bold),
-                TextColumn::make('last_contact_ip')->label(__('wifi::filament/resources/dynamic_client.table.columns.last_contact_ip'))->sortable()->searchable(),
-
+                TextColumn::make('last_contact_ip')->label(__('wifi::filament/resources/dynamic_client.table.columns.last_contact_ip'))
+                    ->sortable()
+                    ->searchable(),
                 TextColumn::make('zero_ip')
                     ->label(__('wifi::filament/resources/dynamic_client.table.columns.zero_ip'))
                     ->searchable(),
