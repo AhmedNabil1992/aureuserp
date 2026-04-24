@@ -77,7 +77,7 @@ function createCustomer(array $overrides = []): Partner
     ], $overrides));
 }
 
-it('registers a customer and returns a bearer token', function () {
+it('registers a customer and requires email verification before login', function () {
     /** @var TestCase $this */
     $address = createAddressData();
 
@@ -98,10 +98,12 @@ it('registers a customer and returns a bearer token', function () {
 
     $response
         ->assertCreated()
-        ->assertJsonPath('message', 'Customer registered successfully.')
-        ->assertJsonPath('data.email', $payload['email']);
+        ->assertJsonPath('message', 'Customer registered successfully. Please verify your email before login.')
+        ->assertJsonPath('data.email', $payload['email'])
+        ->assertJsonPath('email_verification.required', true)
+        ->assertJsonPath('email_verification.verified', false);
 
-    expect($response->json('token'))->not->toBeEmpty();
+    expect($response->json('token'))->toBeNull();
 
     $this->assertDatabaseHas('partners_partners', [
         'email'      => $payload['email'],
@@ -152,7 +154,8 @@ it('lists cities by state id for registration', function () {
 it('logs in a customer with valid credentials', function () {
     /** @var TestCase $this */
     $customer = createCustomer([
-        'email' => 'login.customer@example.com',
+        'email'             => 'login.customer@example.com',
+        'email_verified_at' => now(),
     ]);
 
     $response = $this->postJson(customerAuthRoute('login'), [
@@ -167,6 +170,20 @@ it('logs in a customer with valid credentials', function () {
         ->assertJsonPath('data.id', $customer->id);
 
     expect($response->json('token'))->not->toBeEmpty();
+});
+
+it('rejects login for unverified customer email', function () {
+    /** @var TestCase $this */
+    $customer = createCustomer([
+        'email' => 'unverified.customer@example.com',
+    ]);
+
+    $this->postJson(customerAuthRoute('login'), [
+        'email'    => $customer->email,
+        'password' => 'password123',
+    ])
+        ->assertForbidden()
+        ->assertJsonPath('message', 'Please verify your email before logging in.');
 });
 
 it('rejects invalid customer credentials', function () {

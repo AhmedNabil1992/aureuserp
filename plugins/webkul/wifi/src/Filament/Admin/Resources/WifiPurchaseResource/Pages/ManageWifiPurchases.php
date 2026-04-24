@@ -73,16 +73,6 @@ class ManageWifiPurchases extends ManageRecords
                     $journalQuery = Journal::query()
                         ->where('type', JournalType::SALE->value);
 
-                    if ($package->currency_id) {
-                        $journalQuery
-                            ->where(function ($query) use ($package): void {
-                                $query
-                                    ->whereNull('currency_id')
-                                    ->orWhere('currency_id', $package->currency_id);
-                            })
-                            ->orderByRaw('CASE WHEN currency_id = ? THEN 0 ELSE 1 END', [$package->currency_id]);
-                    }
-
                     $journal = $journalQuery
                         ->orderBy('id')
                         ->first();
@@ -94,12 +84,6 @@ class ManageWifiPurchases extends ManageRecords
                     }
 
                     $currencyId = $package->currency_id;
-
-                    if (! $currencyId) {
-                        throw ValidationException::withMessages([
-                            'wifi_package_id' => __('wifi::filament/resources/wifi_purchase.messages.package_currency'),
-                        ]);
-                    }
 
                     $cardsQuantity = max(1, (int) ($data['quantity'] ?? 1));
                     $packageCards = max(1, (int) ($package->quantity ?? 1));

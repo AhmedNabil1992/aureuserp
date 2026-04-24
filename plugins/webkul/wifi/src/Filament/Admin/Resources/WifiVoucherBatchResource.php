@@ -3,9 +3,8 @@
 namespace Webkul\Wifi\Filament\Admin\Resources;
 
 use BackedEnum;
-use Filament\Actions\DeleteAction;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -209,11 +208,16 @@ class WifiVoucherBatchResource extends Resource
                     ->sortable(),
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                Action::make('downloadPdf')
+                    ->label(__('wifi::filament/resources/wifi_voucher_batch.table.actions.download_pdf'))
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->url(fn (WifiVoucherBatch $record): ?string => filled($record->batch_code)
+                        ? url('wifi/voucher-batches/'.rawurlencode($record->batch_code).'/download')
+                        : null)
+                    ->openUrlInNewTab(),
             ])
             ->toolbarActions([
-                DeleteBulkAction::make(),
+                // DeleteBulkAction::make(),
             ]);
     }
 

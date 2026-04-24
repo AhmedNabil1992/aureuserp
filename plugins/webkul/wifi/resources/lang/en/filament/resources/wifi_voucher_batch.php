@@ -36,7 +36,15 @@ return [
         ],
     ],
 
+    'messages' => [
+        'generated_success' => 'Vouchers generated successfully.',
+        'generated_warning' => 'Batch saved but voucher generation failed.',
+    ],
+
     'table' => [
+        'actions' => [
+            'download_pdf' => 'Download PDF',
+        ],
         'columns' => [
             'id'              => 'ID',
             'batch_code'      => 'Batch Code',

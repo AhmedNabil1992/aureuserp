@@ -43,9 +43,11 @@ Content-Type: application/json
 
 ```json
 {
-    "message": "Customer registered successfully.",
-    "token": "1|plain-text-token",
-    "token_type": "Bearer",
+    "message": "Customer registered successfully. Please verify your email before login.",
+    "email_verification": {
+        "required": true,
+        "verified": false
+    },
     "data": {
         "id": 1,
         "name": "Ahmed Ali",
@@ -64,6 +66,12 @@ Content-Type: application/json
     }
 }
 ```
+
+### Important Behavior
+
+- بعد التسجيل لا يتم إرجاع `token`.
+- يتم إرسال رسالة تأكيد بريد إلكتروني للعميل.
+- لا يمكن للعميل تسجيل الدخول من الموبايل قبل تأكيد البريد.
 
 ## 2) Login
 
@@ -100,6 +108,14 @@ Content-Type: application/json
         "created_at": "2026-04-19T12:00:00.000000Z",
         "updated_at": "2026-04-19T12:00:00.000000Z"
     }
+}
+```
+
+### Error Response `403`
+
+```json
+{
+    "message": "Please verify your email before logging in."
 }
 ```
 
@@ -155,10 +171,11 @@ Content-Type: application/json
 
 ### Success Response `200`
 
-````json
+```json
 {
     "message": "Logout successful."
 }
+```
 
 ## 5) Countries List
 
@@ -180,7 +197,7 @@ Content-Type: application/json
         }
     ]
 }
-````
+```
 
 ## 6) States List By Country
 
@@ -225,26 +242,29 @@ Content-Type: application/json
 }
 ```
 
-```
-
 ## Flutter Flow
 
-1. عند التسجيل أو الدخول، خزّن قيمة `token` في `flutter_secure_storage`.
-2. قبل شاشة التسجيل، حمّل `countries`.
-3. بعد اختيار الدولة (country)، حمّل `states` باستخدام `country_id`.
-4. بعد اختيار المحافظة/الولاية (state)، حمّل `cities` باستخدام `state_id`.
-5. أرسل `country_id`, `state_id`, `city_id` في register.
-6. أرسل الـ token في `Authorization` لكل request محمي.
-7. بعد فتح التطبيق، استدعِ `/customer/api/v1/auth/me` للتأكد من أن الجلسة ما زالت صالحة.
-8. عند تسجيل الخروج، استدعِ `/customer/api/v1/auth/logout` ثم احذف الـ token محلياً.
+1. عند التسجيل، اعرض للمستخدم رسالة واضحة أنه يجب تأكيد البريد الإلكتروني قبل تسجيل الدخول.
+2. لا تتوقع وجود `token` في رد التسجيل.
+3. عند تسجيل الدخول، إذا عاد الرد `403` فاعرض للمستخدم أن البريد غير مؤكد بعد.
+4. عند نجاح تسجيل الدخول فقط، خزّن قيمة `token` في `flutter_secure_storage`.
+5. قبل شاشة التسجيل، حمّل `countries`.
+6. بعد اختيار الدولة (country)، حمّل `states` باستخدام `country_id`.
+7. بعد اختيار المحافظة/الولاية (state)، حمّل `cities` باستخدام `state_id`.
+8. أرسل `country_id`, `state_id`, `city_id` في register.
+9. أرسل الـ token في `Authorization` لكل request محمي.
+10. بعد فتح التطبيق، استدعِ `/customer/api/v1/auth/me` للتأكد من أن الجلسة ما زالت صالحة.
+11. عند تسجيل الخروج، استدعِ `/customer/api/v1/auth/logout` ثم احذف الـ token محلياً.
 
 ## Suggested Dart Models
 
 ### Auth response fields
 
 - `message`
-- `token`
-- `token_type`
+- `email_verification.required` في رد التسجيل
+- `email_verification.verified` في رد التسجيل
+- `token` في رد تسجيل الدخول فقط
+- `token_type` في رد تسجيل الدخول فقط
 - `data`
 
 ### Customer fields
@@ -267,6 +287,8 @@ Content-Type: application/json
 ## Notes
 
 - الـ API الحالية موجهة للأساسيات فقط: register, login, me, logout.
+- التسجيل يتطلب تأكيد البريد الإلكتروني قبل أول login.
+- رد التسجيل لم يعد يحتوي على token.
+- لو حاول العميل تسجيل الدخول قبل تأكيد البريد سيرجع API كود `403`.
 - باقي customer endpoints في Flutter يمكن ربطها لاحقاً على نفس نمط `Bearer token`.
 - إذا كان التطبيق سيستخدم refresh/session strategy مختلفة لاحقاً، يمكن إضافة endpoint خاص بتجديد التوكنات في المرحلة التالية.
-```

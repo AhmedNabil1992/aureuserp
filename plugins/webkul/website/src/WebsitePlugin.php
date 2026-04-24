@@ -61,7 +61,7 @@ class WebsitePlugin implements Plugin
                     )
                     ->userMenuItems([
                         'my_account' => Action::make('my_account')->label(fn () => __('website::filament/app.navigation.account.label'))
-                            ->url(fn (): string => route('filament.customer.home'))
+                            ->url(fn (): string => route('filament.customer.account'))
                             ->sort(2)
                             ->visible(fn (): bool => Filament::auth()->check()),
                     ])
