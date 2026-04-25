@@ -123,6 +123,11 @@ class VoucherBatchPdfController extends Controller
         ]);
     }
 
+    public function signedDownload(string $batchCode): Response
+    {
+        return $this->download($batchCode);
+    }
+
     private function notFoundResponse(string $message): JsonResponse
     {
         return response()->json([

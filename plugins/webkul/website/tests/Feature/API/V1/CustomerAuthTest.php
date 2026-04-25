@@ -4,10 +4,14 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
+use Webkul\Software\Models\License;
+use Webkul\Software\Models\Program;
+use Webkul\Software\Models\ProgramEdition;
 use Webkul\Support\Models\City;
 use Webkul\Support\Models\Country;
 use Webkul\Support\Models\State;
 use Webkul\Website\Models\Partner;
+use Webkul\Wifi\Models\WifiPartnerCloud;
 
 require_once __DIR__.'/../../../../../support/tests/Helpers/TestBootstrapHelper.php';
 
@@ -98,7 +102,7 @@ it('registers a customer and requires email verification before login', function
 
     $response
         ->assertCreated()
-        ->assertJsonPath('message', 'Customer registered successfully. Please verify your email before login.')
+        ->assertJsonPath('message', 'تم تسجيل العميل بنجاح. يرجى التحقق من بريدك الإلكتروني قبل تسجيل الدخول.')
         ->assertJsonPath('data.email', $payload['email'])
         ->assertJsonPath('email_verification.required', true)
         ->assertJsonPath('email_verification.verified', false);
@@ -158,6 +162,50 @@ it('logs in a customer with valid credentials', function () {
         'email_verified_at' => now(),
     ]);
 
+    $expectedWifiService = false;
+
+    if (Schema::hasTable('wifi_partner_clouds')) {
+        WifiPartnerCloud::query()->create([
+            'partner_id' => $customer->id,
+            'cloud_id'   => 999,
+        ]);
+
+        $expectedWifiService = true;
+    }
+
+    $expectedPlaystationService = false;
+
+    if (
+        Schema::hasTable('software_programs')
+        && Schema::hasTable('software_program_editions')
+        && Schema::hasTable('software_licenses')
+    ) {
+        $program = Program::query()->create([
+            'name'       => 'Playstation Time Management',
+            'slug'       => 'playstation-time-management-'.uniqid(),
+            'is_active'  => true,
+            'creator_id' => null,
+        ]);
+
+        $edition = ProgramEdition::query()->create([
+            'program_id' => $program->id,
+            'name'       => 'Standard',
+            'max_devices'=> 1,
+        ]);
+
+        License::query()->create([
+            'serial_number' => 'PS-'.uniqid(),
+            'program_id'    => $program->id,
+            'edition_id'    => $edition->id,
+            'partner_id'    => $customer->id,
+            'license_plan'  => 'monthly',
+            'status'        => 'approved',
+            'is_active'     => true,
+        ]);
+
+        $expectedPlaystationService = true;
+    }
+
     $response = $this->postJson(customerAuthRoute('login'), [
         'email'       => $customer->email,
         'password'    => 'password123',
@@ -166,8 +214,12 @@ it('logs in a customer with valid credentials', function () {
 
     $response
         ->assertOk()
-        ->assertJsonPath('message', 'Login successful.')
-        ->assertJsonPath('data.id', $customer->id);
+        ->assertJsonPath('message', 'تم تسجيل الدخول بنجاح')
+        ->assertJsonPath('email_verification.required', true)
+        ->assertJsonPath('email_verification.verified', true)
+        ->assertJsonPath('data.id', $customer->id)
+        ->assertJsonPath('data.services.wifi_vouchers', $expectedWifiService)
+        ->assertJsonPath('data.services.playstation', $expectedPlaystationService);
 
     expect($response->json('token'))->not->toBeEmpty();
 });
@@ -183,7 +235,7 @@ it('rejects login for unverified customer email', function () {
         'password' => 'password123',
     ])
         ->assertForbidden()
-        ->assertJsonPath('message', 'Please verify your email before logging in.');
+        ->assertJsonPath('message', 'يرجي تأكيد البريد الإلكتروني الخاص بك قبل تسجيل الدخول.');
 });
 
 it('rejects invalid customer credentials', function () {

@@ -19,7 +19,7 @@ class WifiServiceProvider extends PackageServiceProvider
         $package->name(static::$name)
             ->hasViews()
             ->hasTranslations()
-            ->hasRoutes(['web'])
+            ->hasRoutes(['web', 'api'])
             ->hasDependencies(['accounts', 'partners'])
             ->hasMigrations([
                 '2026_04_19_200001_create_wifi_packages_table',
