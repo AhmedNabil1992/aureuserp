@@ -43,14 +43,14 @@ class TimeOffPlugin implements Plugin
                     ->discoverWidgets(
                         in: __DIR__.'/Filament/Widgets',
                         for: 'Webkul\\TimeOff\\Filament\\Widgets'
+                    )
+                    ->plugin(
+                        FullCalendarPlugin::make()
+                            ->selectable()
+                            ->editable(true)
+                            ->setPlugins(['multiMonth'])
                     );
-            })
-            ->plugin(
-                FullCalendarPlugin::make()
-                    ->selectable()
-                    ->editable(true)
-                    ->setPlugins(['multiMonth'])
-            );
+            });
     }
 
     public function boot(Panel $panel): void

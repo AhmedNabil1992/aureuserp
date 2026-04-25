@@ -22,15 +22,19 @@ class PermanentUser extends Model
     protected function casts(): array
     {
         return [
-            'id'               => 'integer',
-            'active'           => 'boolean',
-            'realm_id'         => 'integer',
-            'profile_id'       => 'integer',
-            'cloud_id'         => 'integer',
-            'last_accept_time' => 'datetime',
-            'last_reject_time' => 'datetime',
-            'created'          => 'datetime',
-            'modified'         => 'datetime',
+            'id'                  => 'integer',
+            'username'            => 'string',
+            'active'              => 'boolean',
+            'realm_id'            => 'integer',
+            'profile_id'          => 'integer',
+            'cloud_id'            => 'integer',
+            'last_accept_time'    => 'datetime',
+            'last_reject_time'    => 'datetime',
+            'last_accept_nas'     => 'string',
+            'last_reject_nas'     => 'string',
+            'last_reject_message' => 'string',
+            'created'             => 'datetime',
+            'modified'            => 'datetime',
         ];
     }
 
