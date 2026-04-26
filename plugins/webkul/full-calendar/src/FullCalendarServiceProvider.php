@@ -35,7 +35,9 @@ class FullCalendarServiceProvider extends PackageServiceProvider
     public function packageRegistered(): void
     {
         Panel::configureUsing(function (Panel $panel): void {
-            $panel->plugin(FullCalendarPlugin::make());
+            if ($panel->getId() === 'admin') {
+                $panel->plugin(FullCalendarPlugin::make());
+            }
         });
     }
 

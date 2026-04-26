@@ -5,7 +5,6 @@ namespace Webkul\Wifi\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Webkul\Security\Models\User;
 
@@ -82,7 +81,12 @@ class WifiVoucherBatch extends Model
     {
         static::creating(function (self $batch): void {
             $batch->creator_id ??= Auth::id();
-            $batch->batch_code ??= 'WIFI-'.Str::upper(Str::random(10));
+
+            if (blank($batch->batch_code)) {
+                $cloudName = $batch->cloud_id ? Cloud::find($batch->cloud_id)?->name : null;
+                $normalized = $cloudName ? strtoupper(str_replace(' ', '', $cloudName)) : 'WIFI';
+                $batch->batch_code = $normalized.'_'.date('Ymd').'_'.mt_rand(1, 100);
+            }
         });
 
         static::saving(function (self $batch): void {

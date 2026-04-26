@@ -36,7 +36,15 @@ return [
         ],
     ],
 
+    'messages' => [
+        'generated_success' => 'تم توليد القسائم بنجاح.',
+        'generated_warning' => 'تم حفظ الدفعة ولكن فشل توليد القسائم.',
+    ],
+
     'table' => [
+        'actions' => [
+            'download_pdf' => 'تنزيل PDF',
+        ],
         'columns' => [
             'id'              => 'المعرف',
             'batch_code'      => 'رمز الدفعة',

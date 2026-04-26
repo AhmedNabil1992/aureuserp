@@ -29,6 +29,7 @@
         "milon/barcode": "^11.0",
         "spatie/eloquent-sortable": "^4.4",
         "spatie/laravel-query-builder": "^6.4",
+        "tecnickcom/tcpdf": "^6.11",
         "wikimedia/composer-merge-plugin": "^2.1"
     },
     "require-dev": {

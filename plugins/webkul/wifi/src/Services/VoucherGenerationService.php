@@ -62,6 +62,9 @@ class VoucherGenerationService
             'quantity'          => (int) $batch->quantity,
             'batch'             => $batchCode,
             'activate_on_login' => 'on',
+            'days_valid'        => max(0, $daysValid ?? (int) ($batch->days_valid ?? 0)),
+            'hours_valid'       => max(0, $hoursValid ?? (int) ($batch->hours_valid ?? 0)),
+            'minutes_valid'     => max(0, $minutesValid ?? (int) ($batch->minutes_valid ?? 0)),
             'extra_name'        => '',
             'extra_value'       => '',
             'token'             => $token,
@@ -74,14 +77,7 @@ class VoucherGenerationService
         if ($isUnlimited) {
             $payload['never_expire'] = 'on';
         } else {
-            $resolvedDaysValid = max(0, $daysValid ?? (int) ($batch->days_valid ?? 0));
-            $resolvedHoursValid = max(0, $hoursValid ?? (int) ($batch->hours_valid ?? 0));
-            $resolvedMinutesValid = max(0, $minutesValid ?? (int) ($batch->minutes_valid ?? 0));
             $resolvedExpireAt = $expireAt ?? now()->addMonth();
-
-            $payload['days_valid'] = $resolvedDaysValid;
-            $payload['hours_valid'] = $resolvedHoursValid;
-            $payload['minutes_valid'] = $resolvedMinutesValid;
             $payload['expire'] = $resolvedExpireAt->format('m/d/Y');
         }
 
@@ -129,11 +125,15 @@ class VoucherGenerationService
 
         $normalizedCloud = $normalizedCloud !== '' ? $normalizedCloud : 'WIFI';
 
-        return sprintf('%s_%s_%s', $normalizedCloud, now()->format('Ymd'), random_int(100, 999));
+        return sprintf('%s_%s_%s', $normalizedCloud, now()->format('Ymd'), mt_rand(1, 100));
     }
 
     private function buildDownloadUrl(string $batchCode): ?string
     {
+        if (app('router')->has('wifi.voucher-batches.download')) {
+            return url('wifi/voucher-batches/'.rawurlencode($batchCode).'/download');
+        }
+
         $baseUrl = (string) config('services.wifi_voucher.download_base_url');
 
         if (blank($baseUrl)) {

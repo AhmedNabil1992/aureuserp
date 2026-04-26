@@ -2,10 +2,12 @@
 
 namespace Webkul\Website\Http\Controllers\API\V1;
 
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 use Knuckles\Scribe\Attributes\Authenticated;
 use Knuckles\Scribe\Attributes\Endpoint;
@@ -15,19 +17,21 @@ use Knuckles\Scribe\Attributes\ResponseFromApiResource;
 use Knuckles\Scribe\Attributes\Subgroup;
 use Knuckles\Scribe\Attributes\Unauthenticated;
 use Laravel\Sanctum\PersonalAccessToken;
+use Webkul\Software\Models\License;
 use Webkul\Support\Models\City;
 use Webkul\Website\Http\Requests\CustomerLoginRequest;
 use Webkul\Website\Http\Requests\CustomerRegisterRequest;
 use Webkul\Website\Http\Resources\V1\CustomerResource;
 use Webkul\Website\Models\Partner;
+use Webkul\Wifi\Models\WifiPartnerCloud;
 
 #[Group('Website API Management')]
 #[Subgroup('Customer Authentication', 'Register and authenticate customer accounts for the mobile application')]
 class CustomerAuthController extends Controller
 {
-    #[Endpoint('Register customer', 'Create a new customer account and issue a Sanctum token.')]
+    #[Endpoint('Register customer', 'Create a new customer account and require email verification before login.')]
     #[Unauthenticated]
-    #[ResponseFromApiResource(CustomerResource::class, Partner::class, status: 201, additional: ['message' => 'Customer registered successfully.'])]
+    #[ResponseFromApiResource(CustomerResource::class, Partner::class, status: 201, additional: ['message' => 'Customer registered successfully. Please verify your email before login.'])]
     #[Response(status: 422, description: 'Validation error', content: '{"message": "The given data was invalid.", "errors": {"email": ["The email has already been taken."]}}')]
     public function register(CustomerRegisterRequest $request): JsonResponse
     {
@@ -35,24 +39,29 @@ class CustomerAuthController extends Controller
         $cityName = City::query()->whereKey($data['city_id'])->value('name');
 
         $customer = Partner::create([
-            'name'       => $data['name'],
-            'email'      => $data['email'],
-            'phone'      => $data['phone'],
-            'country_id' => $data['country_id'],
-            'state_id'   => $data['state_id'],
-            'city'       => $cityName,
-            'street1'    => $data['street1'],
-            'password'   => $data['password'],
-            'is_active'  => true,
+            'name'          => $data['name'],
+            'email'         => $data['email'],
+            'phone'         => $data['phone'],
+            'country_id'    => $data['country_id'],
+            'state_id'      => $data['state_id'],
+            'city'          => $cityName,
+            'street1'       => $data['street1'],
+            'password'      => $data['password'],
+            'customer_rank' => 1,
+            'is_active'     => true,
         ]);
 
-        $token = $customer->createToken($data['device_name'] ?? 'customer-mobile')->plainTextToken;
+        if ($customer instanceof MustVerifyEmail && ! $customer->hasVerifiedEmail()) {
+            $customer->sendEmailVerificationNotification();
+        }
 
         return response()->json([
-            'message'    => 'Customer registered successfully.',
-            'token'      => $token,
-            'token_type' => 'Bearer',
-            'data'       => CustomerResource::make($customer)->resolve(),
+            'message'            => 'تم تسجيل العميل بنجاح. يرجى التحقق من بريدك الإلكتروني قبل تسجيل الدخول.',
+            'email_verification' => [
+                'required' => true,
+                'verified' => $customer->hasVerifiedEmail(),
+            ],
+            'data'               => CustomerResource::make($customer)->resolve(),
         ], 201);
     }
 
@@ -72,13 +81,48 @@ class CustomerAuthController extends Controller
             ]);
         }
 
+        if ($customer instanceof MustVerifyEmail && ! $customer->hasVerifiedEmail()) {
+            return response()->json([
+                'message' => 'يرجي تأكيد البريد الإلكتروني الخاص بك قبل تسجيل الدخول.',
+            ], 403);
+        }
+
         $token = $customer->createToken($data['device_name'] ?? 'customer-mobile')->plainTextToken;
 
+        $hasWifiVouchers = false;
+
+        if (Schema::hasTable('wifi_partner_clouds')) {
+            $hasWifiVouchers = WifiPartnerCloud::query()
+                ->where('partner_id', $customer->id)
+                ->exists();
+        }
+
+        $hasPlaystationService = false;
+
+        if (Schema::hasTable('software_licenses') && Schema::hasTable('software_programs')) {
+            $hasPlaystationService = License::query()
+                ->where('partner_id', $customer->id)
+                ->whereHas('program', function ($query): void {
+                    $query->where('name', 'Playstation Time Management');
+                })
+                ->exists();
+        }
+
+        $customerData = CustomerResource::make($customer)->resolve();
+        $customerData['services'] = [
+            'wifi_vouchers' => $hasWifiVouchers,
+            'playstation'   => $hasPlaystationService,
+        ];
+
         return response()->json([
-            'message'    => 'Login successful.',
-            'token'      => $token,
-            'token_type' => 'Bearer',
-            'data'       => CustomerResource::make($customer)->resolve(),
+            'message'            => 'تم تسجيل الدخول بنجاح',
+            'token'              => $token,
+            'token_type'         => 'Bearer',
+            'email_verification' => [
+                'required' => true,
+                'verified' => true,
+            ],
+            'data'               => $customerData,
         ]);
     }
 
