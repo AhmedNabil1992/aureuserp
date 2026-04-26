@@ -49,10 +49,14 @@ class CompanySeeder extends Seeder
                 'updated_at'       => now(),
             ]);
 
-            $currency = Currency::find(1);
+            $baseCurrencyCode = config('app.currency', 'EGP');
+
+            $currency = Currency::query()
+                ->where('name', $baseCurrencyCode)
+                ->first() ?? Currency::query()->first();
 
             if (! $currency) {
-                throw new Exception('Currency with ID 1 not found.');
+                throw new Exception("Currency with code {$baseCurrencyCode} not found.");
             }
 
             DB::table('companies')->insert([

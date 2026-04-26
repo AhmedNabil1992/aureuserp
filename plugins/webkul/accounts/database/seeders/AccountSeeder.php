@@ -22,8 +22,11 @@ class AccountSeeder extends Seeder
         DB::table('accounts_accounts')->delete();
 
         $user = User::first();
+        $baseCurrencyCode = config('app.currency', 'EGP');
 
-        $currency = Currency::active()->first() ?? Currency::first();
+        $currency = Currency::query()
+            ->where('name', $baseCurrencyCode)
+            ->first() ?? Currency::active()->first() ?? Currency::first();
 
         $company = Company::first();
 

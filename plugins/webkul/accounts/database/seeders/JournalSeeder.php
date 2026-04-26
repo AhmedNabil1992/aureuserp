@@ -20,8 +20,11 @@ class JournalSeeder extends Seeder
         $user = User::first();
 
         $company = Company::first();
+        $baseCurrencyCode = config('app.currency', 'EGP');
 
-        $currency = Currency::active()->first() ?? Currency::first();
+        $currency = Currency::query()
+            ->where('name', $baseCurrencyCode)
+            ->first() ?? Currency::active()->first() ?? Currency::first();
 
         $journals = [
             [

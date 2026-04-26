@@ -13,6 +13,7 @@ class CurrencySeeder extends Seeder
     public function run(): void
     {
         $currencies = [
+            'EGP' => 'Egyptian Pound',
             'USD' => 'US Dollar',
             'EUR' => 'Euro',
             'GBP' => 'British Pound',
@@ -48,7 +49,6 @@ class CurrencySeeder extends Seeder
             'COP' => 'Colombian Peso',
             'PKR' => 'Pakistani Rupee',
             'NGN' => 'Nigerian Naira',
-            'EGP' => 'Egyptian Pound',
             'KWD' => 'Kuwaiti Dinar',
             'QAR' => 'Qatari Riyal',
             'OMR' => 'Omani Rial',

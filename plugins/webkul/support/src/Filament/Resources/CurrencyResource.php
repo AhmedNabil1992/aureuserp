@@ -212,7 +212,7 @@ class CurrencyResource extends Resource
                     ->sortable(),
                 TextColumn::make('rounding')
                     ->label(__('support::filament/resources/currency.table.columns.rounding'))
-                    ->money('USD', divideBy: 1)
+                    ->money(config('app.currency', 'EGP'), divideBy: 1)
                     ->sortable(),
                 ToggleColumn::make('active')
                     ->label(__('support::filament/resources/currency.table.columns.status'))
@@ -323,7 +323,7 @@ class CurrencyResource extends Resource
                                         TextEntry::make('rounding')
                                             ->icon('heroicon-o-arrow-path-rounded-square')
                                             ->placeholder('—')
-                                            ->money('USD', divideBy: 1)
+                                            ->money(config('app.currency', 'EGP'), divideBy: 1)
                                             ->label(__('support::filament/resources/currency.infolist.sections.format-information.entries.rounding')),
                                     ])->columns(2),
                             ])->columnSpan(2),
