@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Webkul\Account\Enums\AccountType;
 use Webkul\Account\Enums\DisplayType;
+use Webkul\Account\Enums\JournalType;
 use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Enums\MoveType;
 use Webkul\Account\Enums\PaymentState;
@@ -105,6 +106,8 @@ class AccountManager
             $line->update(['parent_state' => MoveState::POSTED]);
         }
 
+        $this->autoReconcileOutstandingPayments($record);
+
         if ($record->isSaleDocument()) {
             $record->partner?->update(['customer_rank' => DB::raw('COALESCE(customer_rank, 0) + 1')]);
         } elseif ($record->isPurchaseDocument()) {
@@ -130,6 +133,63 @@ class AccountManager
         MoveConfirmed::dispatch($record);
 
         return $record;
+    }
+
+    protected function autoReconcileOutstandingPayments(AccountMove $record): void
+    {
+        if (! $record->isInvoice(true)) {
+            return;
+        }
+
+        $record->refresh();
+
+        if (! in_array($record->payment_state, [PaymentState::NOT_PAID, PaymentState::PARTIAL, PaymentState::IN_PAYMENT], true)) {
+            return;
+        }
+
+        $paymentTermLines = $record->paymentTermLines
+            ->filter(fn ($line) => ! $line->reconciled)
+            ->values();
+
+        if ($paymentTermLines->isEmpty()) {
+            return;
+        }
+
+        $outstandingLines = MoveLine::query()
+            ->whereIn('account_id', $paymentTermLines->pluck('account_id')->unique())
+            ->where('parent_state', MoveState::POSTED)
+            ->where('partner_id', $record->commercial_partner_id)
+            ->where('reconciled', false)
+            ->where('move_id', '!=', $record->id)
+            ->where(function ($query) {
+                $query->where('amount_residual', '!=', 0.0)
+                    ->orWhere('amount_residual_currency', '!=', 0.0);
+            })
+            ->when($record->isInbound(), function ($query) {
+                return $query->where('balance', '<', 0);
+            }, function ($query) {
+                return $query->where('balance', '>', 0);
+            })
+            ->orderBy('date')
+            ->orderBy('id')
+            ->get();
+
+        if ($outstandingLines->isEmpty()) {
+            return;
+        }
+
+        foreach ($outstandingLines->pluck('account_id')->unique() as $accountId) {
+            $linesToReconcile = $paymentTermLines
+                ->where('account_id', $accountId)
+                ->merge($outstandingLines->where('account_id', $accountId))
+                ->values();
+
+            if ($linesToReconcile->count() < 2) {
+                continue;
+            }
+
+            $this->reconcile($linesToReconcile);
+        }
     }
 
     public function setAsCheckedMove(AccountMove $record): AccountMove
@@ -1082,7 +1142,10 @@ class AccountManager
             ));
         }
 
-        if ($payment->outstandingAccount->account_type === AccountType::ASSET_CASH) {
+        if (
+            in_array($payment->journal?->type, [JournalType::BANK, JournalType::CASH, JournalType::CREDIT_CARD], true)
+            || $payment->outstandingAccount->account_type === AccountType::ASSET_CASH
+        ) {
             $payment->state = PaymentStatus::PAID;
 
             $payment->save();

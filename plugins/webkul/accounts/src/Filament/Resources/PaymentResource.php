@@ -194,12 +194,12 @@ class PaymentResource extends Resource
                                                 'journal',
                                                 'name',
                                                 modifyQueryUsing: fn (Builder $query) => $query
-                                                    ->where('type', JournalType::BANK)
-                                                    ->where('responsible_user_id', Auth::id()),
+                                                    ->whereIn('type', [JournalType::BANK, JournalType::CASH, JournalType::CREDIT_CARD])
+                                                    ->paymentAccessibleBy(Auth::id()),
                                             )
                                             ->default(function () {
-                                                $journal = Journal::where('type', JournalType::BANK)
-                                                    ->where('responsible_user_id', Auth::id())
+                                                $journal = Journal::whereIn('type', [JournalType::BANK, JournalType::CASH, JournalType::CREDIT_CARD])
+                                                    ->paymentAccessibleBy(Auth::id())
                                                     ->first();
 
                                                 return $journal?->id;

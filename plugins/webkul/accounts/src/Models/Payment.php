@@ -200,6 +200,18 @@ class Payment extends Model
 
     public function getOutstandingAccount($paymentType)
     {
+        if (
+            $this->journal
+            && in_array($this->journal->type, [JournalType::BANK, JournalType::CASH, JournalType::CREDIT_CARD])
+        ) {
+            $liquidityAccount = $this->journal->defaultAccount
+                ?? $this->journal->allowedAccounts()->where('account_type', AccountType::ASSET_CASH)->first();
+
+            if ($liquidityAccount) {
+                return $liquidityAccount;
+            }
+        }
+
         $defaultAccountSettings = new DefaultAccountSettings;
 
         if ($this->payment_type == PaymentType::RECEIVE) {

@@ -2,6 +2,7 @@
 
 namespace Webkul\Account\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -161,6 +162,25 @@ class Journal extends Model implements Sortable
             : $this->outboundPaymentMethodLines;
     }
 
+    public function scopePaymentAccessibleBy(Builder $query, ?int $userId = null): Builder
+    {
+        $userId ??= Auth::id();
+
+        if (! $userId) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->where(function (Builder $journalQuery) use ($userId) {
+            $journalQuery
+                ->where('responsible_user_id', $userId)
+                ->orWhere(function (Builder $fallbackQuery) use ($userId) {
+                    $fallbackQuery
+                        ->whereNull('responsible_user_id')
+                        ->where('creator_id', $userId);
+                });
+        });
+    }
+
     public function computeSuspenseAccountId()
     {
         if (! in_array($this->type, [JournalType::BANK, JournalType::CASH, JournalType::CREDIT_CARD])) {
@@ -216,6 +236,13 @@ class Journal extends Model implements Sortable
 
         static::creating(function ($journal) {
             $journal->creator_id ??= Auth::id();
+
+            if (
+                ! $journal->responsible_user_id
+                && in_array($journal->type, [JournalType::BANK, JournalType::CASH, JournalType::CREDIT_CARD])
+            ) {
+                $journal->responsible_user_id = $journal->creator_id;
+            }
         });
 
         static::saving(function ($journal) {

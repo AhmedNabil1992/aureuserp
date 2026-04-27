@@ -28,6 +28,7 @@ class WifiServiceProvider extends PackageServiceProvider
                 '2026_04_20_000101_create_wifi_partner_clouds_table',
                 '2026_04_20_000201_alter_wifi_packages_add_currency_id',
                 '2026_04_21_210001_alter_wifi_voucher_batches_add_profile_validity_drop_dynamic_client',
+                '2026_04_24_153145_add_currency_id_to_wifi_packages_table',
             ])
             ->runsMigrations()
             ->hasInstallCommand(function (InstallCommand $command): void {

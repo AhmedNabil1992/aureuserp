@@ -446,6 +446,11 @@ class RefundController extends Controller
         $paymentRegister->computeAvailableJournalIds();
 
         $journalId = $data['journal_id'] ?? ($paymentRegister->available_journal_ids[0] ?? null);
+
+        if ($journalId && ! in_array($journalId, $paymentRegister->available_journal_ids, true)) {
+            throw new Exception('You can only pay using journals assigned to your user.');
+        }
+
         $journal = $journalId ? Journal::find($journalId) : null;
 
         if ($journal && empty($data['currency_id']) && $journal->currency_id) {
@@ -456,6 +461,18 @@ class RefundController extends Controller
         $paymentRegister->journal = $journal;
         $paymentRegister->computePaymentMethodLineId();
 
+        $paymentMethodLineId = $data['payment_method_line_id'] ?? $paymentRegister->payment_method_line_id;
+
+        if ($paymentMethodLineId) {
+            $availablePaymentMethodLineIds = $journal
+                ? $journal->getAvailablePaymentMethodLines($paymentRegister->payment_type)->pluck('id')->toArray()
+                : [];
+
+            if (! in_array($paymentMethodLineId, $availablePaymentMethodLineIds, true)) {
+                throw new Exception('Selected payment method is not available for the selected journal.');
+            }
+        }
+
         $amountsToPay = $paymentRegister->getTotalAmountsToPay($paymentRegister->batches);
         $paymentRegister->amount = $data['amount'] ?? $amountsToPay['amount_by_default'];
         $paymentRegister->computeInstallmentsMode();
@@ -464,7 +481,7 @@ class RefundController extends Controller
             'currency_id'             => $paymentRegister->currency_id,
             'journal_id'              => $journalId,
             'partner_bank_id'         => $data['partner_bank_id'] ?? null,
-            'payment_method_line_id'  => $data['payment_method_line_id'] ?? $paymentRegister->payment_method_line_id,
+            'payment_method_line_id'  => $paymentMethodLineId,
             'communication'           => $data['communication'] ?? $refund->name,
             'installments_mode'       => $data['installments_mode'] ?? $paymentRegister->installments_mode,
             'payment_date'            => $paymentRegister->payment_date,

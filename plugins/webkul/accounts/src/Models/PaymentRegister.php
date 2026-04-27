@@ -453,6 +453,7 @@ class PaymentRegister extends Model
 
         return Journal::where('company_id', $companyId)
             ->whereIn('type', [JournalType::BANK, JournalType::CASH, JournalType::CREDIT_CARD])
+            ->paymentAccessibleBy(Auth::id())
             ->whereHas($paymentMethodRelation)
             ->get();
     }
