@@ -58,6 +58,8 @@ class SoftwareServiceProvider extends PackageServiceProvider
                 '2026_04_13_000027_alter_software_program_features_add_product_id',
                 '2026_04_15_000028_alter_software_licenses_make_edition_nullable',
                 '2026_04_19_000029_create_software_ticket_attachments_table',
+                '2026_05_02_000031_create_fcm_tokens_table',
+                '2026_05_02_000032_create_software_customer_notifications_table',
             ])
             ->runsMigrations()
             ->hasInstallCommand(function (InstallCommand $command): void {

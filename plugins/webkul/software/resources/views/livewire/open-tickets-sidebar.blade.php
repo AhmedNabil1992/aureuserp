@@ -80,30 +80,19 @@
 
 @once
 @push('scripts')
-<script type="module">
-    import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js';
-    import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js';
-
-    const firebaseConfig = {!! json_encode([
-        'apiKey'            => config('services.firebase_web.api_key'),
-        'authDomain'        => config('services.firebase_web.auth_domain'),
-        'databaseURL'       => config('services.firebase_web.database_url'),
-        'projectId'         => config('services.firebase_web.project_id'),
-        'storageBucket'     => config('services.firebase_web.storage_bucket'),
-        'messagingSenderId' => config('services.firebase_web.messaging_sender_id'),
-        'appId'             => config('services.firebase_web.app_id'),
-    ]) !!};
+<script>
+    const { ref, onValue } = window.firebaseDatabase;
 
     function openTicketsSidebar() {
         return {
             _unsubscribers: [],
             init() {
-                if (! firebaseConfig.databaseURL) { return; }
+                if (! window.AureusFirebase?.hasRequiredFirebaseConfig) { return; }
+                if (! window.AureusFirebase?.firebaseConfig?.databaseURL) { return; }
 
-                // Reuse the same Firebase app if already initialized
-                const existing = getApps().find(a => a.name === 'sidebar');
-                const app = existing ?? initializeApp(firebaseConfig, 'sidebar');
-                const db  = getDatabase(app);
+                const db = window.AureusFirebase.getDatabase('sidebar');
+
+                if (! db) { return; }
 
                 // Listen to the root tickets/ node for any update
                 const path = ref(db, 'tickets');

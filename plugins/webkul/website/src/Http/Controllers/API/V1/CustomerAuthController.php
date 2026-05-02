@@ -17,8 +17,12 @@ use Knuckles\Scribe\Attributes\ResponseFromApiResource;
 use Knuckles\Scribe\Attributes\Subgroup;
 use Knuckles\Scribe\Attributes\Unauthenticated;
 use Laravel\Sanctum\PersonalAccessToken;
+use Webkul\Software\Models\CustomerNotification;
+use Webkul\Software\Models\FcmToken;
 use Webkul\Software\Models\License;
+use Webkul\Software\Services\FirebaseNotificationService;
 use Webkul\Support\Models\City;
+use Webkul\Website\Http\Requests\CustomerFcmTokenRequest;
 use Webkul\Website\Http\Requests\CustomerLoginRequest;
 use Webkul\Website\Http\Requests\CustomerRegisterRequest;
 use Webkul\Website\Http\Resources\V1\CustomerResource;
@@ -135,6 +139,37 @@ class CustomerAuthController extends Controller
         return CustomerResource::make($request->user());
     }
 
+    #[Endpoint('Update customer FCM token', 'Register or refresh Firebase Cloud Messaging token for the authenticated customer device.')]
+    #[Authenticated]
+    #[Response(status: 200, description: 'Token updated', content: '{"success": true, "message": "FCM Token updated successfully."}')]
+    #[Response(status: 401, description: 'Unauthenticated', content: '{"message": "Unauthenticated."}')]
+    public function updateFcmToken(CustomerFcmTokenRequest $request): JsonResponse
+    {
+        /** @var Partner $customer */
+        $customer = $request->user();
+
+        $token = $request->validated('fcm_token');
+
+        FcmToken::updateOrCreate(
+            ['token' => $token],
+            [
+                'user_id'     => null,
+                'partner_id'  => $customer->id,
+                'device_name' => $request->validated('device_name'),
+            ],
+        );
+
+        $this->pushUnreadNotificationsToToken(
+            customerId: (int) $customer->id,
+            token: (string) $token,
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'FCM Token updated successfully.',
+        ]);
+    }
+
     #[Endpoint('Logout customer', 'Revoke the current customer access token.')]
     #[Authenticated]
     #[Response(status: 200, description: 'Logout successful', content: '{"message": "Logout successful."}')]
@@ -143,6 +178,17 @@ class CustomerAuthController extends Controller
     {
         /** @var Partner $customer */
         $customer = $request->user();
+
+        $validated = $request->validate([
+            'fcm_token' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        if (! empty($validated['fcm_token'])) {
+            FcmToken::query()
+                ->where('partner_id', $customer->id)
+                ->where('token', $validated['fcm_token'])
+                ->delete();
+        }
 
         $accessToken = $customer->currentAccessToken();
 
@@ -153,5 +199,53 @@ class CustomerAuthController extends Controller
         return response()->json([
             'message' => 'Logout successful.',
         ]);
+    }
+
+    private function pushUnreadNotificationsToToken(int $customerId, string $token): void
+    {
+        $notifications = CustomerNotification::query()
+            ->where('partner_id', $customerId)
+            ->where('is_read', false)
+            ->latest('id')
+            ->limit(20)
+            ->get();
+
+        if ($notifications->isEmpty()) {
+            return;
+        }
+
+        $firebaseNotificationService = app(FirebaseNotificationService::class);
+
+        foreach ($notifications as $notification) {
+            $firebaseNotificationService->sendToTokens(
+                tokens: [$token],
+                title: $notification->title,
+                body: $notification->body,
+                data: $this->normalizeDataPayload($notification->data),
+            );
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $data
+     * @return array<string, string>
+     */
+    private function normalizeDataPayload(?array $data): array
+    {
+        if (empty($data)) {
+            return [];
+        }
+
+        return collect($data)
+            ->filter(fn ($value, $key): bool => filled($key) && filled($value))
+            ->mapWithKeys(function ($value, $key): array {
+                if (is_scalar($value)) {
+                    return [(string) $key => (string) $value];
+                }
+
+                return [(string) $key => json_encode($value, JSON_UNESCAPED_UNICODE) ?: ''];
+            })
+            ->filter(fn ($value): bool => $value !== '')
+            ->all();
     }
 }

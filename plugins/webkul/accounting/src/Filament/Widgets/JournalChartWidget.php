@@ -7,6 +7,7 @@ use Livewire\Component;
 use Webkul\Account\Enums\JournalType;
 use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Enums\PaymentState;
+use Webkul\Account\Enums\PaymentType;
 use Webkul\Account\Models\Move;
 use Webkul\Accounting\Filament\Clusters\Accounting\Resources\JournalEntryResource;
 use Webkul\Accounting\Filament\Clusters\Customers\Resources\InvoiceResource;
@@ -111,6 +112,23 @@ class JournalChartWidget extends Component
                     'amount'           => $amount = (clone $baseQuery)->where('state', MoveState::DRAFT)->sum('amount_total'),
                     'formatted_amount' => money($amount),
                 ],
+                'today_bills' => [
+                    'label' => __('accounting::filament/widgets/journal-chart-widget.stats.today-bills'),
+                    'url'   => $this->getUrl('index'),
+                    'value' => (clone $baseQuery)
+                        ->where(function ($query): void {
+                            $query->whereDate('invoice_date', today())
+                                ->orWhereDate('date', today());
+                        })
+                        ->count(),
+                    'amount' => $amount = (clone $baseQuery)
+                        ->where(function ($query): void {
+                            $query->whereDate('invoice_date', today())
+                                ->orWhereDate('date', today());
+                        })
+                        ->sum('amount_total'),
+                    'formatted_amount' => money($amount),
+                ],
                 'late' => [
                     'label' => __('accounting::filament/widgets/journal-chart-widget.stats.late'),
                     'url'   => $this->getUrl('index', ['activeTableView' => 'overdue']),
@@ -148,15 +166,29 @@ class JournalChartWidget extends Component
                 ],
             ];
         } else {
+            $monthAmounts = $this->getLiquidityAmounts(now()->startOfMonth(), now()->endOfMonth());
+
             $data['stats'] = [
-                'payments' => [
-                    'label'  => __('accounting::filament/widgets/journal-chart-widget.stats.payments'),
-                    'url'    => $this->getUrl('index'),
-                    'value'  => null,
-                    'amount' => $amount = (clone $baseQuery)
-                        ->where('state', MoveState::POSTED)
-                        ->sum('amount_total'),
-                    'formatted_amount' => money($amount),
+                'month_in' => [
+                    'label'            => __('accounting::filament/widgets/journal-chart-widget.stats.month-in'),
+                    'url'              => $this->getUrl('index'),
+                    'value'            => null,
+                    'amount'           => $monthAmounts['in'],
+                    'formatted_amount' => money($monthAmounts['in']),
+                ],
+                'month_out' => [
+                    'label'            => __('accounting::filament/widgets/journal-chart-widget.stats.month-out'),
+                    'url'              => $this->getUrl('index'),
+                    'value'            => null,
+                    'amount'           => $monthAmounts['out'],
+                    'formatted_amount' => money($monthAmounts['out']),
+                ],
+                'month_net' => [
+                    'label'            => __('accounting::filament/widgets/journal-chart-widget.stats.month-net'),
+                    'url'              => $this->getUrl('index'),
+                    'value'            => null,
+                    'amount'           => $monthAmounts['net'],
+                    'formatted_amount' => money($monthAmounts['net']),
                 ],
             ];
         }
@@ -205,44 +237,116 @@ class JournalChartWidget extends Component
 
     private function getLiquidityChartData(): array
     {
-        $start = now()->subWeeks(5)->startOfWeek();
-        $end = now()->endOfWeek();
+        $start = now()->subDays(13)->startOfDay();
+        $end = now()->endOfDay();
+
+        $days = [];
+
+        for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+            $days[$date->toDateString()] = [
+                'label' => $date->format('d M'),
+                'in'    => 0.0,
+                'out'   => 0.0,
+            ];
+        }
 
         $moves = Move::query()
             ->where('journal_id', $this->journal->id)
             ->where('state', MoveState::POSTED)
+            ->with('originPayment:id,payment_type,date')
             ->applyPermissionScope()
-            ->whereBetween('date', [$start, $end])
-            ->orderBy('date')
+            ->where(function ($query) use ($start, $end): void {
+                $query->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+                    ->orWhereHas('originPayment', function ($paymentQuery) use ($start, $end): void {
+                        $paymentQuery->whereBetween('date', [$start->toDateString(), $end->toDateString()]);
+                    });
+            })
             ->get();
 
-        $labels = [];
-        $balances = [];
-        $runningBalance = 0;
+        foreach ($moves as $move) {
+            $paymentDate = $move->originPayment?->date?->toDateString()
+                ?? Carbon::parse($move->date)->toDateString();
 
-        foreach ($moves->groupBy(fn ($m) => Carbon::parse($m->date)->format('Y-m-d')) as $week => $weekMoves) {
-            $labels[] = Carbon::parse($week)->format('d M');
-
-            foreach ($weekMoves as $move) {
-                $runningBalance += (float) $move->amount_total;
+            if (! array_key_exists($paymentDate, $days)) {
+                continue;
             }
 
-            $balances[] = $runningBalance;
+            $paymentType = $move->originPayment?->payment_type;
+            $amount = abs((float) $move->amount_total);
+
+            if ($paymentType === PaymentType::SEND) {
+                $days[$paymentDate]['out'] += $amount;
+
+                continue;
+            }
+
+            $days[$paymentDate]['in'] += $amount;
         }
 
         return [
-            'type'     => 'line',
-            'labels'   => $labels,
+            'type'     => 'bar',
+            'labels'   => array_column($days, 'label'),
             'datasets' => [
                 [
-                    'label'       => __('accounting::filament/widgets/journal-chart-widget.chart.balance'),
-                    'data'        => $balances,
-                    'borderColor' => '#3b82f6',
-                    'tension'     => 0.3,
-                    'fill'        => false,
+                    'label'           => __('accounting::filament/widgets/journal-chart-widget.chart.customers'),
+                    'data'            => array_column($days, 'in'),
+                    'backgroundColor' => '#22c55e',
+                ],
+                [
+                    'label'           => __('accounting::filament/widgets/journal-chart-widget.chart.vendors'),
+                    'data'            => array_column($days, 'out'),
+                    'backgroundColor' => '#f97316',
                 ],
             ],
         ];
+    }
+
+    private function getLiquidityAmounts(Carbon $start, Carbon $end): array
+    {
+        $moves = Move::query()
+            ->where('journal_id', $this->journal->id)
+            ->where('state', MoveState::POSTED)
+            ->with('originPayment:id,payment_type')
+            ->applyPermissionScope()
+            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+            ->get();
+
+        $in = 0.0;
+        $out = 0.0;
+
+        foreach ($moves as $move) {
+            $amount = $this->getSignedLiquidityAmount($move);
+
+            if ($amount >= 0) {
+                $in += $amount;
+
+                continue;
+            }
+
+            $out += abs($amount);
+        }
+
+        return [
+            'in'  => $in,
+            'out' => $out,
+            'net' => $in - $out,
+        ];
+    }
+
+    private function getSignedLiquidityAmount(Move $move): float
+    {
+        $amount = abs((float) $move->amount_total);
+        $paymentType = $move->originPayment?->payment_type;
+
+        if ($paymentType === PaymentType::RECEIVE) {
+            return $amount;
+        }
+
+        if ($paymentType === PaymentType::SEND) {
+            return -$amount;
+        }
+
+        return (float) $move->amount_total;
     }
 
     private function getInvoiceChartData(): array

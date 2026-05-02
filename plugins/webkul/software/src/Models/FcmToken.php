@@ -16,7 +16,7 @@ use Webkul\Security\Models\User;
  */
 class FcmToken extends Model
 {
-    protected $table = 'software_fcm_tokens';
+    protected $table = 'fcm_tokens';
 
     protected $fillable = [
         'user_id',

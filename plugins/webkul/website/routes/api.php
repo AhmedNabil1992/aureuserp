@@ -20,5 +20,6 @@ Route::name('customer.api.v1.website.auth.')
     ->middleware(['auth:sanctum'])
     ->group(function (): void {
         Route::get('me', [CustomerAuthController::class, 'me'])->name('me');
+        Route::post('fcm-token', [CustomerAuthController::class, 'updateFcmToken'])->name('fcm-token');
         Route::post('logout', [CustomerAuthController::class, 'logout'])->name('logout');
     });

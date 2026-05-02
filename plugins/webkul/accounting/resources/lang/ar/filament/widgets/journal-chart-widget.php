@@ -9,6 +9,13 @@ return [
         'paid'        => 'مدفوع',
         'entries'     => 'القيود',
         'payments'    => 'المدفوعات',
+        'today-bills' => 'فواتير اليوم',
+        'today-in'    => 'وارد اليوم',
+        'today-out'   => 'صادر اليوم',
+        'today-net'   => 'صافي اليوم',
+        'month-in'    => 'وارد هذا الشهر',
+        'month-out'   => 'صادر هذا الشهر',
+        'month-net'   => 'صافي هذا الشهر',
     ],
 
     'actions' => [
@@ -21,6 +28,8 @@ return [
 
     'chart' => [
         'balance'   => 'الرصيد',
+        'customers' => 'العملاء (وارد)',
+        'vendors'   => 'الموردون (صادر)',
         'overdue'   => 'متأخر',
         'this-week' => 'هذا الأسبوع',
         'not-due'   => 'غير مستحق',

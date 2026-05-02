@@ -167,7 +167,7 @@
 
 @once
 @push('scripts')
-<script type="module">
+<script>
     /**
      * Firebase Realtime Database listener for ticket conversations.
      * When the server writes to tickets/{id}/last_event, Livewire refreshes
@@ -175,27 +175,19 @@
      *
      * Config values are injected from the server-side env via json_encode().
      */
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js';
-    import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js';
-
-    const firebaseConfig = {!! json_encode([
-        'apiKey'            => config('services.firebase_web.api_key'),
-        'authDomain'        => config('services.firebase_web.auth_domain'),
-        'databaseURL'       => config('services.firebase_web.database_url'),
-        'projectId'         => config('services.firebase_web.project_id'),
-        'storageBucket'     => config('services.firebase_web.storage_bucket'),
-        'messagingSenderId' => config('services.firebase_web.messaging_sender_id'),
-        'appId'             => config('services.firebase_web.app_id'),
-    ]) !!};
+    const { ref, onValue } = window.firebaseDatabase;
 
     function ticketConversation(ticketId) {
         return {
             _unsubscribe: null,
             init() {
-                if (! firebaseConfig.databaseURL) { return; }
+                if (! window.AureusFirebase?.hasRequiredFirebaseConfig) { return; }
+                if (! window.AureusFirebase?.firebaseConfig?.databaseURL) { return; }
 
-                const app = initializeApp(firebaseConfig, 'ticket-conversation-' + ticketId);
-                const db  = getDatabase(app);
+                const db = window.AureusFirebase.getDatabase('ticket-conversation-' + ticketId);
+
+                if (! db) { return; }
+
                 const path = ref(db, 'tickets/' + ticketId + '/last_event');
 
                 let lastEventId = null;
