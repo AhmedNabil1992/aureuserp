@@ -5,6 +5,11 @@ return [
         'title' => 'الطرود',
         'group' => 'المخزون',
     ],
+    'global-search' => [
+        'name'         => 'الاسم',
+        'package-type' => 'نوع الطرد',
+        'location'     => 'الموقع',
+    ],
 
     'form' => [
         'sections' => [

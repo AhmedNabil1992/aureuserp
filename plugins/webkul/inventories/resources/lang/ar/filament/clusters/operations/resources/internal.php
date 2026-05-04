@@ -5,6 +5,9 @@ return [
         'title' => 'التحويلات الداخلية',
         'group' => 'التحويلات',
     ],
+    'global-search' => [
+        'origin' => 'المصدر',
+    ],
 
     'table' => [
         'actions' => [

@@ -16,7 +16,8 @@ return [
 
     'table' => [
         'columns' => [
-            'name'         => 'الاسم',
+            'name'       => 'الاسم',
+            'created-by' => 'أُنشئ بواسطة',
         ],
 
         'actions' => [

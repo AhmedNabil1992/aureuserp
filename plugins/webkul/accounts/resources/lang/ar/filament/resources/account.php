@@ -1,6 +1,10 @@
 <?php
 
 return [
+    'global-search' => [
+        'code' => 'الرمز',
+        'type' => 'النوع',
+    ],
     'form' => [
         'sections' => [
             'fields' => [
@@ -15,6 +19,7 @@ return [
                 'deprecated'    => 'مهمل',
                 'reconcile'     => 'تسوية',
                 'non-trade'     => 'غير تجاري',
+                'companies'     => 'الشركات',
             ],
         ],
     ],
@@ -28,57 +33,55 @@ return [
             'deprecated'   => 'مهمل',
             'reconcile'    => 'تسوية',
             'non-trade'    => 'غير تجاري',
+            'journals'     => 'اليوميات',
+        ],
+
+        'grouping' => [
+            'account-type' => 'نوع الحساب',
+        ],
+
+        'filters' => [
+            'account-type'     => 'نوع الحساب',
+            'allow-reconcile'  => 'السماح بالتسوية',
+            'currency'         => 'العملة',
+            'account-journals' => 'اليوميات',
+            'non-trade'        => 'غير تجاري',
         ],
 
         'actions' => [
-            'delete' => [
+            'edit' => [
                 'notification' => [
-                    'title' => 'تم حذف الحساب',
-                    'body'  => 'تم حذف الحساب بنجاح.',
+                    'title' => 'تم تعديل الحساب',
+                    'body'  => 'تم تعديل الحساب بنجاح.',
                 ],
             ],
         ],
 
-        'bulk-actions' => [
-            'delete' => [
-                'notification' => [
-                    'title' => 'تم حذف الحسابات',
-                    'body'  => 'تم حذف الحسابات بنجاح.',
+        'delete' => [
+            'notification' => [
+                'title'   => 'تم حذف الحسابات',
+                'body'    => 'تم حذف الحسابات بنجاح.',
+                'success' => [
+                    'title' => 'تم حذف الحساب',
+                    'body'  => 'تم حذف الحساب بنجاح.',
+                ],
+
+                'error' => [
+                    'title' => 'فشل حذف الحساب',
+                    'body'  => 'لا يمكن حذف الحساب لأنه يحتوي على قيود يومية مرتبطة.',
                 ],
             ],
         ],
     ],
-
-    'infolist' => [
-        'sections' => [
-            'entries' => [
-                'name'            => 'الاسم',
-                'tax-type'        => 'نوع الضريبة',
-                'tax-computation' => 'حساب الضريبة',
-                'tax-scope'       => 'نطاق الضريبة',
-                'status'          => 'الحالة',
-                'amount'          => 'المبلغ',
-            ],
-
-            'field-set' => [
-                'advanced-options' => [
-                    'title' => 'خيارات متقدمة',
-
-                    'entries' => [
-                        'invoice-label'       => 'تسمية الفاتورة',
-                        'tax-group'           => 'مجموعة الضرائب',
-                        'country'             => 'البلد',
-                        'include-in-price'    => 'تضمين في السعر',
-                        'include-base-amount' => 'تضمين المبلغ الأساسي',
-                        'is-base-affected'    => 'هل يتأثر الأساس',
-                    ],
-                ],
-
-                'description-and-legal-notes' => [
-                    'title'   => 'الوصف والملاحظات القانونية للفاتورة',
-                    'entries' => [
-                        'description' => 'الوصف',
-                        'legal-notes' => 'الملاحظات القانونية',
+    'bulk-actions' => [
+        'delete' => [
+            'notification' => [
+                'success' => [
+                    'title' => 'تم حذف الحسابات',
+                    'body'  => 'تم حذف الحسابات بنجاح.',
+                    'error' => [
+                        'title' => 'فشل حذف الحسابات',
+                        'body'  => 'لا يمكن حذف الحسابات لأنها تحتوي على قيود يومية مرتبطة.',
                     ],
                 ],
             ],

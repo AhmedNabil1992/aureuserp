@@ -27,6 +27,7 @@ return [
             'storage-category'   => 'فئة التخزين',
             'available-quantity' => 'الكمية المتاحة',
             'quantity'           => 'الكمية',
+            'uom'                => 'UOM',
             'package'            => 'الطرد',
             'last-counted-at'    => 'آخر جرد في',
             'on-hand'            => 'الكمية المتاحة',

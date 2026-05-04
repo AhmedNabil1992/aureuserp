@@ -5,7 +5,10 @@ return [
         'title' => 'الدفعات / الأرقام التسلسلية',
         'group' => 'المخزون',
     ],
-
+    'global-search' => [
+        'ref'     => 'المرجع',
+        'product' => 'المنتج',
+    ],
     'form' => [
         'sections' => [
             'general' => [

@@ -1,6 +1,10 @@
 <?php
 
 return [
+    'global-search' => [
+        'reference' => 'المرجع',
+        'barcode'   => 'الباركود',
+    ],
     'navigation' => [
         'title' => 'المنتجات',
         'group' => 'المنتجات',

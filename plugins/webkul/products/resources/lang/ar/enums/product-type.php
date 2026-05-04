@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'goods'   => 'Goods',
-    'service' => 'Service',
+    'goods'   => 'بضائع',
+    'service' => 'خدمة',
     'product' => 'منتج',
 ];

@@ -9,7 +9,7 @@ return [
     ],
 
     'global-search' => [
-        'name'               => 'القسم',
+        // 'name'               => 'القسم',
         'department-manager' => 'المدير',
         'company'            => 'الشركة',
     ],

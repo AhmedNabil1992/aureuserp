@@ -9,7 +9,7 @@ return [
     ],
 
     'global-search' => [
-        'name'       => 'اسم الموظف',
+        // 'name'       => 'اسم الموظف',
         'department' => 'القسم',
         'work-email' => 'البريد الإلكتروني للعمل',
         'work-phone' => 'هاتف العمل',

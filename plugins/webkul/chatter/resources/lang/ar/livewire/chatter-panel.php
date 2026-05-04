@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'heading'      => 'المحادثات',
     'placeholders' => [
         'no-record-found' => 'لم يتم العثور على سجل.',
         'loading'         => 'جاري تحميل المحادثات...',

@@ -5,7 +5,10 @@ return [
         'title' => 'الاستلامات',
         'group' => 'التحويلات',
     ],
-
+    'global-search' => [
+        'partner' => 'الشريك',
+        'origin'  => 'المصدر',
+    ],
     'table' => [
         'actions' => [
             'delete' => [
