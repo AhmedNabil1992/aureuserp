@@ -4,9 +4,11 @@ return [
     'tabs' => [
         'goods'     => 'السلع',
         'services'  => 'الخدمات',
+        'product'   => 'المنتج',
         'favorites' => 'المفضلة',
         'archived'  => 'المؤرشفة',
     ],
+
     'header-actions' => [
         'create' => [
             'label' => 'منتج جديد',

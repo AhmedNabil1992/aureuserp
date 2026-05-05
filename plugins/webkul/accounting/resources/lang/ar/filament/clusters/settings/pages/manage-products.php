@@ -2,6 +2,7 @@
 
 return [
     'title' => 'إدارة المنتجات',
+
     'form'  => [
         'enable-variants'               => 'المتغيرات',
         'enable-variants-helper-text'   => 'تعيين خصائص المنتج (مثل اللون والحجم) لإدارة المتغيرات',

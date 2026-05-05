@@ -141,6 +141,8 @@ class PluginResource extends Resource
                             DB::beginTransaction();
 
                             try {
+                                set_time_limit(0);
+
                                 $phpPath = self::getPhpExecutablePath();
 
                                 $php = escapeshellarg($phpPath);
@@ -149,9 +151,7 @@ class PluginResource extends Resource
 
                                 $commandName = escapeshellarg("{$record->name}:install");
 
-                                $cmd = "timeout 300 $php $artisan $commandName 2>&1";
-
-                                $cmd = self::buildTimeoutCommand(300, "$php $artisan $commandName 2>&1");
+                                $cmd = self::buildTimeoutCommand(600, "$php $artisan $commandName 2>&1");
 
                                 $output = [];
 

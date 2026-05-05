@@ -29,10 +29,12 @@ return [
         'columns' => [
             'code'         => 'Code',
             'account-name' => 'Account Name',
-            'account-type' => 'Account',
+            'account-type' => 'Account Type',
             'currency'     => 'Currency',
-            'journals'     => 'Journals',
+            'deprecated'   => 'Deprecated',
             'reconcile'    => 'Allow Reconcile',
+            'non-trade'    => 'Non Trade',
+            'journals'     => 'Journals',
         ],
 
         'grouping' => [

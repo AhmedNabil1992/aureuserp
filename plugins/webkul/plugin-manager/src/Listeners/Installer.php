@@ -22,7 +22,7 @@ class Installer
      */
     public function installed()
     {
-        $user = User::first();
+        $user = User::query()->first();
 
         $httpClient = new Client;
 

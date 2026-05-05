@@ -1,7 +1,8 @@
 <?php
 
 return [
-    'navigation' => [
-        'title' => 'قائمة المنتجات',
+    'tabs' => [
+        'sales'    => 'مبيعات',
+        'purchase' => 'مشتريات',
     ],
 ];
