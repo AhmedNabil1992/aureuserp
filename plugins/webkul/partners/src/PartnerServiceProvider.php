@@ -3,6 +3,8 @@
 namespace Webkul\Partner;
 
 use Filament\Panel;
+use Webkul\PluginManager\Console\Commands\InstallCommand;
+use Webkul\PluginManager\Console\Commands\UninstallCommand;
 use Webkul\PluginManager\Package;
 use Webkul\PluginManager\PackageServiceProvider;
 
@@ -26,7 +28,11 @@ class PartnerServiceProvider extends PackageServiceProvider
                 '2025_03_28_115218_add_address_columns_in_partners_partners_table',
                 '2026_04_20_000001_add_is_dealer_to_partners_table',
             ])
-            ->runsMigrations();
+            ->runsMigrations()
+            ->hasInstallCommand(function (InstallCommand $command): void {
+                $command->runsMigrations();
+            })
+            ->hasUninstallCommand(function (UninstallCommand $command): void {});
     }
 
     public function packageBooted(): void

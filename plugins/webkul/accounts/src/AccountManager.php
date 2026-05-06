@@ -2027,6 +2027,7 @@ class AccountManager
                 'move_type'          => $move->typeReverseMapping[$move->move_type->value],
                 'reversed_entry_id'  => $move->id,
                 'partner_id'         => $move->partner_id,
+                'state'              => MoveState::DRAFT,
             ]);
 
             $reverseMove = $move->replicate();
