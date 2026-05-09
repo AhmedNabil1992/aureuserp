@@ -23,6 +23,21 @@ return [
         'password_confirmation' => [
             'label' => 'Confirm password',
         ],
+        'phone' => [
+            'label' => 'Phone number',
+        ],
+        'country' => [
+            'label' => 'Country',
+        ],
+        'state' => [
+            'label' => 'State / Province',
+        ],
+        'city' => [
+            'label' => 'City',
+        ],
+        'street' => [
+            'label' => 'Street address',
+        ],
         'actions' => [
             'register' => [
                 'label' => 'Create account',

@@ -10,6 +10,7 @@ use Filament\Auth\Events\Registered;
 use Filament\Auth\Http\Responses\Contracts\RegistrationResponse;
 use Filament\Auth\Notifications\VerifyEmail;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Notifications\Notification;
@@ -23,8 +24,10 @@ use Illuminate\Auth\SessionGuard;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Webkul\Support\Models\Country;
 
 class Register extends Page
 {
@@ -46,6 +49,12 @@ class Register extends Page
         }
 
         $this->callHook('beforeFill');
+
+        // Auto-detect country from IP
+        $countryId = $this->detectCountryFromIP();
+        if ($countryId) {
+            $this->data['country_id'] = $countryId;
+        }
 
         $this->form->fill();
 
@@ -147,6 +156,11 @@ class Register extends Page
                     ->components([
                         $this->getNameFormComponent(),
                         $this->getEmailFormComponent(),
+                        $this->getPhoneFormComponent(),
+                        $this->getCountryFormComponent(),
+                        $this->getStateFormComponent(),
+                        $this->getCityFormComponent(),
+                        $this->getStreetFormComponent(),
                         $this->getPasswordFormComponent(),
                         $this->getPasswordConfirmationFormComponent(),
                     ])
@@ -195,6 +209,68 @@ class Register extends Page
             ->revealable(filament()->arePasswordsRevealable())
             ->required()
             ->dehydrated(false);
+    }
+
+    protected function getPhoneFormComponent(): Component
+    {
+        return TextInput::make('phone')
+            ->label(__('website::filament/customer/pages/auth/register.form.phone.label'))
+            ->tel()
+            ->required()
+            ->maxLength(255);
+    }
+
+    protected function getCountryFormComponent(): Component
+    {
+        return Select::make('country_id')
+            ->label(__('website::filament/customer/pages/auth/register.form.country.label'))
+            ->relationship('country', 'name')
+            ->searchable()
+            ->required()
+            ->live(debounce: 500);
+    }
+
+    protected function getStateFormComponent(): Component
+    {
+        return Select::make('state_id')
+            ->label(__('website::filament/customer/pages/auth/register.form.state.label'))
+            ->relationship(
+                'state',
+                'name',
+                fn ($query) => $query->when(
+                    $this->data['country_id'] ?? null,
+                    fn ($q) => $q->where('country_id', $this->data['country_id'])
+                )
+            )
+            ->searchable()
+            ->required()
+            ->live(debounce: 500)
+            ->disabled(fn () => ! ($this->data['country_id'] ?? null));
+    }
+
+    protected function getCityFormComponent(): Component
+    {
+        return Select::make('city_id')
+            ->label(__('website::filament/customer/pages/auth/register.form.city.label'))
+            ->relationship(
+                'city',
+                'name',
+                fn ($query) => $query->when(
+                    $this->data['state_id'] ?? null,
+                    fn ($q) => $q->where('state_id', $this->data['state_id'])
+                )
+            )
+            ->required()
+            ->searchable()
+            ->disabled(fn () => ! ($this->data['state_id'] ?? null));
+    }
+
+    protected function getStreetFormComponent(): Component
+    {
+        return TextInput::make('street1')
+            ->label(__('website::filament/customer/pages/auth/register.form.street.label'))
+            ->required()
+            ->maxLength(255);
     }
 
     public function loginAction(): Action
@@ -252,5 +328,54 @@ class Register extends Page
     protected function mutateFormDataBeforeRegister(array $data): array
     {
         return $data;
+    }
+
+    /**
+     * Detect country from user's IP address with caching
+     */
+    private function detectCountryFromIP(): ?int
+    {
+        try {
+            $ip = request()->ip() ?? '127.0.0.1';
+
+            // Skip localhost
+            if (in_array($ip, ['127.0.0.1', '::1'])) {
+                return null;
+            }
+
+            // Check cache first (30 minutes)
+            $cacheKey = "country_by_ip_{$ip}";
+            if (Cache::has($cacheKey)) {
+                return Cache::get($cacheKey);
+            }
+
+            // Use ipapi.co service (free, no API key required)
+            $response = @file_get_contents("https://ipapi.co/{$ip}/json/");
+
+            if ($response === false) {
+                return null;
+            }
+
+            $data = json_decode($response, true);
+
+            if (! isset($data['country_code'])) {
+                return null;
+            }
+
+            // Find country by ISO code (stored as 'code' in database)
+            $country = Country::where('code', strtoupper($data['country_code']))->first();
+
+            $countryId = $country?->id;
+
+            // Cache for 30 minutes
+            if ($countryId) {
+                Cache::put($cacheKey, $countryId, now()->addMinutes(30));
+            }
+
+            return $countryId;
+        } catch (Exception $e) {
+            // Silently fail - let user select manually if detection fails
+            return null;
+        }
     }
 }

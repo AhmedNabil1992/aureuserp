@@ -75,7 +75,9 @@ class InstallCommand extends Command
 
                     $this->newLine();
 
-                    $this->call($dependency.':install');
+                    $this->call($dependency.':install', [
+                        '--no-interaction' => true,
+                    ]);
                 }
 
                 $this->newLine();
@@ -104,7 +106,9 @@ class InstallCommand extends Command
 
                 $this->newLine();
 
-                $this->call($dependency.':install');
+                $this->call($dependency.':install', [
+                    '--no-interaction' => true,
+                ]);
             }
 
             $this->newLine();

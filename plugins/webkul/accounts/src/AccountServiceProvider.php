@@ -90,6 +90,8 @@ class AccountServiceProvider extends PackageServiceProvider
                 '2026_02_25_044931_alter_accounts_full_reconciles_table',
                 '2026_03_03_120000_alter_accounts_journals_bank_account_foreign_key',
                 '2026_04_20_000001_alter_accounts_journals_add_responsible_user',
+                '2026_05_09_000002_create_accounts_customer_credits_table',
+                '2026_05_09_000003_create_accounts_balance_requests_table',
             ])
             ->runsMigrations()
             ->hasSettings([

@@ -23,6 +23,21 @@ return [
         'password_confirmation' => [
             'label' => 'تأكيد كلمة المرور',
         ],
+        'phone' => [
+            'label' => 'رقم الهاتف',
+        ],
+        'country' => [
+            'label' => 'البلد',
+        ],
+        'state' => [
+            'label' => 'الولاية / المحافظة',
+        ],
+        'city' => [
+            'label' => 'المدينة',
+        ],
+        'street' => [
+            'label' => 'عنوان الشارع',
+        ],
         'actions' => [
             'register' => [
                 'label' => 'إنشاء حساب',

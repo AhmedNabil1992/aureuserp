@@ -14,12 +14,15 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Webkul\Account\Models\BalanceRequest;
+use Webkul\Account\Models\CustomerCredit;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Partner\Database\Factories\PartnerFactory;
 use Webkul\Partner\Enums\AccountType;
 use Webkul\Security\Models\User;
 use Webkul\Security\Traits\HasPermissionScope;
+use Webkul\Support\Models\City;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Country;
 use Webkul\Support\Models\State;
@@ -47,7 +50,7 @@ class Partner extends Authenticatable implements FilamentUser, MustVerifyEmail
         'reference',
         'street1',
         'street2',
-        'city',
+        'city_id',
         'zip',
         'state_id',
         'country_id',
@@ -99,6 +102,11 @@ class Partner extends Authenticatable implements FilamentUser, MustVerifyEmail
         return $this->belongsTo(State::class);
     }
 
+    public function city(): BelongsTo
+    {
+        return $this->belongsTo(City::class);
+    }
+
     public function parent(): BelongsTo
     {
         return $this->belongsTo(self::class);
@@ -144,6 +152,16 @@ class Partner extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function bankAccounts(): HasMany
     {
         return $this->hasMany(BankAccount::class, 'partner_id');
+    }
+
+    public function customerCredit(): HasMany
+    {
+        return $this->hasMany(CustomerCredit::class, 'partner_id');
+    }
+
+    public function balanceRequests(): HasMany
+    {
+        return $this->hasMany(BalanceRequest::class, 'partner_id');
     }
 
     public function tags(): BelongsToMany

@@ -21,7 +21,6 @@ use Webkul\Software\Models\CustomerNotification;
 use Webkul\Software\Models\FcmToken;
 use Webkul\Software\Models\License;
 use Webkul\Software\Services\FirebaseNotificationService;
-use Webkul\Support\Models\City;
 use Webkul\Website\Http\Requests\CustomerFcmTokenRequest;
 use Webkul\Website\Http\Requests\CustomerLoginRequest;
 use Webkul\Website\Http\Requests\CustomerRegisterRequest;
@@ -40,7 +39,6 @@ class CustomerAuthController extends Controller
     public function register(CustomerRegisterRequest $request): JsonResponse
     {
         $data = $request->validated();
-        $cityName = City::query()->whereKey($data['city_id'])->value('name');
 
         $customer = Partner::create([
             'name'          => $data['name'],
@@ -48,7 +46,7 @@ class CustomerAuthController extends Controller
             'phone'         => $data['phone'],
             'country_id'    => $data['country_id'],
             'state_id'      => $data['state_id'],
-            'city'          => $cityName,
+            'city_id'       => $data['city_id'],
             'street1'       => $data['street1'],
             'password'      => $data['password'],
             'customer_rank' => 1,
