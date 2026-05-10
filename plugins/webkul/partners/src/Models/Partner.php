@@ -14,8 +14,6 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Webkul\Account\Models\BalanceRequest;
-use Webkul\Account\Models\CustomerCredit;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Partner\Database\Factories\PartnerFactory;
@@ -152,16 +150,6 @@ class Partner extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function bankAccounts(): HasMany
     {
         return $this->hasMany(BankAccount::class, 'partner_id');
-    }
-
-    public function customerCredit(): HasMany
-    {
-        return $this->hasMany(CustomerCredit::class, 'partner_id');
-    }
-
-    public function balanceRequests(): HasMany
-    {
-        return $this->hasMany(BalanceRequest::class, 'partner_id');
     }
 
     public function tags(): BelongsToMany

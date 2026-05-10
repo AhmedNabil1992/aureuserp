@@ -17,7 +17,7 @@ class ViewLicense extends ViewRecord
 
     public function getTitle(): string
     {
-        return __('تفاصيل الترخيص');
+        return __('software::filament/customer/license.pages.view.title');
     }
 
     public function infolist(Schema $schema): Schema
@@ -29,19 +29,19 @@ class ViewLicense extends ViewRecord
                         Section::make(__('معلومات الترخيص'))
                             ->schema([
                                 TextEntry::make('serial_number')
-                                    ->label(__('رقم السيريال'))
+                                    ->label(__('software::filament/customer/license.pages.view.fields.serial_number'))
                                     ->copyable(),
 
                                 TextEntry::make('program.name')
-                                    ->label(__('اسم البرنامج')),
+                                    ->label(__('software::filament/customer/license.pages.view.fields.program_name')),
 
                                 TextEntry::make('edition.name')
-                                    ->label(__('الإصدار')),
+                                    ->label(__('software::filament/customer/license.pages.view.fields.edition')),
 
                                 TextEntry::make('status')
-                                    ->label(__('الحالة'))
+                                    ->label(__('software::filament/customer/license.pages.view.fields.status'))
                                     ->badge()
-                                    ->formatStateUsing(fn ($state) => ucfirst($state))
+                                    ->formatStateUsing(fn ($state) => __('software::filament/customer/license.statuses.'.$state))
                                     ->color(fn ($state) => match ($state) {
                                         'active'    => 'success',
                                         'inactive'  => 'gray',
@@ -51,16 +51,18 @@ class ViewLicense extends ViewRecord
                                     }),
 
                                 TextEntry::make('start_date')
-                                    ->label(__('تاريخ البداية'))
+                                    ->label(__('software::filament/customer/license.pages.view.fields.start_date'))
                                     ->date('Y-m-d'),
 
                                 TextEntry::make('end_date')
-                                    ->label(__('تاريخ النهاية'))
+                                    ->label(__('software::filament/customer/license.pages.view.fields.end_date'))
                                     ->date('Y-m-d'),
 
                                 TextEntry::make('is_active')
-                                    ->label(__('مفعل'))
-                                    ->formatStateUsing(fn ($state) => $state ? __('نعم') : __('لا')),
+                                    ->label(__('software::filament/customer/license.pages.view.fields.is_active'))
+                                    ->formatStateUsing(fn ($state) => $state
+                                        ? __('software::filament/customer/license.common.yes')
+                                        : __('software::filament/customer/license.common.no')),
                             ])
                             ->columns(2),
                     ])
@@ -74,24 +76,26 @@ class ViewLicense extends ViewRecord
             ->model($this->record->subscriptions())
             ->columns([
                 TextColumn::make('feature.name')
-                    ->label(__('اسم الخدمة'))
+                    ->label(__('software::filament/customer/license.pages.view.subscriptions.columns.feature_name'))
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('start_date')
-                    ->label(__('من'))
+                    ->label(__('software::filament/customer/license.pages.view.subscriptions.columns.start_date'))
                     ->date('Y-m-d')
                     ->sortable(),
 
                 TextColumn::make('end_date')
-                    ->label(__('إلى'))
+                    ->label(__('software::filament/customer/license.pages.view.subscriptions.columns.end_date'))
                     ->date('Y-m-d')
                     ->sortable(),
 
                 TextColumn::make('is_active')
-                    ->label(__('الحالة'))
+                    ->label(__('software::filament/customer/license.pages.view.subscriptions.columns.status'))
                     ->badge()
-                    ->formatStateUsing(fn ($state) => $state ? __('نشط') : __('غير نشط'))
+                    ->formatStateUsing(fn ($state) => $state
+                        ? __('software::filament/customer/license.statuses.active')
+                        : __('software::filament/customer/license.statuses.inactive'))
                     ->color(fn ($state) => $state ? 'success' : 'gray'),
             ])
             ->paginated([10, 25])

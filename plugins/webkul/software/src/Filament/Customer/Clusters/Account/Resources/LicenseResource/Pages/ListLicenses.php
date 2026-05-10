@@ -11,6 +11,6 @@ class ListLicenses extends ListRecords
 
     public function getTitle(): string
     {
-        return __('تراخيص البرامج');
+        return __('software::filament/customer/license.pages.list.title');
     }
 }

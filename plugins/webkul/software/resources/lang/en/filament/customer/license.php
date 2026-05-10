@@ -1,72 +1,67 @@
 <?php
 
 return [
-    'title' => 'Software Licenses',
-    'heading' => 'My Licenses',
-    'single' => 'License',
-    'plural' => 'Licenses',
-
     'navigation' => [
-        'label' => 'Licenses',
+        'label' => 'Program List',
         'group' => 'Account',
+    ],
+
+    'models' => [
+        'singular' => 'Program License',
+        'plural'   => 'Program Licenses',
     ],
 
     'table' => [
         'columns' => [
-            'id' => 'License ID',
-            'product_name' => 'Product',
-            'license_key' => 'License Key',
-            'status' => 'Status',
-            'expiry_date' => 'Expiry Date',
-            'activation_count' => 'Activations',
-            'max_activations' => 'Max Activations',
+            'serial_number' => 'Serial Number',
+            'program_name'  => 'Program Name',
+            'edition'       => 'Edition',
+            'status'        => 'Status',
+            'start_date'    => 'Start Date',
+            'end_date'      => 'End Date',
+            'devices_count' => 'Devices Count',
         ],
         'filters' => [
-            'status' => 'Filter by Status',
-        ],
-        'actions' => [
-            'view' => 'View Details',
-            'download' => 'Download License',
-            'activate' => 'Activate',
+            'status'  => 'Status',
+            'program' => 'Program',
         ],
     ],
 
     'pages' => [
+        'list' => [
+            'title' => 'Program Licenses',
+        ],
         'view' => [
-            'title' => 'License Details',
-            'heading' => 'License Information',
-            'sections' => [
-                'info' => 'License Information',
-                'activations' => 'Activations',
-                'support' => 'Support',
-            ],
+            'title'  => 'License Details',
             'fields' => [
-                'license_key' => 'License Key',
-                'product' => 'Product',
-                'status' => 'Status',
-                'expiry_date' => 'Expiry Date',
-                'activation_count' => 'Active Activations',
-                'max_activations' => 'Maximum Activations',
-                'support_until' => 'Support Until',
-                'notes' => 'Notes',
+                'serial_number' => 'Serial Number',
+                'program_name'  => 'Program Name',
+                'edition'       => 'Edition',
+                'status'        => 'Status',
+                'start_date'    => 'Start Date',
+                'end_date'      => 'End Date',
+                'is_active'     => 'Active',
             ],
-            'actions' => [
-                'renew' => 'Renew License',
-                'upgrade' => 'Upgrade License',
-                'download' => 'Download',
+            'subscriptions' => [
+                'columns' => [
+                    'feature_name' => 'Service Name',
+                    'start_date'   => 'From',
+                    'end_date'     => 'To',
+                    'status'       => 'Status',
+                ],
             ],
         ],
     ],
 
     'statuses' => [
-        'active' => 'Active',
-        'inactive' => 'Inactive',
-        'expired' => 'Expired',
+        'active'    => 'Active',
+        'inactive'  => 'Inactive',
+        'expired'   => 'Expired',
         'suspended' => 'Suspended',
     ],
 
-    'empty_state' => [
-        'heading' => 'No Licenses',
-        'description' => 'You don\'t have any licenses yet. Contact support to purchase a license.',
+    'common' => [
+        'yes' => 'Yes',
+        'no'  => 'No',
     ],
 ];

@@ -27,17 +27,17 @@ class LicenseResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('قائمة البرامج');
+        return __('software::filament/customer/license.navigation.label');
     }
 
     public static function getModelLabel(): string
     {
-        return __('ترخيص برنامج');
+        return __('software::filament/customer/license.models.singular');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('تراخيص البرامج');
+        return __('software::filament/customer/license.models.plural');
     }
 
     public static function table(Table $table): Table
@@ -45,24 +45,24 @@ class LicenseResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('serial_number')
-                    ->label(__('رقم السيريال'))
+                    ->label(__('software::filament/customer/license.table.columns.serial_number'))
                     ->searchable()
                     ->sortable()
                     ->copyable(),
 
                 TextColumn::make('program.name')
-                    ->label(__('اسم البرنامج'))
+                    ->label(__('software::filament/customer/license.table.columns.program_name'))
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('edition.name')
-                    ->label(__('الإصدار'))
+                    ->label(__('software::filament/customer/license.table.columns.edition'))
                     ->sortable(),
 
                 TextColumn::make('status')
-                    ->label(__('الحالة'))
+                    ->label(__('software::filament/customer/license.table.columns.status'))
                     ->badge()
-                    ->formatStateUsing(fn ($state) => ucfirst($state))
+                    ->formatStateUsing(fn ($state) => __('software::filament/customer/license.statuses.'.$state))
                     ->color(fn ($state) => match ($state) {
                         'active'    => 'success',
                         'inactive'  => 'gray',
@@ -73,34 +73,34 @@ class LicenseResource extends Resource
                     ->sortable(),
 
                 TextColumn::make('start_date')
-                    ->label(__('تاريخ البداية'))
+                    ->label(__('software::filament/customer/license.table.columns.start_date'))
                     ->date('Y-m-d')
                     ->sortable(),
 
                 TextColumn::make('end_date')
-                    ->label(__('تاريخ النهاية'))
+                    ->label(__('software::filament/customer/license.table.columns.end_date'))
                     ->date('Y-m-d')
                     ->sortable()
                     ->color(fn ($record) => $record->end_date < now() ? 'danger' : 'success'),
 
                 TextColumn::make('devices_count')
-                    ->label(__('عدد الأجهزة'))
+                    ->label(__('software::filament/customer/license.table.columns.devices_count'))
                     ->counts('devices')
                     ->sortable(),
             ])
             ->filters([
                 SelectFilter::make('status')
-                    ->label(__('الحالة'))
+                    ->label(__('software::filament/customer/license.table.filters.status'))
                     ->options([
-                        'active'    => __('نشط'),
-                        'inactive'  => __('غير نشط'),
-                        'suspended' => __('معلق'),
-                        'expired'   => __('منتهي الصلاحية'),
+                        'active'    => __('software::filament/customer/license.statuses.active'),
+                        'inactive'  => __('software::filament/customer/license.statuses.inactive'),
+                        'suspended' => __('software::filament/customer/license.statuses.suspended'),
+                        'expired'   => __('software::filament/customer/license.statuses.expired'),
                     ])
                     ->multiple(),
 
                 SelectFilter::make('program_id')
-                    ->label(__('البرنامج'))
+                    ->label(__('software::filament/customer/license.table.filters.program'))
                     ->relationship('program', 'name')
                     ->searchable()
                     ->preload(),

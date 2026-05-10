@@ -1,72 +1,67 @@
 <?php
 
 return [
-    'title' => 'رخص البرمجيات',
-    'heading' => 'رخصي',
-    'single' => 'رخصة',
-    'plural' => 'رخص',
-
     'navigation' => [
-        'label' => 'الرخص',
+        'label' => 'قائمة البرامج',
         'group' => 'الحساب',
+    ],
+
+    'models' => [
+        'singular' => 'ترخيص برنامج',
+        'plural'   => 'تراخيص البرامج',
     ],
 
     'table' => [
         'columns' => [
-            'id' => 'رقم الرخصة',
-            'product_name' => 'المنتج',
-            'license_key' => 'مفتاح الرخصة',
-            'status' => 'الحالة',
-            'expiry_date' => 'تاريخ الانتهاء',
-            'activation_count' => 'التفعيلات',
-            'max_activations' => 'الحد الأقصى للتفعيلات',
+            'serial_number' => 'رقم السيريال',
+            'program_name'  => 'اسم البرنامج',
+            'edition'       => 'الإصدار',
+            'status'        => 'الحالة',
+            'start_date'    => 'تاريخ البداية',
+            'end_date'      => 'تاريخ النهاية',
+            'devices_count' => 'عدد الأجهزة',
         ],
         'filters' => [
-            'status' => 'تصفية حسب الحالة',
-        ],
-        'actions' => [
-            'view' => 'عرض التفاصيل',
-            'download' => 'تحميل الرخصة',
-            'activate' => 'تفعيل',
+            'status'  => 'الحالة',
+            'program' => 'البرنامج',
         ],
     ],
 
     'pages' => [
+        'list' => [
+            'title' => 'تراخيص البرامج',
+        ],
         'view' => [
-            'title' => 'تفاصيل الرخصة',
-            'heading' => 'معلومات الرخصة',
-            'sections' => [
-                'info' => 'معلومات الرخصة',
-                'activations' => 'التفعيلات',
-                'support' => 'الدعم الفني',
-            ],
+            'title'  => 'تفاصيل الرخصة',
             'fields' => [
-                'license_key' => 'مفتاح الرخصة',
-                'product' => 'المنتج',
-                'status' => 'الحالة',
-                'expiry_date' => 'تاريخ الانتهاء',
-                'activation_count' => 'التفعيلات النشطة',
-                'max_activations' => 'الحد الأقصى للتفعيلات',
-                'support_until' => 'الدعم حتى',
-                'notes' => 'الملاحظات',
+                'serial_number' => 'رقم السيريال',
+                'program_name'  => 'اسم البرنامج',
+                'edition'       => 'الإصدار',
+                'status'        => 'الحالة',
+                'start_date'    => 'تاريخ البداية',
+                'end_date'      => 'تاريخ النهاية',
+                'is_active'     => 'مفعل',
             ],
-            'actions' => [
-                'renew' => 'تجديد الرخصة',
-                'upgrade' => 'ترقية الرخصة',
-                'download' => 'تحميل',
+            'subscriptions' => [
+                'columns' => [
+                    'feature_name' => 'اسم الخدمة',
+                    'start_date'   => 'من',
+                    'end_date'     => 'إلى',
+                    'status'       => 'الحالة',
+                ],
             ],
         ],
     ],
 
     'statuses' => [
-        'active' => 'نشطة',
-        'inactive' => 'غير نشطة',
-        'expired' => 'منتهية',
+        'active'    => 'نشطة',
+        'inactive'  => 'غير نشطة',
+        'expired'   => 'منتهية',
         'suspended' => 'معلقة',
     ],
 
-    'empty_state' => [
-        'heading' => 'لا توجد رخص',
-        'description' => 'ليس لديك أي رخص حتى الآن. تواصل مع الدعم الفني لشراء رخصة.',
+    'common' => [
+        'yes' => 'نعم',
+        'no'  => 'لا',
     ],
 ];

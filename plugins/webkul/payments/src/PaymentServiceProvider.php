@@ -23,7 +23,6 @@ class PaymentServiceProvider extends PackageServiceProvider
                 '2025_02_12_103602_add_columns_to_account_payments_table',
                 '2025_08_08_105243_alter_payments_payment_methods_table',
                 '2026_02_25_105243_alter_payments_payment_transactions_table',
-                '2026_05_09_120000_add_payment_transaction_foreign_key_to_accounts_balance_requests_table',
             ])
             ->runsMigrations()
             ->hasDependencies([

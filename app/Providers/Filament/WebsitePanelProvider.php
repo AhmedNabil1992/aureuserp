@@ -33,7 +33,6 @@ class WebsitePanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Blue,
             ])
-            ->emailVerification()
             ->topNavigation()
             ->renderHook(
                 PanelsRenderHook::USER_MENU_BEFORE,

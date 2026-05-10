@@ -18,6 +18,8 @@ use Filament\Pages\Concerns\CanUseDatabaseTransactions;
 use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Auth\EloquentUserProvider;
 use Illuminate\Auth\SessionGuard;
@@ -27,7 +29,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
+use Webkul\Support\Models\City;
 use Webkul\Support\Models\Country;
+use Webkul\Support\Models\State;
 
 class Register extends Page
 {
@@ -127,6 +132,10 @@ class Register extends Page
             return;
         }
 
+        if (! Filament::hasEmailVerification()) {
+            return;
+        }
+
         if ($user->hasVerifiedEmail()) {
             return;
         }
@@ -137,8 +146,12 @@ class Register extends Page
             throw new Exception("Model [{$userClass}] does not have a [notify()] method.");
         }
 
-        $notification = app(VerifyEmail::class);
-        $notification->url = Filament::getVerifyEmailUrl($user);
+        try {
+            $notification = app(VerifyEmail::class);
+            $notification->url = Filament::getVerifyEmailUrl($user);
+        } catch (RouteNotFoundException) {
+            return;
+        }
 
         $user->notify($notification);
     }
@@ -224,8 +237,19 @@ class Register extends Page
     {
         return Select::make('country_id')
             ->label(__('website::filament/customer/pages/auth/register.form.country.label'))
-            ->relationship('country', 'name')
             ->searchable()
+            ->options(fn (): array => Country::query()->orderBy('name')->pluck('name', 'id')->all())
+            ->afterStateUpdated(function (Set $set): void {
+                $set('state_id', null);
+                $set('city_id', null);
+            })
+            ->getSearchResultsUsing(fn (string $search): array => Country::query()
+                ->where('name', 'like', "%{$search}%")
+                ->orderBy('name')
+                ->limit(50)
+                ->pluck('name', 'id')
+                ->all())
+            ->getOptionLabelUsing(fn ($value): ?string => Country::query()->find($value)?->name)
             ->required()
             ->live(debounce: 500);
     }
@@ -234,35 +258,46 @@ class Register extends Page
     {
         return Select::make('state_id')
             ->label(__('website::filament/customer/pages/auth/register.form.state.label'))
-            ->relationship(
-                'state',
-                'name',
-                fn ($query) => $query->when(
-                    $this->data['country_id'] ?? null,
-                    fn ($q) => $q->where('country_id', $this->data['country_id'])
-                )
-            )
             ->searchable()
+            ->options(fn (Get $get): array => State::query()
+                ->when($get('country_id'), fn ($query, $countryId) => $query->where('country_id', $countryId))
+                ->orderBy('name')
+                ->pluck('name', 'id')
+                ->all())
+            ->afterStateUpdated(fn (Set $set) => $set('city_id', null))
+            ->getSearchResultsUsing(fn (Get $get, string $search): array => State::query()
+                ->when($get('country_id'), fn ($query, $countryId) => $query->where('country_id', $countryId))
+                ->where('name', 'like', "%{$search}%")
+                ->orderBy('name')
+                ->limit(50)
+                ->pluck('name', 'id')
+                ->all())
+            ->getOptionLabelUsing(fn ($value): ?string => State::query()->find($value)?->name)
             ->required()
             ->live(debounce: 500)
-            ->disabled(fn () => ! ($this->data['country_id'] ?? null));
+            ->disabled(fn (Get $get): bool => ! filled($get('country_id')));
     }
 
     protected function getCityFormComponent(): Component
     {
         return Select::make('city_id')
             ->label(__('website::filament/customer/pages/auth/register.form.city.label'))
-            ->relationship(
-                'city',
-                'name',
-                fn ($query) => $query->when(
-                    $this->data['state_id'] ?? null,
-                    fn ($q) => $q->where('state_id', $this->data['state_id'])
-                )
-            )
-            ->required()
             ->searchable()
-            ->disabled(fn () => ! ($this->data['state_id'] ?? null));
+            ->options(fn (Get $get): array => City::query()
+                ->when($get('state_id'), fn ($query, $stateId) => $query->where('state_id', $stateId))
+                ->orderBy('name')
+                ->pluck('name', 'id')
+                ->all())
+            ->getSearchResultsUsing(fn (Get $get, string $search): array => City::query()
+                ->when($get('state_id'), fn ($query, $stateId) => $query->where('state_id', $stateId))
+                ->where('name', 'like', "%{$search}%")
+                ->orderBy('name')
+                ->limit(50)
+                ->pluck('name', 'id')
+                ->all())
+            ->getOptionLabelUsing(fn ($value): ?string => City::query()->find($value)?->name)
+            ->required()
+            ->disabled(fn (Get $get): bool => ! filled($get('state_id')));
     }
 
     protected function getStreetFormComponent(): Component
