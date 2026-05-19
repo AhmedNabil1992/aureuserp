@@ -234,7 +234,9 @@ class Payment extends Model
         parent::boot();
 
         static::creating(function ($payment) {
-            $payment->creator_id ??= Auth::id();
+            if (! $payment->creator_id && Auth::user() instanceof User) {
+                $payment->creator_id = Auth::id();
+            }
         });
 
         static::created(function ($move) {
@@ -293,7 +295,9 @@ class Payment extends Model
 
     public function computeCreator()
     {
-        $this->creator_id = Auth::id();
+        if (Auth::user() instanceof User) {
+            $this->creator_id = Auth::id();
+        }
     }
 
     public function computePartnerType()

@@ -43,6 +43,17 @@ class AccountPlugin implements Plugin
                         in: __DIR__.'/Filament/Widgets',
                         for: 'Webkul\\Account\\Filament\\Widgets'
                     );
+            })
+            ->when($panel->getId() == 'customer', function (Panel $panel): void {
+                $panel
+                    ->discoverResources(
+                        in: __DIR__.'/Filament/Customer/Clusters',
+                        for: 'Webkul\\Account\\Filament\\Customer\\Clusters'
+                    )
+                    ->discoverWidgets(
+                        in: __DIR__.'/Filament/Customer/Widgets',
+                        for: 'Webkul\\Account\\Filament\\Customer\\Widgets'
+                    );
             });
     }
 
