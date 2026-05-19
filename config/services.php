@@ -57,4 +57,8 @@ return [
         'download_base_url' => env('WIFI_VOUCHER_DOWNLOAD_BASE_URL', 'https://etech-valley.com/voucher'),
     ],
 
+    'legacy_api' => [
+        'key' => env('LEGACY_API_KEY'),
+    ],
+
 ];

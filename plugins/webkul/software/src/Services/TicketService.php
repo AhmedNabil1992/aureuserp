@@ -30,6 +30,10 @@ class TicketService
     {
         $data['ticket_number'] = $this->generateTicketNumber();
 
+        if (isset($data['content'])) {
+            $data['content'] = $this->sanitizeHtml($data['content']);
+        }
+
         $ticket = Ticket::create($data);
 
         $this->saveAttachments($ticket, $filePaths);
@@ -45,6 +49,10 @@ class TicketService
      */
     public function replyToTicket(Ticket $ticket, array $data, array $filePaths = []): TicketEvent
     {
+        if (isset($data['content'])) {
+            $data['content'] = $this->sanitizeHtml($data['content']);
+        }
+
         $event = $ticket->events()->create($data);
 
         $this->saveAttachments($event, $filePaths);
@@ -97,6 +105,26 @@ class TicketService
     public function storeUploadedFile(UploadedFile $file): string
     {
         return $file->store('software/tickets', 'public');
+    }
+
+    /**
+     * Strip dangerous HTML tags and event-handler attributes to prevent XSS.
+     */
+    private function sanitizeHtml(string $content): string
+    {
+        $allowedTags = '<p><br><b><i><strong><em><u><s><ul><ol><li><a>'
+            .'<h1><h2><h3><h4><h5><h6><blockquote><pre><code><span><div>'
+            .'<table><thead><tbody><tr><th><td><img>';
+
+        $content = strip_tags($content, $allowedTags);
+
+        // Remove on* event-handler attributes (e.g. onclick, onerror)
+        $content = preg_replace('/\s+on[a-z]+\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s>]*)/i', '', $content) ?? $content;
+
+        // Remove javascript: protocol in href/src/action attributes
+        $content = preg_replace('/\s+(href|src|action)\s*=\s*["\']?\s*javascript:[^"\'>\s]*/i', '', $content) ?? $content;
+
+        return $content;
     }
 
     /**

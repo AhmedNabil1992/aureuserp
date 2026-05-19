@@ -38,7 +38,7 @@ Route::name('customer.api.v1.software.')
         Route::post('notifications/read-all', [CustomerNotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
     });
 
-Route::prefix('api')->group(function (): void {
+Route::prefix('api')->middleware(['App\Http\Middleware\VerifyLegacyApiKey'])->group(function (): void {
     Route::post('/insert-licenses', [LicenseLegacyController::class, 'insertLicenses']);
     Route::post('/insert-keys', [LicenseLegacyController::class, 'insertKeys']);
     Route::post('/license-info', [LicenseLegacyController::class, 'licenseInfo']);

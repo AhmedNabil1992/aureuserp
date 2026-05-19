@@ -76,7 +76,7 @@ class LicenseLegacyController extends Controller
         } catch (Throwable $exception) {
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred: '.$exception->getMessage(),
+                'message' => app()->isProduction() ? 'An error occurred. Please try again later.' : 'An error occurred: '.$exception->getMessage(),
             ], 500);
         }
     }
@@ -112,7 +112,7 @@ class LicenseLegacyController extends Controller
         } catch (Throwable $exception) {
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred: '.$exception->getMessage(),
+                'message' => app()->isProduction() ? 'An error occurred. Please try again later.' : 'An error occurred: '.$exception->getMessage(),
             ], 500);
         }
     }
@@ -135,7 +135,7 @@ class LicenseLegacyController extends Controller
         } catch (\RuntimeException) {
             return response()->json('Invalid license key.', 400);
         } catch (Throwable $exception) {
-            return response()->json('Internal server error: '.$exception->getMessage(), 500);
+            return response()->json(app()->isProduction() ? 'Internal server error.' : 'Internal server error: '.$exception->getMessage(), 500);
         }
     }
 

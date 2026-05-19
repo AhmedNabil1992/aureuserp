@@ -11,8 +11,8 @@ Route::name('customer.api.v1.website.auth.')
         Route::get('locations/states', [CustomerLocationController::class, 'states'])->name('locations.states');
         Route::get('locations/cities', [CustomerLocationController::class, 'cities'])->name('locations.cities');
 
-        Route::post('register', [CustomerAuthController::class, 'register'])->name('register');
-        Route::post('login', [CustomerAuthController::class, 'login'])->name('login');
+        Route::post('register', [CustomerAuthController::class, 'register'])->name('register')->middleware('throttle:10,1');
+        Route::post('login', [CustomerAuthController::class, 'login'])->name('login')->middleware('throttle:10,1');
     });
 
 Route::name('customer.api.v1.website.auth.')

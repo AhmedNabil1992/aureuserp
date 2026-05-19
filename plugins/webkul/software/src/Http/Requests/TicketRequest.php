@@ -28,7 +28,7 @@ class TicketRequest extends FormRequest
             'priority'      => ['nullable', Rule::enum(TicketPriority::class)],
             'status'        => $isUpdate ? ['sometimes', 'required', Rule::enum(TicketStatus::class)] : ['nullable', Rule::enum(TicketStatus::class)],
             'attachments'   => ['nullable', 'array'],
-            'attachments.*' => ['file', 'max:10240'],
+            'attachments.*' => ['file', 'max:10240', 'mimes:jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx,txt,zip,rar'],
         ];
     }
 
