@@ -16,7 +16,6 @@ use Webkul\Inventory\Models\Location;
 use Webkul\Inventory\Models\Product as InventoryProduct;
 use Webkul\Partner\Models\Partner;
 use Webkul\PluginManager\Package;
-use Webkul\Product\Enums as ProductEnums;
 use Webkul\Product\Enums\ProductType;
 use Webkul\Product\Models\BillOfMaterial;
 use Webkul\Sale\Enums\AdvancedPayment;
@@ -610,7 +609,7 @@ class SaleManager
             if (
                 $line->state !== OrderState::SALE
                 || $line->order->locked
-                || $line->product?->type !== ProductEnums\ProductType::GOODS
+                || $line->product?->type !== ProductType::GOODS
             ) {
                 continue;
             }

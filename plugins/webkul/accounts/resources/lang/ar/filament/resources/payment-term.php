@@ -13,9 +13,7 @@ return [
                 'status'               => 'الحالة',
             ],
         ],
-=======
 
->>>>>>> upstream/master
         'tabs' => [
             'due-terms' => [
                 'title' => 'شروط الاستحقاق',
@@ -127,3 +125,23 @@ return [
                 'status'               => 'الحالة',
             ],
         ],
+
+        'tabs' => [
+            'due-terms' => [
+                'title' => 'شروط الاستحقاق',
+
+                'repeater' => [
+                    'due-terms' => [
+                        'entries' => [
+                            'value'                  => 'القيمة',
+                            'due'                    => 'المستحق',
+                            'delay-type'             => 'نوع التأخير',
+                            'days-on-the-next-month' => 'أيام في الشهر التالي',
+                            'days'                   => 'أيام',
+                        ],
+                    ],
+                ],
+            ],
+        ],
+    ],
+];
