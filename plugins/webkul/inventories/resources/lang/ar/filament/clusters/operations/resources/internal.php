@@ -9,6 +9,10 @@ return [
         'origin' => 'المصدر',
     ],
 
+    'global-search' => [
+        'origin' => 'المصدر',
+    ],
+
     'table' => [
         'actions' => [
             'delete' => [

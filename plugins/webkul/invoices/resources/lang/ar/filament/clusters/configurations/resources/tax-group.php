@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'model-label' => 'مجموعات الضرائب',
+    'model-label' => 'مجموعة ضريبية',
 
     'navigation' => [
         'title' => 'مجموعات الضرائب',

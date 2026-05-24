@@ -7,11 +7,14 @@ use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\Facades\Event;
 use Livewire\Livewire;
 use Webkul\Account\Events\MoveConfirmed;
+use Webkul\Inventory\Events\OperationBackOrdered;
+use Webkul\Inventory\Events\OperationDone;
 use Webkul\PluginManager\Console\Commands\InstallCommand;
 use Webkul\PluginManager\Console\Commands\UninstallCommand;
 use Webkul\PluginManager\Package;
 use Webkul\PluginManager\PackageServiceProvider;
 use Webkul\Purchase\Facades\PurchaseOrder as PurchaseOrderFacade;
+use Webkul\Purchase\Listeners\ComputePurchaseOrderListener;
 use Webkul\Purchase\Listeners\CreateReceiptOnBillConfirmed;
 use Webkul\Purchase\Livewire\Customer\ListProducts;
 use Webkul\Purchase\Livewire\OrderSummary;
@@ -44,6 +47,10 @@ class PurchaseServiceProvider extends PackageServiceProvider
                 '2025_03_17_115707_create_purchases_order_operations_table_from_purchases',
                 '2026_03_11_103115_alter_purchases_order_lines_table',
                 '2026_03_13_181105_alter_purchases_orders_table',
+                '2026_04_15_044345_add_destination_address_id_in_purchases_orders_table',
+                '2026_04_22_115707_create_purchases_order_line_moves_table_from_purchases',
+                '2026_04_23_043411_add_procurement_group_id_column_in_purchases_orders_table_from_purchases',
+                '2026_04_23_043412_add_procurement_group_id_column_in_purchases_order_lines_table_from_purchases',
             ])
             ->runsMigrations()
             ->hasSettings([
@@ -68,6 +75,8 @@ class PurchaseServiceProvider extends PackageServiceProvider
         Livewire::component('order-summary', OrderSummary::class);
 
         Livewire::component('list-products', ListProducts::class);
+
+        Event::listen([OperationDone::class, OperationBackOrdered::class], ComputePurchaseOrderListener::class);
 
         // \Webkul\Account\Models\Move::observe(\Webkul\Purchase\Observers\AccountMoveObserver::class);
 

@@ -10,6 +10,11 @@ return [
         'origin'  => 'المصدر',
     ],
 
+    'global-search' => [
+        'partner' => 'الشريك',
+        'origin'  => 'المصدر',
+    ],
+
     'form' => [
         'sections' => [
             'general' => [
@@ -31,16 +36,17 @@ return [
                 'title' => 'العمليات',
 
                 'columns' => [
-                    'product'        => 'المنتج',
-                    'final-location' => 'الموقع النهائي',
-                    'description'    => 'الوصف',
-                    'scheduled-at'   => 'موعد الجدولة',
-                    'deadline'       => 'الموعد النهائي',
-                    'packaging'      => 'التعبئة',
-                    'demand'         => 'الطلب',
-                    'quantity'       => 'الكمية',
-                    'unit'           => 'الوحدة',
-                    'picked'         => 'تم الانتقاء',
+                    'product'                    => 'المنتج',
+                    'final-location'             => 'الموقع النهائي',
+                    'description'                => 'الوصف',
+                    'scheduled-at'               => 'موعد الجدولة',
+                    'deadline'                   => 'الموعد النهائي',
+                    'packaging'                  => 'التعبئة',
+                    'demand'                     => 'الطلب',
+                    'quantity'                   => 'الكمية',
+                    'insufficient-stock-tooltip' => 'الكمية المتاحة غير كافية',
+                    'unit'                       => 'الوحدة',
+                    'picked'                     => 'تم الانتقاء',
                 ],
 
                 'fields' => [

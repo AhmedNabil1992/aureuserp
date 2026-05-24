@@ -29,6 +29,8 @@ class Partner extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
     use HasChatter, HasFactory, HasLogActivity, HasPermissionScope, Notifiable, SoftDeletes;
 
+    public const ACTIVITY_PLAN_PLUGIN = 'partners';
+
     protected $table = 'partners_partners';
 
     protected $fillable = [

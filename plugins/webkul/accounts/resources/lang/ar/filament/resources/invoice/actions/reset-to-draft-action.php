@@ -1,7 +1,8 @@
 <?php
 
 return [
-    'title'      => 'إعادة إلى مسودة',
+    'title' => 'إعادة إلى مسودة',
+
     'validation' => [
         'notification' => [
             'error' => [

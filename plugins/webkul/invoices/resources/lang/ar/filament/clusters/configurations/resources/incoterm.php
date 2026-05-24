@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'model-label' => 'شروط التسليم',
+    'model-label' => 'شرط التسليم',
 
     'navigation' => [
         'title' => 'شروط التسليم',

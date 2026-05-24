@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'model-label' => 'شروط الدفع',
+    'model-label' => 'شرط الدفع',
 
     'navigation' => [
         'title' => 'شروط الدفع',

@@ -11,6 +11,12 @@ return [
         'location'     => 'الموقع',
     ],
 
+    'global-search' => [
+        'name'         => 'الاسم',
+        'package-type' => 'نوع الطرد',
+        'location'     => 'الموقع',
+    ],
+
     'form' => [
         'sections' => [
             'general' => [

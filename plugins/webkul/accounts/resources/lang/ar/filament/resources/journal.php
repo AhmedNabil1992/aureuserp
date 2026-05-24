@@ -23,11 +23,13 @@ return [
                             'bank-account'                   => 'الحساب البنكي',
                         ],
                     ],
+
                     'bank-account-number' => [
                         'title' => 'رقم الحساب البنكي',
                     ],
                 ],
             ],
+
             'incoming-payments' => [
                 'title'            => 'المدفوعات الواردة',
                 'add-action-label' => 'إضافة سطر',
@@ -40,6 +42,7 @@ return [
                     'relation-notes-placeholder' => 'أدخل تفاصيل العلاقة',
                 ],
             ],
+
             'outgoing-payments' => [
                 'title'            => 'المدفوعات الصادرة',
                 'add-action-label' => 'إضافة سطر',
@@ -52,8 +55,10 @@ return [
                     'relation-notes-placeholder' => 'أدخل تفاصيل العلاقة',
                 ],
             ],
+
             'advanced-settings' => [
                 'title'  => 'إعدادات متقدمة',
+
                 'fields' => [
                     'allowed-accounts'       => 'الحسابات المسموح بها',
                     'control-access'         => 'التحكم في الوصول',
@@ -129,6 +134,7 @@ return [
                 'field-set' => [
                     'accounting-information' => [
                         'title'   => 'معلومات المحاسبة',
+
                         'entries' => [
                             'dedicated-credit-note-sequence' => 'تسلسل إشعار دائن مخصص',
                             'dedicated-payment-sequence'     => 'تسلسل دفع مخصص',
@@ -142,14 +148,17 @@ return [
                             'suspense-account'               => 'حساب المعلقات',
                         ],
                     ],
+
                     'bank-account-number' => [
-                        'title'   => 'رقم الحساب البنكي',
+                        'title' => 'رقم الحساب البنكي',
+
                         'entries' => [
                             'account-number' => 'رقم الحساب',
                         ],
                     ],
                 ],
             ],
+
             'incoming-payments' => [
                 'title' => 'المدفوعات الواردة',
 
@@ -161,6 +170,7 @@ return [
                     'relation-notes-placeholder' => 'أدخل تفاصيل العلاقة',
                 ],
             ],
+
             'outgoing-payments' => [
                 'title' => 'المدفوعات الصادرة',
 
@@ -172,8 +182,10 @@ return [
                     'relation-notes-placeholder' => 'أدخل تفاصيل العلاقة',
                 ],
             ],
+
             'advanced-settings' => [
-                'title'            => 'إعدادات متقدمة',
+                'title'   => 'إعدادات متقدمة',
+
                 'allowed-accounts' => [
                     'title' => 'الحسابات المسموح بها',
 

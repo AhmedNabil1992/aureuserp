@@ -17,12 +17,13 @@ use Filament\Support\Enums\Width;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Webkul\Manufacturing\ManufacturingPlugin;
 use Webkul\Support\Filament\Pages\Profile;
 use Webkul\Support\GlobalSearchProvider;
 
@@ -69,14 +70,17 @@ class AdminPanelProvider extends PanelProvider
                     ->label(__('admin.navigation.purchase'))
                     ->icon('icon-purchases'),
                 NavigationGroup::make()
+                    ->label(__('admin.navigation.manufacturing'))
+                    ->icon('icon-manufacturing'),
+                NavigationGroup::make()
+                    ->label(__('admin.navigation.inventory'))
+                    ->icon('icon-inventories'),
+                NavigationGroup::make()
                     ->label(__('admin.navigation.invoice'))
                     ->icon('icon-invoices'),
                 NavigationGroup::make()
                     ->label(__('admin.navigation.accounting'))
                     ->icon('icon-accounting'),
-                NavigationGroup::make()
-                    ->label(__('admin.navigation.inventory'))
-                    ->icon('icon-inventories'),
                 NavigationGroup::make()
                     ->label(__('admin.navigation.product'))
                     ->icon('icon-products'),
@@ -118,6 +122,7 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('icon-settings'),
             ])
             ->plugins([
+                ManufacturingPlugin::make(),
                 FilamentShieldPlugin::make()
                     ->gridColumns([
                         'default' => 1,
@@ -144,7 +149,7 @@ class AdminPanelProvider extends PanelProvider
                 StartSession::class,
                 AuthenticateSession::class,
                 ShareErrorsFromSession::class,
-                VerifyCsrfToken::class,
+                PreventRequestForgery::class,
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,

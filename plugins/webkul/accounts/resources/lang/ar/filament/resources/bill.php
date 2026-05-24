@@ -9,13 +9,9 @@ return [
     ],
 
     'global-search' => [
-        'number'           => 'الرقم',
-        'customer'         => 'العميل',
-        'invoice-date'     => 'تاريخ الفاتورة',
-        'invoice-due-date' => 'تاريخ استحقاق الفاتورة',
-        'vendor'           => 'المورد',
-        'date'             => 'التاريخ',
-        'due-date'         => 'تاريخ الاستحقاق',
+        'vendor'   => 'المورد',
+        'date'     => 'التاريخ',
+        'due-date' => 'تاريخ الاستحقاق',
     ],
 
     'form' => [
@@ -72,6 +68,7 @@ return [
 
             'other-information' => [
                 'title'    => 'معلومات أخرى',
+
                 'fieldset' => [
                     'accounting' => [
                         'title' => 'المحاسبة',
@@ -100,7 +97,6 @@ return [
 
     'table' => [
         'total'   => 'الإجمالي',
-
         'columns' => [
             'number'           => 'الرقم',
             'state'            => 'الحالة',
@@ -193,6 +189,7 @@ return [
         'section' => [
             'general' => [
                 'title'   => 'عام',
+
                 'entries' => [
                     'vendor-invoice'    => 'فاتورة المورد',
                     'vendor'            => 'المورد',
@@ -239,6 +236,7 @@ return [
                         'title' => 'المحاسبة',
 
                         'entries' => [
+                            'company'           => 'الشركة',
                             'incoterm'          => 'شروط التجارة',
                             'incoterm-location' => 'موقع شروط التجارة',
                             'payment-method'    => 'طريقة الدفع',

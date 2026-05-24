@@ -63,9 +63,11 @@ class SupportServiceProvider extends PackageServiceProvider
                 '2025_11_14_102615_alter_currency_rates_table',
                 '2026_03_18_000001_alter_unit_of_measures_factor_precision',
                 '2026_04_02_000001_create_calendars_table',
-                '2026_04_10_000002_create_cities_table',
-                '2026_04_10_000003_add_name_ar_to_states_table',
-                '2026_04_11_000004_add_name_ar_to_cities_table',
+                  '2026_04_10_000002_create_cities_table',
+                  '2026_04_10_000003_add_name_ar_to_states_table',
+                  '2026_04_11_000004_add_name_ar_to_cities_table',
+                  '2026_04_29_065935_add_resource_columns_in_calendar_leaves_table',
+                  '2026_05_01_065935_add_resource_columns_in_calendar_attendances_table',
             ])
             ->runsMigrations()
             ->hasSeeder('Webkul\\Support\\Database\\Seeders\\DatabaseSeeder');
@@ -90,8 +92,6 @@ class SupportServiceProvider extends PackageServiceProvider
 
         $this->registerFilamentDefaults();
 
-        $this->registerLanguageSwitch();
-
         $this->registerRtlSupport();
     }
 
@@ -100,6 +100,8 @@ class SupportServiceProvider extends PackageServiceProvider
         Panel::configureUsing(function (Panel $panel): void {
             $panel->plugin(SupportPlugin::make());
         });
+
+        $this->registerLanguageSwitch();
 
         $this->registerHooks();
 

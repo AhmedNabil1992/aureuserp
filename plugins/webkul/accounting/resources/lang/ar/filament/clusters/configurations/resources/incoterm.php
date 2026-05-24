@@ -3,7 +3,7 @@
 return [
     'model-label' => 'شروط التسليم',
 
-    'navigation'  => [
+    'navigation' => [
         'title' => 'شروط التسليم',
         'group' => 'الفوترة',
     ],

@@ -13,13 +13,13 @@ return [
             'general' => [
                 'title'  => 'عام',
                 'fields' => [
-                    'vendor-credit-note' => 'مذكرة ائتمان المورد',
+                    'vendor-credit-note' => 'إشعار دائن المورد',
                     'vendor'             => 'المورد',
                     'bill-date'          => 'تاريخ الفاتورة',
                     'bill-reference'     => 'مرجع الفاتورة',
-                    'accounting-date'    => 'تاريخ المحاسبة',
+                    'accounting-date'    => 'التاريخ المحاسبي',
                     'payment-reference'  => 'مرجع الدفع',
-                    'recipient-bank'     => 'البنك المستلم',
+                    'recipient-bank'     => 'بنك المستفيد',
                     'due-date'           => 'تاريخ الاستحقاق',
                     'payment-term'       => 'شروط الدفع',
                 ],
@@ -61,7 +61,7 @@ return [
                     ],
 
                     'secured' => [
-                        'title'  => 'مؤمن',
+                        'title'  => 'مؤمّن',
                         'fields' => [
                             'payment-method' => 'طريقة الدفع',
                             'auto-post'      => 'ترحيل تلقائي',
@@ -138,7 +138,7 @@ return [
                     ],
 
                     'secured' => [
-                        'title'   => 'مؤمن',
+                        'title'   => 'مؤمّن',
                         'entries' => [
                             'payment-method' => 'طريقة الدفع',
                             'auto-post'      => 'ترحيل تلقائي',

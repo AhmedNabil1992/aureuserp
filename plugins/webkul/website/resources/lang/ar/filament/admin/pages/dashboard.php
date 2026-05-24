@@ -9,5 +9,5 @@ return [
 
     'author' => 'الكاتب',
 
-    'all-author' => 'كل الكُتّاب',
+    'all-author' => 'جميع الكتّاب',
 ];

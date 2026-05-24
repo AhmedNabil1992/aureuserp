@@ -3,7 +3,7 @@
 return [
     'title' => 'إدارة المنتجات',
 
-    'form'  => [
+    'form' => [
         'enable-variants'               => 'المتغيرات',
         'enable-variants-helper-text'   => 'تعيين خصائص المنتج (مثل اللون والحجم) لإدارة المتغيرات',
         'enable-uom'                    => 'وحدة القياس',

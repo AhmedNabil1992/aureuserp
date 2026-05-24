@@ -52,6 +52,7 @@ use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Webkul\Chatter\Filament\Actions\ActivityTableAction;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper as FormProgressStepper;
 use Webkul\Field\Filament\Infolists\Components\ProgressStepper as InfolistProgressStepper;
 use Webkul\Field\Filament\Traits\HasCustomFields;
@@ -599,6 +600,8 @@ class TaskResource extends Resource
             )
             ->filtersFormColumns(2)
             ->recordActions([
+                ActivityTableAction::make()
+                    ->hidden(fn ($record) => $record->trashed()),
                 ActionGroup::make([
                     ViewAction::make()
                         ->hidden(fn ($record) => $record->trashed()),

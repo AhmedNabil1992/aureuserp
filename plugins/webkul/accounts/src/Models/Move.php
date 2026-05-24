@@ -35,6 +35,8 @@ class Move extends Model implements Sortable
 {
     use HasChatter, HasCustomFields, HasFactory, HasLogActivity, HasPermissionScope, SortableTrait;
 
+    public const ACTIVITY_PLAN_PLUGIN = 'accounts';
+
     protected $table = 'accounts_account_moves';
 
     public function getModelTitle(): string

@@ -9,19 +9,16 @@ return [
     ],
 
     'global-search' => [
-        'number'           => 'الرقم',
-        'customer'         => 'العميل',
-        'invoice-date'     => 'تاريخ الفاتورة',
-        'invoice-due-date' => 'تاريخ استحقاق الفاتورة',
-        'customer'         => 'العميل',
-        'date'             => 'التاريخ',
-        'due-date'         => 'تاريخ الاستحقاق',
+        'customer' => 'العميل',
+        'date'     => 'التاريخ',
+        'due-date' => 'تاريخ الاستحقاق',
     ],
 
     'form' => [
         'section' => [
             'general' => [
                 'title'  => 'عام',
+
                 'fields' => [
                     'customer-invoice' => 'فاتورة العميل',
                     'customer'         => 'العميل',
@@ -68,9 +65,11 @@ return [
 
             'other-information' => [
                 'title'    => 'معلومات أخرى',
+
                 'fieldset' => [
                     'invoice' => [
                         'title'  => 'الفاتورة',
+
                         'fields' => [
                             'customer-reference' => 'مرجع العميل',
                             'sales-person'       => 'مندوب المبيعات',
@@ -81,7 +80,8 @@ return [
                     ],
 
                     'accounting' => [
-                        'title'  => 'المحاسبة',
+                        'title' => 'المحاسبة',
+
                         'fields' => [
                             'company'                 => 'الشركة',
                             'incoterm'                => 'شروط التجارة',
@@ -237,6 +237,7 @@ return [
                 'fieldset' => [
                     'invoice' => [
                         'title'   => 'الفاتورة',
+
                         'entries' => [
                             'customer-reference' => 'مرجع العميل',
                             'sales-person'       => 'مندوب المبيعات',
@@ -250,6 +251,7 @@ return [
                         'title' => 'المحاسبة',
 
                         'entries' => [
+                            'company'           => 'الشركة',
                             'incoterm'          => 'شروط التجارة',
                             'incoterm-location' => 'موقع شروط التجارة',
                             'payment-method'    => 'طريقة الدفع',
