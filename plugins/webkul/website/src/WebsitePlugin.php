@@ -81,6 +81,13 @@ class WebsitePlugin implements Plugin
                         ])->render(),
                     );
             })
+            ->when($panel->getId() == 'customer', function (Panel $panel) {
+                $panel
+                    ->discoverClusters(
+                        in: __DIR__.'/Filament/Customer/Clusters',
+                        for: 'Webkul\\Website\\Filament\\Customer\\Clusters'
+                    );
+            })
             ->when($panel->getId() == 'admin', function (Panel $panel) {
                 $panel
                     ->discoverResources(

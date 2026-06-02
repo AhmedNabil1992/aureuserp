@@ -3,6 +3,7 @@
 use App\Providers\AppServiceProvider;
 use App\Providers\Filament\AdminPanelProvider;
 use App\Providers\Filament\CustomerPanelProvider;
+use App\Providers\Filament\WebsitePanelProvider;
 use Webkul\Account\AccountServiceProvider;
 use Webkul\Accounting\AccountingServiceProvider;
 use Webkul\Analytic\AnalyticServiceProvider;
@@ -24,11 +25,14 @@ use Webkul\Purchase\PurchaseServiceProvider;
 use Webkul\Recruitment\RecruitmentServiceProvider;
 use Webkul\Sale\SaleServiceProvider;
 use Webkul\Security\SecurityServiceProvider;
+use Webkul\Software\SoftwareServiceProvider;
 use Webkul\Support\SupportServiceProvider;
 use Webkul\TableViews\TableViewsServiceProvider;
 use Webkul\TimeOff\TimeOffServiceProvider;
 use Webkul\Timesheet\TimesheetServiceProvider;
 use Webkul\Website\WebsiteServiceProvider;
+use Webkul\Wifi\WifiServiceProvider;
+use Webkul\Marketing\MarketingServiceProvider;
 
 // use App\Providers\AppServiceProvider;
 // use App\Providers\Filament\AdminPanelProvider;
@@ -64,6 +68,7 @@ return [
     AppServiceProvider::class,
     AdminPanelProvider::class,
     CustomerPanelProvider::class,
+    WebsitePanelProvider::class,
     AccountingServiceProvider::class,
     AccountServiceProvider::class,
     AnalyticServiceProvider::class,
@@ -83,11 +88,14 @@ return [
     RecruitmentServiceProvider::class,
     SaleServiceProvider::class,
     SecurityServiceProvider::class,
+    SoftwareServiceProvider::class,
     SupportServiceProvider::class,
     TableViewsServiceProvider::class,
     TimeOffServiceProvider::class,
     FullCalendarServiceProvider::class,
     TimesheetServiceProvider::class,
+    MarketingServiceProvider::class,
+    WifiServiceProvider::class,
     WebsiteServiceProvider::class,
     PluginManagerServiceProvider::class,
 ];

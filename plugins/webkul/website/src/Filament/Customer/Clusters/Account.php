@@ -23,6 +23,6 @@ class Account extends Cluster
 
     public static function shouldRegisterNavigation(): bool
     {
-        return Filament::auth()->check();
+        return false;
     }
 }
