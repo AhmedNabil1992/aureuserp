@@ -184,11 +184,28 @@ class AccountManager
                 ->merge($outstandingLines->where('account_id', $accountId))
                 ->values();
 
+            $paymentIds = $outstandingLines
+                ->where('account_id', $accountId)
+                ->map(fn (MoveLine $line) => $line->move->origin_payment_id ?: $line->payment_id)
+                ->filter()
+                ->unique()
+                ->values();
+
             if ($linesToReconcile->count() < 2) {
                 continue;
             }
 
             $this->reconcile($linesToReconcile);
+
+            if ($paymentIds->isNotEmpty()) {
+                $record->matchedPayments()->syncWithoutDetaching($paymentIds->all());
+
+                Payment::whereIn('id', $paymentIds->all())
+                    ->get()
+                    ->each(function (Payment $payment): void {
+                        $payment->save();
+                    });
+            }
         }
     }
 
@@ -1203,6 +1220,26 @@ class AccountManager
         $this->isReconciliationAllowedForLines($lines);
 
         $this->reconcilePlan([$lines]);
+
+        $invoiceMoveIds = $lines
+            ->pluck('move')
+            ->filter(fn (AccountMove $move) => $move->isInvoice(true))
+            ->pluck('id')
+            ->unique();
+
+        $paymentIds = $lines
+            ->map(fn (MoveLine $line) => $line->move->origin_payment_id ?: $line->payment_id)
+            ->filter()
+            ->unique();
+
+        if ($invoiceMoveIds->isNotEmpty() && $paymentIds->isNotEmpty()) {
+            AccountMove::query()
+                ->whereIn('id', $invoiceMoveIds->all())
+                ->get()
+                ->each(function (AccountMove $invoiceMove) use ($paymentIds): void {
+                    $invoiceMove->matchedPayments()->syncWithoutDetaching($paymentIds->all());
+                });
+        }
 
         Payment::whereIn('move_id', $lines->pluck('move_id')->unique())
             ->get()

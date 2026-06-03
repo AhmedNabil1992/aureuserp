@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\AccountType;
 use Webkul\Account\Enums\JournalType;
 use Webkul\Account\Enums\MoveType;
+use Webkul\Account\Enums\PaymentState;
 use Webkul\Account\Enums\PaymentStatus;
 use Webkul\Account\Enums\PaymentType;
 use Webkul\Account\Facades\Account as AccountFacade;
@@ -248,8 +249,6 @@ class Payment extends Model
         });
 
         static::saving(function ($payment) {
-            $payment->computeState();
-
             $payment->computePartnerType();
 
             $payment->computeCreator();
@@ -263,6 +262,9 @@ class Payment extends Model
             $payment->computeDestinationAccountId();
 
             $payment->computeAmountCompanyCurrencySigned();
+
+            // State depends on outstanding account and move line reconciliation state.
+            $payment->computeState();
 
             $payment->computeReconciliationStatus();
         });
@@ -347,7 +349,15 @@ class Payment extends Model
         if (
             $this->state === PaymentStatus::IN_PROCESS
             && $this->invoices()->exists()
-            && $this->invoices->every(fn ($invoice) => $invoice->payment_state === PaymentStatus::PAID)
+            && $this->invoices->every(function ($invoice): bool {
+                $invoicePaymentState = $invoice->payment_state;
+
+                if ($invoicePaymentState instanceof PaymentState) {
+                    return $invoicePaymentState === PaymentState::PAID;
+                }
+
+                return (string) $invoicePaymentState === PaymentState::PAID->value;
+            })
         ) {
             $this->state = PaymentStatus::PAID;
         }

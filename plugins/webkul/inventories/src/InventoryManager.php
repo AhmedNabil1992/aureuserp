@@ -38,6 +38,42 @@ use Webkul\Purchase\Models\PurchaseOrder;
 
 class InventoryManager
 {
+    /**
+     * Backward-compatible alias for transfer computation flow used by older callers.
+     */
+    public function computeTransfer(Operation $record): Operation
+    {
+        if ($record->state === OperationState::DRAFT) {
+            $record = $this->confirmTransfer($record);
+        }
+
+        if (in_array($record->state, [OperationState::WAITING, OperationState::CONFIRMED], true)) {
+            $record = $this->assignTransfer($record);
+        }
+
+        return $record->refresh();
+    }
+
+    /**
+     * Backward-compatible alias for transfer validation used by older callers.
+     */
+    public function validateTransfer(Operation $record): Operation
+    {
+        if ($record->state === OperationState::DONE || $record->state === OperationState::CANCELED) {
+            return $record->refresh();
+        }
+
+        if ($record->state === OperationState::DRAFT) {
+            $record = $this->confirmTransfer($record);
+        }
+
+        if (in_array($record->state, [OperationState::WAITING, OperationState::CONFIRMED], true)) {
+            $record = $this->assignTransfer($record);
+        }
+
+        return $this->doneTransfer($record);
+    }
+
     public function confirmTransfer(Operation $record, $merge = false): Operation
     {
         $this->confirmMoves($record->moves->filter(fn (Move $move) => $move->state === MoveState::DRAFT));

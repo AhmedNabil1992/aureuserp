@@ -13,7 +13,9 @@ use Webkul\Account\Models\Move as AccountMove;
 use Webkul\Inventory\Enums as InventoryEnums;
 use Webkul\Inventory\Facades\Inventory as InventoryFacade;
 use Webkul\Inventory\Models\Location;
+use Webkul\Inventory\Models\Operation as InventoryOperation;
 use Webkul\Inventory\Models\Product as InventoryProduct;
+use Webkul\Inventory\Models\Warehouse;
 use Webkul\Partner\Models\Partner;
 use Webkul\PluginManager\Package;
 use Webkul\Product\Enums\ProductType;
@@ -65,11 +67,11 @@ class SaleManager
     public function confirmSaleOrder(Order $record): Order
     {
         return DB::transaction(function () use ($record): Order {
-            $record = $this->computeWarehouseId($record->refresh());
+            $record = $record->refresh();
+            $record->computeWarehouseId();
             $record->save();
             $record->refresh();
 
-            $this->applyPullRules($record);
             $this->consumeBillOfMaterials($record);
 
             $record->update([
