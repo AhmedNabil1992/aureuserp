@@ -146,6 +146,17 @@ trait HasChatter
         return $message;
     }
 
+    public function addActivity(array $data): Message
+    {
+        $user = Filament::auth()->user() ?? Auth::user();
+
+        $data['assigned_to'] ??= $user?->id;
+
+        return $this->addMessage(array_merge($data, [
+            'type' => 'activity',
+        ]));
+    }
+
     protected function resolveChatterMessageOwner(): Model
     {
         if (method_exists($this, 'chatterMessageOwner')) {

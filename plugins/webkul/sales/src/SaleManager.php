@@ -968,6 +968,7 @@ class SaleManager
             return;
         }
 
-        $record->operations->each(fn ($operation) => InventoryFacade::cancelOperation($operation));
+        // $record->operations->each(fn ($operation) => InventoryFacade::cancelOperation($operation));
+        $record->operations->each(fn ($operation) => InventoryFacade::cancelTransfer($operation));
     }
 }

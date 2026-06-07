@@ -1,20 +1,20 @@
-import { Calendar } from '@fullcalendar/core'
-import interactionPlugin from '@fullcalendar/interaction'
-import dayGridPlugin from '@fullcalendar/daygrid'
-import timeGridPlugin from '@fullcalendar/timegrid'
-import listPlugin from '@fullcalendar/list'
-import multiMonthPlugin from '@fullcalendar/multimonth'
-import scrollGridPlugin from '@fullcalendar/scrollgrid'
-import timelinePlugin from '@fullcalendar/timeline'
-import adaptivePlugin from '@fullcalendar/adaptive'
-import resourcePlugin from '@fullcalendar/resource'
-import resourceDayGridPlugin from '@fullcalendar/resource-daygrid'
-import resourceTimelinePlugin from '@fullcalendar/resource-timeline'
-import resourceTimeGridPlugin from '@fullcalendar/resource-timegrid'
-import rrulePlugin from '@fullcalendar/rrule'
-import momentPlugin from '@fullcalendar/moment'
-import momentTimezonePlugin from '@fullcalendar/moment-timezone'
-import locales from '@fullcalendar/core/locales-all'
+import { Calendar } from "@fullcalendar/core";
+import interactionPlugin from "@fullcalendar/interaction";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import listPlugin from "@fullcalendar/list";
+import multiMonthPlugin from "@fullcalendar/multimonth";
+import scrollGridPlugin from "@fullcalendar/scrollgrid";
+import timelinePlugin from "@fullcalendar/timeline";
+import adaptivePlugin from "@fullcalendar/adaptive";
+import resourcePlugin from "@fullcalendar/resource";
+import resourceDayGridPlugin from "@fullcalendar/resource-daygrid";
+import resourceTimelinePlugin from "@fullcalendar/resource-timeline";
+import resourceTimeGridPlugin from "@fullcalendar/resource-timegrid";
+import rrulePlugin from "@fullcalendar/rrule";
+import momentPlugin from "@fullcalendar/moment";
+import momentTimezonePlugin from "@fullcalendar/moment-timezone";
+import locales from "@fullcalendar/core/locales-all";
 
 export default function fullCalendar({
     locale,
@@ -30,93 +30,201 @@ export default function fullCalendar({
 }) {
     return {
         init() {
-            const calendar = new Calendar(this.$el, {
+            const isSelectable = Boolean(selectable || config?.selectable);
+
+            const calendarOptions = {
                 headerToolbar: {
-                    'left': 'prev,next today',
-                    'center': 'title',
-                    'right': 'dayGridMonth,dayGridWeek,dayGridDay',
+                    left: "prev,next today",
+                    center: "title",
+                    right: "dayGridMonth,dayGridWeek,dayGridDay",
                 },
-                plugins: plugins.map(plugin => availablePlugins[plugin]),
+                plugins: plugins.map((plugin) => availablePlugins[plugin]),
                 locale,
                 timeZone,
                 editable,
                 selectable,
                 ...config,
                 locales,
-                eventClassNames,
-                eventContent,
-                eventDidMount,
-                eventWillUnmount,
                 events: (info, successCallback, failureCallback) => {
-                    this.$wire.fetchEvents({ start: info.startStr, end: info.endStr, timezone: info.timeZone })
+                    this.$wire
+                        .fetchEvents({
+                            start: info.startStr,
+                            end: info.endStr,
+                            timezone: info.timeZone,
+                        })
                         .then(successCallback)
-                        .catch(failureCallback)
+                        .catch(failureCallback);
                 },
                 eventClick: ({ event, jsEvent }) => {
-                    jsEvent.preventDefault()
+                    jsEvent.preventDefault();
 
                     if (event.url) {
-                        const isNotPlainLeftClick = e => (e.which > 1) || (e.altKey) || (e.ctrlKey) || (e.metaKey) || (e.shiftKey)
-                        return window.open(event.url, (event.extendedProps.shouldOpenUrlInNewTab || isNotPlainLeftClick(jsEvent)) ? '_blank' : '_self')
+                        const isNotPlainLeftClick = (e) =>
+                            e.which > 1 ||
+                            e.altKey ||
+                            e.ctrlKey ||
+                            e.metaKey ||
+                            e.shiftKey;
+                        return window.open(
+                            event.url,
+                            event.extendedProps.shouldOpenUrlInNewTab ||
+                                isNotPlainLeftClick(jsEvent)
+                                ? "_blank"
+                                : "_self",
+                        );
                     }
 
-                    this.$wire.onEventClick(event)
+                    this.$wire.onEventClick(event);
                 },
-                eventDrop: async ({ event, oldEvent, relatedEvents, delta, oldResource, newResource, revert }) => {
-                    const shouldRevert = await this.$wire.onEventDrop(event, oldEvent, relatedEvents, delta, oldResource, newResource)
+                eventDrop: async ({
+                    event,
+                    oldEvent,
+                    relatedEvents,
+                    delta,
+                    oldResource,
+                    newResource,
+                    revert,
+                }) => {
+                    const shouldRevert = await this.$wire.onEventDrop(
+                        event,
+                        oldEvent,
+                        relatedEvents,
+                        delta,
+                        oldResource,
+                        newResource,
+                    );
 
-                    if (typeof shouldRevert === 'boolean' && shouldRevert) {
-                        revert()
+                    if (typeof shouldRevert === "boolean" && shouldRevert) {
+                        revert();
                     }
                 },
-                eventResize: async ({ event, oldEvent, relatedEvents, startDelta, endDelta, revert }) => {
-                    const shouldRevert = await this.$wire.onEventResize(event, oldEvent, relatedEvents, startDelta, endDelta)
+                eventResize: async ({
+                    event,
+                    oldEvent,
+                    relatedEvents,
+                    startDelta,
+                    endDelta,
+                    revert,
+                }) => {
+                    const shouldRevert = await this.$wire.onEventResize(
+                        event,
+                        oldEvent,
+                        relatedEvents,
+                        startDelta,
+                        endDelta,
+                    );
 
-                    if (typeof shouldRevert === 'boolean' && shouldRevert) {
-                        revert()
+                    if (typeof shouldRevert === "boolean" && shouldRevert) {
+                        revert();
                     }
                 },
                 dateClick: ({ dateStr, allDay, view, resource }) => {
-                    if (! selectable) {
+                    if (!isSelectable) {
                         return;
                     }
 
-                    this.$wire.onDateSelect(dateStr, null, allDay, view, resource)
+                    const safeView = view
+                        ? {
+                              type: view.type,
+                          }
+                        : null;
+
+                    const safeResource = resource
+                        ? {
+                              id: resource.id,
+                              title: resource.title,
+                          }
+                        : null;
+
+                    this.$wire.onDateSelect(
+                        dateStr,
+                        null,
+                        allDay,
+                        safeView,
+                        safeResource,
+                    );
                 },
                 select: ({ startStr, endStr, allDay, view, resource }) => {
-                    if (! selectable) {
+                    if (!isSelectable) {
                         return;
                     }
 
-                    this.$wire.onDateSelect(startStr, endStr, allDay, view, resource)
+                    const safeView = view
+                        ? {
+                              type: view.type,
+                          }
+                        : null;
+
+                    const safeResource = resource
+                        ? {
+                              id: resource.id,
+                              title: resource.title,
+                          }
+                        : null;
+
+                    this.$wire.onDateSelect(
+                        startStr,
+                        endStr,
+                        allDay,
+                        safeView,
+                        safeResource,
+                    );
                 },
-            })
+            };
 
-            calendar.render()
+            if (eventClassNames !== null && eventClassNames !== undefined) {
+                calendarOptions.eventClassNames = eventClassNames;
+            }
 
-            window.addEventListener('full-calendar--refresh', () => calendar.refetchEvents())
-            window.addEventListener('full-calendar--prev', () => calendar.prev())
-            window.addEventListener('full-calendar--next', () => calendar.next())
-            window.addEventListener('full-calendar--today', () => calendar.today())
-            window.addEventListener('full-calendar--goto', (event) => calendar.gotoDate(event.detail.date))
+            if (typeof eventContent === "function") {
+                calendarOptions.eventContent = eventContent;
+            }
+
+            if (typeof eventDidMount === "function") {
+                calendarOptions.eventDidMount = eventDidMount;
+            }
+
+            if (typeof eventWillUnmount === "function") {
+                calendarOptions.eventWillUnmount = eventWillUnmount;
+            }
+
+            const calendar = new Calendar(this.$el, calendarOptions);
+
+            calendar.render();
+
+            window.addEventListener("full-calendar--refresh", () =>
+                calendar.refetchEvents(),
+            );
+            window.addEventListener("full-calendar--prev", () =>
+                calendar.prev(),
+            );
+            window.addEventListener("full-calendar--next", () =>
+                calendar.next(),
+            );
+            window.addEventListener("full-calendar--today", () =>
+                calendar.today(),
+            );
+            window.addEventListener("full-calendar--goto", (event) =>
+                calendar.gotoDate(event.detail.date),
+            );
         },
-    }
+    };
 }
 
 const availablePlugins = {
-    'interaction': interactionPlugin,
-    'dayGrid': dayGridPlugin,
-    'timeGrid': timeGridPlugin,
-    'list': listPlugin,
-    'multiMonth': multiMonthPlugin,
-    'scrollGrid': scrollGridPlugin,
-    'timeline': timelinePlugin,
-    'adaptive': adaptivePlugin,
-    'resource': resourcePlugin,
-    'resourceDayGrid': resourceDayGridPlugin,
-    'resourceTimeline': resourceTimelinePlugin,
-    'resourceTimeGrid': resourceTimeGridPlugin,
-    'rrule': rrulePlugin,
-    'moment': momentPlugin,
-    'momentTimezone': momentTimezonePlugin,
-}
+    interaction: interactionPlugin,
+    dayGrid: dayGridPlugin,
+    timeGrid: timeGridPlugin,
+    list: listPlugin,
+    multiMonth: multiMonthPlugin,
+    scrollGrid: scrollGridPlugin,
+    timeline: timelinePlugin,
+    adaptive: adaptivePlugin,
+    resource: resourcePlugin,
+    resourceDayGrid: resourceDayGridPlugin,
+    resourceTimeline: resourceTimelinePlugin,
+    resourceTimeGrid: resourceTimeGridPlugin,
+    rrule: rrulePlugin,
+    moment: momentPlugin,
+    momentTimezone: momentTimezonePlugin,
+};

@@ -15,7 +15,9 @@ use Webkul\Field\FieldServiceProvider;
 use Webkul\FullCalendar\FullCalendarServiceProvider;
 use Webkul\Inventory\InventoryServiceProvider;
 use Webkul\Invoice\InvoiceServiceProvider;
+use Webkul\Maintenance\MaintenanceServiceProvider;
 use Webkul\Manufacturing\ManufacturingServiceProvider;
+use Webkul\Marketing\MarketingServiceProvider;
 use Webkul\Partner\PartnerServiceProvider;
 use Webkul\Payment\PaymentServiceProvider;
 use Webkul\PluginManager\PluginManagerServiceProvider;
@@ -32,7 +34,6 @@ use Webkul\TimeOff\TimeOffServiceProvider;
 use Webkul\Timesheet\TimesheetServiceProvider;
 use Webkul\Website\WebsiteServiceProvider;
 use Webkul\Wifi\WifiServiceProvider;
-use Webkul\Marketing\MarketingServiceProvider;
 
 // use App\Providers\AppServiceProvider;
 // use App\Providers\Filament\AdminPanelProvider;
@@ -81,6 +82,7 @@ return [
     InvoiceServiceProvider::class,
     PartnerServiceProvider::class,
     ManufacturingServiceProvider::class,
+    MaintenanceServiceProvider::class,
     PaymentServiceProvider::class,
     ProductServiceProvider::class,
     ProjectServiceProvider::class,
