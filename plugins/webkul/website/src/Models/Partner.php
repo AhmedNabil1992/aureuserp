@@ -30,6 +30,7 @@ class Partner extends BasePartner
         $this->mergeFillable([
             'password',
             'is_active',
+            'customer_rank',
         ]);
 
         $this->mergeCasts([

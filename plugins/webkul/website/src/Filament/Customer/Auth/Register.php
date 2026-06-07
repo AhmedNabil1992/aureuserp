@@ -362,6 +362,8 @@ class Register extends Page
 
     protected function mutateFormDataBeforeRegister(array $data): array
     {
+        $data['customer_rank'] = 1;
+
         return $data;
     }
 
