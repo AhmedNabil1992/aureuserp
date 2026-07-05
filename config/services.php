@@ -52,7 +52,7 @@ return [
 
     'wifi_voucher' => [
         'endpoint'          => env('WIFI_VOUCHER_API_ENDPOINT', 'https://cloud.etech-valley.com/cake4/rd_cake/vouchers/add.json'),
-        'token'             => env('WIFI_VOUCHER_API_TOKEN'),
+        'token'             => env('WIFI_VOUCHER_API_TOKEN', '27cab0d2-77e3-4d78-aaab-b6356c1a4935'),
         'language'          => env('WIFI_VOUCHER_API_LANGUAGE', '4_4'),
         'download_base_url' => env('WIFI_VOUCHER_DOWNLOAD_BASE_URL', 'https://etech-valley.com/voucher'),
     ],
