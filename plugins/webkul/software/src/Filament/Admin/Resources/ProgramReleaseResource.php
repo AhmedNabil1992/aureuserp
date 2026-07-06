@@ -39,7 +39,7 @@ class ProgramReleaseResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Program Releases';
+        return __('software::filament/admin/resources/program-release.navigation.label');
     }
 
     public static function form(Schema $schema): Schema
@@ -61,7 +61,7 @@ class ProgramReleaseResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->columns([
-            TextColumn::make('program.name')->label('Program')->searchable(),
+            TextColumn::make('program.name')->label(__('software::filament/admin/resources/program-release.table.columns.program'))->searchable(),
             TextColumn::make('version_number')->searchable()->sortable(),
             TextColumn::make('release_date')->date()->sortable(),
             IconColumn::make('is_active')->boolean(),

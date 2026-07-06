@@ -40,7 +40,7 @@ class LicenseActivityResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->columns([
-            TextColumn::make('license.serial_number')->label('License')->searchable(),
+            TextColumn::make('license.serial_number')->label(__('software::filament/admin/resources/license-activity.table.columns.license'))->searchable(),
             TextColumn::make('current_version')->searchable(),
             TextColumn::make('last_online_at')->dateTime()->sortable(),
         ])->recordActions([

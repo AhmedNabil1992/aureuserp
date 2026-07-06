@@ -50,7 +50,7 @@ class LicenseResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Licenses';
+        return __('software::filament/admin/resources/license.navigation.label');
     }
 
     public static function form(Schema $schema): Schema
@@ -108,12 +108,12 @@ class LicenseResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('serial_number')->searchable()->sortable(),
-                TextColumn::make('program.slug')->label('Program')->searchable(),
-                TextColumn::make('edition.name')->label('Edition')->searchable(),
-                TextColumn::make('partner.name')->label('Partner')->searchable(),
-                TextColumn::make('partner.phone')->label('Partner Phone')->searchable(),
-                TextColumn::make('state.name_ar')->label('State')->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('city.name_ar')->label('City')->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('program.slug')->label(__('software::filament/admin/resources/license.table.columns.program'))->searchable(),
+                TextColumn::make('edition.name')->label(__('software::filament/admin/resources/license.table.columns.edition'))->searchable(),
+                TextColumn::make('partner.name')->label(__('software::filament/admin/resources/license.table.columns.partner'))->searchable(),
+                TextColumn::make('partner.phone')->label(__('software::filament/admin/resources/license.table.columns.partner_phone'))->searchable(),
+                TextColumn::make('state.name_ar')->label(__('software::filament/admin/resources/license.table.columns.state'))->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('city.name_ar')->label(__('software::filament/admin/resources/license.table.columns.city'))->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('license_plan')->badge(),
                 TextColumn::make('period')->numeric()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('start_date')->date()->toggleable(isToggledHiddenByDefault: true),
@@ -121,20 +121,20 @@ class LicenseResource extends Resource
                 TextColumn::make('status')->badge(),
                 IconColumn::make('is_active')->boolean(),
                 TextColumn::make('requested_at')->dateTime()->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('approver.name')->label('Approver')->searchable()->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('approver.name')->label(__('software::filament/admin/resources/license.table.columns.approver'))->searchable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')->dateTime()->sortable(),
             ])
             ->recordUrl(fn (License $record): string => static::getUrl('view', ['record' => $record]))
             ->recordActions([
                 ActionGroup::make([
                     Action::make('billLicense')
-                        ->label('Bill License')
+                        ->label(__('software::filament/admin/resources/license.actions.bill_license'))
                         ->icon('heroicon-o-receipt-percent')
                         ->color('success')
                         ->visible(fn (License $record): bool => ! $record->invoices()->exists() && ! $record->devices()->whereNotNull('license_key')->exists())
                         ->form([
                             Select::make('edition_id')
-                                ->label('Edition')
+                                ->label(__('software::filament/admin/resources/license.actions.edition'))
                                 ->options(fn (License $record): array => ProgramEdition::query()
                                     ->where('program_id', $record->program_id)
                                     ->orderBy('name')
@@ -144,7 +144,7 @@ class LicenseResource extends Resource
                                 ->required()
                                 ->searchable(),
                             Select::make('license_plan')
-                                ->label('Type')
+                                ->label(__('software::filament/admin/resources/license.actions.type'))
                                 ->options(collect(LicensePlan::cases())->mapWithKeys(fn (LicensePlan $case): array => [
                                     $case->value => ucfirst($case->value),
                                 ])->all())
@@ -162,8 +162,8 @@ class LicenseResource extends Resource
 
                                 if ($result['isTrial']) {
                                     Notification::make()
-                                        ->title('Trial license activated successfully')
-                                        ->body('Trial will expire on '.$result['license']->end_date?->format('Y-m-d'))
+                                        ->title(__('software::filament/admin/resources/license.notifications.trial_activated'))
+                                        ->body(__('software::filament/admin/resources/license.notifications.trial_expires_on', ['date' => $result['license']->end_date?->format('Y-m-d')]))
                                         ->success()
                                         ->send();
 
@@ -171,20 +171,20 @@ class LicenseResource extends Resource
                                 }
 
                                 Notification::make()
-                                    ->title('Invoice created successfully')
-                                    ->body('Invoice No: '.$result['invoiceNumber'])
+                                    ->title(__('software::filament/admin/resources/license.notifications.invoice_created'))
+                                    ->body(__('software::filament/admin/resources/license.notifications.invoice_number', ['number' => $result['invoiceNumber']]))
                                     ->success()
                                     ->send();
                             } catch (\Throwable $exception) {
                                 Notification::make()
-                                    ->title('Failed to create invoice')
+                                    ->title(__('software::filament/admin/resources/license.notifications.invoice_failed'))
                                     ->body($exception->getMessage())
                                     ->danger()
                                     ->send();
                             }
                         }),
                     Action::make('renewLicense')
-                        ->label('Renew')
+                        ->label(__('software::filament/admin/resources/license.actions.renew'))
                         ->icon('heroicon-o-arrow-path')
                         ->color('info')
                         ->visible(fn (License $record): bool => $record->invoices()->exists()
@@ -192,7 +192,7 @@ class LicenseResource extends Resource
                             && in_array($record->license_plan?->value, [LicensePlan::Monthly->value, LicensePlan::Annual->value], true))
                         ->form([
                             Select::make('license_plan')
-                                ->label('Type')
+                                ->label(__('software::filament/admin/resources/license.actions.type'))
                                 ->options([
                                     LicensePlan::Monthly->value => ucfirst(LicensePlan::Monthly->value),
                                     LicensePlan::Annual->value  => ucfirst(LicensePlan::Annual->value),
@@ -211,20 +211,20 @@ class LicenseResource extends Resource
                                 );
 
                                 Notification::make()
-                                    ->title('License renewed successfully')
-                                    ->body('Invoice No: '.$result['invoice']->invoice_number)
+                                    ->title(__('software::filament/admin/resources/license.notifications.renew_success'))
+                                    ->body(__('software::filament/admin/resources/license.notifications.invoice_number', ['number' => $result['invoice']->invoice_number]))
                                     ->success()
                                     ->send();
                             } catch (\Throwable $exception) {
                                 Notification::make()
-                                    ->title('Failed to renew license')
+                                    ->title(__('software::filament/admin/resources/license.notifications.renew_failed'))
                                     ->body($exception->getMessage())
                                     ->danger()
                                     ->send();
                             }
                         }),
                     Action::make('activateLicense')
-                        ->label('Activate')
+                        ->label(__('software::filament/admin/resources/license.actions.activate'))
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
                         ->visible(fn (License $record): bool => ! $record->is_active)
@@ -234,19 +234,19 @@ class LicenseResource extends Resource
                                 app(LicenseManager::class)->activateLicense($record);
 
                                 Notification::make()
-                                    ->title('License activated successfully')
+                                    ->title(__('software::filament/admin/resources/license.notifications.activate_success'))
                                     ->success()
                                     ->send();
                             } catch (\Throwable $exception) {
                                 Notification::make()
-                                    ->title('Failed to activate license')
+                                    ->title(__('software::filament/admin/resources/license.notifications.activate_failed'))
                                     ->body($exception->getMessage())
                                     ->danger()
                                     ->send();
                             }
                         }),
                     Action::make('deactivateLicense')
-                        ->label('Deactivate')
+                        ->label(__('software::filament/admin/resources/license.actions.deactivate'))
                         ->icon('heroicon-o-pause-circle')
                         ->color('warning')
                         ->visible(fn (License $record): bool => $record->is_active)
@@ -256,19 +256,19 @@ class LicenseResource extends Resource
                                 app(LicenseManager::class)->deactivateLicense($record);
 
                                 Notification::make()
-                                    ->title('License deactivated successfully')
+                                    ->title(__('software::filament/admin/resources/license.notifications.deactivate_success'))
                                     ->success()
                                     ->send();
                             } catch (\Throwable $exception) {
                                 Notification::make()
-                                    ->title('Failed to deactivate license')
+                                    ->title(__('software::filament/admin/resources/license.notifications.deactivate_failed'))
                                     ->body($exception->getMessage())
                                     ->danger()
                                     ->send();
                             }
                         }),
                     Action::make('expireLicense')
-                        ->label('Expire')
+                        ->label(__('software::filament/admin/resources/license.actions.expire'))
                         ->icon('heroicon-o-no-symbol')
                         ->color('danger')
                         ->visible(fn (License $record): bool => $record->is_active
@@ -279,12 +279,12 @@ class LicenseResource extends Resource
                                 app(LicenseManager::class)->expireLicense($record);
 
                                 Notification::make()
-                                    ->title('License expired successfully')
+                                    ->title(__('software::filament/admin/resources/license.notifications.expire_success'))
                                     ->success()
                                     ->send();
                             } catch (\Throwable $exception) {
                                 Notification::make()
-                                    ->title('Failed to expire license')
+                                    ->title(__('software::filament/admin/resources/license.notifications.expire_failed'))
                                     ->body($exception->getMessage())
                                     ->danger()
                                     ->send();

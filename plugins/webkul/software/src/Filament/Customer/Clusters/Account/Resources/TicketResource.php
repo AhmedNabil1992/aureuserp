@@ -43,12 +43,12 @@ class TicketResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Support Tickets';
+        return __('software::filament/customer/ticket.navigation.label');
     }
 
     public static function getModelLabel(): string
     {
-        return 'Support Ticket';
+        return __('software::filament/customer/ticket.models.singular');
     }
 
     public static function form(Schema $schema): Schema
@@ -57,7 +57,7 @@ class TicketResource extends Resource
 
         return $schema->components([
             Select::make('license_id')
-                ->label('License / Product')
+                ->label(__('software::filament/customer/ticket.form.fields.license_or_product'))
                 ->options(function () use ($partnerId): array {
                     if (! $partnerId) {
                         return [];
@@ -96,7 +96,7 @@ class TicketResource extends Resource
                 ->columnSpanFull(),
 
             RichEditor::make('content')
-                ->label('Describe your issue')
+                ->label(__('software::filament/customer/ticket.form.fields.describe_issue'))
                 ->required()
                 ->toolbarButtons([
                     'bold', 'italic', 'underline',
@@ -106,7 +106,7 @@ class TicketResource extends Resource
                 ->columnSpanFull(),
 
             FileUpload::make('attachments')
-                ->label('Attachments (optional)')
+                ->label(__('software::filament/customer/ticket.form.fields.attachments_optional'))
                 ->multiple()
                 ->disk('public')
                 ->directory('software/tickets')
@@ -120,7 +120,7 @@ class TicketResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('ticket_number')
-                    ->label('#')
+                    ->label(__('software::filament/customer/ticket.table.columns.number'))
                     ->sortable(),
 
                 TextColumn::make('title')
@@ -128,7 +128,7 @@ class TicketResource extends Resource
                     ->limit(60),
 
                 TextColumn::make('program.name')
-                    ->label('Product')
+                    ->label(__('software::filament/customer/ticket.table.columns.product'))
                     ->sortable(),
 
                 TextColumn::make('status')
@@ -150,7 +150,7 @@ class TicketResource extends Resource
                     }),
 
                 TextColumn::make('updated_at')
-                    ->label('Last Update')
+                    ->label(__('software::filament/customer/ticket.table.columns.last_update'))
                     ->dateTime()
                     ->sortable(),
             ])

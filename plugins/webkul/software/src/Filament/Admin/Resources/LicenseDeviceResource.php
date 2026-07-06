@@ -49,7 +49,7 @@ class LicenseDeviceResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->columns([
-            TextColumn::make('license.serial_number')->label('License')->searchable(),
+            TextColumn::make('license.serial_number')->label(__('software::filament/admin/resources/license-device.table.columns.license'))->searchable(),
             TextColumn::make('computer_id')->searchable(),
             TextColumn::make('license_key')->searchable(),
             TextColumn::make('bios_id')->searchable(),

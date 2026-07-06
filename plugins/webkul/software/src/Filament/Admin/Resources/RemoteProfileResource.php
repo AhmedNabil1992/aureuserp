@@ -43,7 +43,7 @@ class RemoteProfileResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->columns([
-            TextColumn::make('license.serial_number')->label('License')->searchable(),
+            TextColumn::make('license.serial_number')->label(__('software::filament/admin/resources/remote-profile.table.columns.license'))->searchable(),
             TextColumn::make('anydesk'),
             TextColumn::make('teamviewer'),
             TextColumn::make('rustdesk'),

@@ -35,7 +35,7 @@ class ErrorLogResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Error Logs';
+        return __('software::filament/admin/resources/error-log.navigation.label');
     }
 
     public static function form(Schema $schema): Schema
@@ -56,7 +56,7 @@ class ErrorLogResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->columns([
-            TextColumn::make('device.computer_id')->label('Computer ID')->searchable(),
+            TextColumn::make('device.computer_id')->label(__('software::filament/admin/resources/error-log.table.columns.computer_id'))->searchable(),
             TextColumn::make('eid')->numeric(),
             TextColumn::make('status')->badge(),
             TextColumn::make('app_version')->searchable(),

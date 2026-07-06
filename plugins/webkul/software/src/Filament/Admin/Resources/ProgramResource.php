@@ -40,7 +40,7 @@ class ProgramResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Programs';
+        return __('software::filament/admin/resources/program.navigation.label');
     }
 
     public static function form(Schema $schema): Schema
@@ -48,7 +48,7 @@ class ProgramResource extends Resource
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->label('Name')
+                    ->label(__('software::filament/admin/resources/program.form.fields.name'))
                     ->required()
                     ->maxLength(255)
                     ->live(onBlur: true)
@@ -58,12 +58,12 @@ class ProgramResource extends Resource
                         }
                     }),
                 TextInput::make('slug')
-                    ->label('Slug')
+                    ->label(__('software::filament/admin/resources/program.form.fields.slug'))
                     ->required()
                     ->maxLength(255)
                     ->unique(ignoreRecord: true),
                 Select::make('product_id')
-                    ->label('Base Service Product')
+                    ->label(__('software::filament/admin/resources/program.form.fields.base_service_product'))
                     ->options(fn (): array => Product::query()
                         ->where('type', 'service')
                         ->whereNull('parent_id')
@@ -73,17 +73,17 @@ class ProgramResource extends Resource
                     ->searchable()
                     ->preload()
                     ->nullable()
-                    ->helperText('Main product for this software program.'),
+                    ->helperText(__('software::filament/admin/resources/program.form.helper_text.base_service_product')),
                 Textarea::make('description')
-                    ->label('Description')
+                    ->label(__('software::filament/admin/resources/program.form.fields.description'))
                     ->rows(3)
                     ->columnSpanFull(),
                 Textarea::make('installation_notes')
-                    ->label('Installation Notes')
+                    ->label(__('software::filament/admin/resources/program.form.fields.installation_notes'))
                     ->rows(4)
                     ->columnSpanFull(),
                 Toggle::make('is_active')
-                    ->label('Active')
+                    ->label(__('software::filament/admin/resources/program.form.fields.active'))
                     ->default(true),
             ])
             ->columns(2);
@@ -94,20 +94,34 @@ class ProgramResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Name')
+                    ->label(__('software::filament/admin/resources/program.table.columns.name'))
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('description')
+                    ->label(__('software::filament/admin/resources/program.table.columns.description'))
+                    ->limit(50)
+                    ->searchable(),
                 TextColumn::make('slug')
-                    ->label('Slug')
+                    ->label(__('software::filament/admin/resources/program.table.columns.slug'))
                     ->searchable(),
                 TextColumn::make('product.name')
-                    ->label('Base Product')
+                    ->label(__('software::filament/admin/resources/program.table.columns.base_product'))
                     ->searchable(),
+                TextColumn::make('installation_notes')
+                    ->label(__('software::filament/admin/resources/program.table.columns.installation_notes'))
+                    ->limit(50),
+                TextColumn::make('creator.name')
+                    ->label(__('software::filament/admin/resources/program.table.columns.creator'))
+                    ->searchable(),
+                TextColumn::make('created_at')
+                    ->label(__('software::filament/admin/resources/program.table.columns.created_at'))
+                    ->dateTime()
+                    ->sortable(),
                 IconColumn::make('is_active')
-                    ->label('Active')
+                    ->label(__('software::filament/admin/resources/program.table.columns.active'))
                     ->boolean(),
                 TextColumn::make('updated_at')
-                    ->label('Updated At')
+                    ->label(__('software::filament/admin/resources/program.table.columns.updated_at'))
                     ->dateTime()
                     ->sortable(),
             ])

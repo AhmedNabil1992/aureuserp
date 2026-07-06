@@ -47,7 +47,7 @@ class LicenseSubscriptionResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->columns([
-            TextColumn::make('license.serial_number')->label('License')->searchable(),
+            TextColumn::make('license.serial_number')->label(__('software::filament/admin/resources/license-subscription.table.columns.license'))->searchable(),
             TextColumn::make('service_type')->badge(),
             TextColumn::make('start_date')->date(),
             TextColumn::make('end_date')->date(),

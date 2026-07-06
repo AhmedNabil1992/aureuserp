@@ -38,7 +38,7 @@ class ProgramFeatureResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Program Features';
+        return __('software::filament/admin/resources/program-feature.navigation.label');
     }
 
     public static function form(Schema $schema): Schema
@@ -47,14 +47,14 @@ class ProgramFeatureResource extends Resource
             Select::make('program_id')->relationship('program', 'name')->searchable()->preload()->required(),
             TextInput::make('name')->required()->maxLength(255),
             Select::make('service_type')
-                ->label('Subscription Type')
+                ->label(__('software::filament/admin/resources/program-feature.form.fields.subscription_type'))
                 ->options(collect(ServiceType::cases())->mapWithKeys(fn (ServiceType $case): array => [
                     $case->value => ucfirst(str_replace('_', ' ', $case->value)),
                 ])->all())
                 ->nullable()
-                ->helperText('When billing, this feature generates an invoice line and a subscription of this type.'),
+                ->helperText(__('software::filament/admin/resources/program-feature.form.helper_text.subscription_type')),
             Select::make('product_id')
-                ->label('Service Product')
+                ->label(__('software::filament/admin/resources/program-feature.form.fields.service_product'))
                 ->options(fn (): array => Product::query()
                     ->where('type', 'service')
                     ->orderBy('name')
@@ -63,7 +63,7 @@ class ProgramFeatureResource extends Resource
                 ->searchable()
                 ->preload()
                 ->nullable()
-                ->helperText('Product service line that will be added to the invoice.'),
+                ->helperText(__('software::filament/admin/resources/program-feature.form.helper_text.service_product')),
             TextInput::make('amount')->numeric(),
             Textarea::make('description')->rows(3)->columnSpanFull(),
         ])->columns(2);
@@ -72,10 +72,10 @@ class ProgramFeatureResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->columns([
-            TextColumn::make('program.name')->label('Program')->searchable(),
+            TextColumn::make('program.name')->label(__('software::filament/admin/resources/program-feature.table.columns.program'))->searchable(),
             TextColumn::make('name')->searchable(),
-            TextColumn::make('service_type')->badge()->label('Subscription Type'),
-            TextColumn::make('product.name')->label('Service Product')->searchable(),
+            TextColumn::make('service_type')->badge()->label(__('software::filament/admin/resources/program-feature.table.columns.subscription_type')),
+            TextColumn::make('product.name')->label(__('software::filament/admin/resources/program-feature.table.columns.service_product'))->searchable(),
             TextColumn::make('amount')->numeric(),
             TextColumn::make('updated_at')->dateTime()->sortable(),
         ])->recordActions([

@@ -47,10 +47,10 @@ class TicketEventResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->columns([
-            TextColumn::make('ticket.ticket_number')->label('Ticket')->searchable(),
+            TextColumn::make('ticket.ticket_number')->label(__('software::filament/admin/resources/ticket-event.table.columns.ticket'))->searchable(),
             TextColumn::make('type')->searchable(),
-            TextColumn::make('user.name')->label('User')->searchable(),
-            TextColumn::make('partner.name')->label('Partner')->searchable(),
+            TextColumn::make('user.name')->label(__('software::filament/admin/resources/ticket-event.table.columns.user'))->searchable(),
+            TextColumn::make('partner.name')->label(__('software::filament/admin/resources/ticket-event.table.columns.partner'))->searchable(),
             IconColumn::make('is_private')->boolean(),
             TextColumn::make('created_at')->dateTime()->sortable(),
         ])->recordActions([

@@ -43,14 +43,14 @@ class TicketResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Tickets';
+        return __('software::filament/admin/resources/ticket.navigation.label');
     }
 
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
             TextInput::make('ticket_number')
-                ->label('Ticket #')
+                ->label(__('software::filament/admin/resources/ticket.form.fields.ticket_number'))
                 ->disabled()
                 ->dehydrated()
                 ->numeric()
@@ -69,14 +69,14 @@ class TicketResource extends Resource
                 ->columnSpan(1),
 
             Select::make('assigned_to')
-                ->label('Assign To')
+                ->label(__('software::filament/admin/resources/ticket.form.fields.assign_to'))
                 ->relationship('assignedTo', 'name')
                 ->searchable()
                 ->preload()
                 ->columnSpan(1),
 
             Select::make('partner_id')
-                ->label('Customer')
+                ->label(__('software::filament/admin/resources/ticket.form.fields.customer'))
                 ->relationship('partner', 'name')
                 ->searchable()
                 ->preload(false)
@@ -89,7 +89,7 @@ class TicketResource extends Resource
                 ->columnSpan(1),
 
             Select::make('license_id')
-                ->label('License')
+                ->label(__('software::filament/admin/resources/ticket.form.fields.license'))
                 ->options(function (Get $get): array {
                     $partnerId = $get('partner_id');
 
@@ -118,7 +118,7 @@ class TicketResource extends Resource
                 ->columnSpan(1),
 
             Select::make('program_id')
-                ->label('Program')
+                ->label(__('software::filament/admin/resources/ticket.form.fields.program'))
                 ->relationship('program', 'name')
                 ->disabled()
                 ->dehydrated()
@@ -130,7 +130,7 @@ class TicketResource extends Resource
                 ->columnSpanFull(),
 
             RichEditor::make('content')
-                ->label('Description')
+                ->label(__('software::filament/admin/resources/ticket.form.fields.description'))
                 ->required()
                 ->toolbarButtons([
                     'bold', 'italic', 'underline', 'strike',
@@ -142,7 +142,7 @@ class TicketResource extends Resource
                 ->columnSpanFull(),
 
             FileUpload::make('attachments')
-                ->label('Attachments')
+                ->label(__('software::filament/admin/resources/ticket.form.fields.attachments'))
                 ->multiple()
                 ->disk('public')
                 ->directory('software/tickets')
@@ -156,7 +156,7 @@ class TicketResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('ticket_number')
-                    ->label('#')
+                    ->label(__('software::filament/admin/resources/ticket.table.columns.number'))
                     ->sortable()
                     ->searchable(),
 
@@ -165,17 +165,17 @@ class TicketResource extends Resource
                     ->limit(50),
 
                 TextColumn::make('partner.name')
-                    ->label('Customer')
+                    ->label(__('software::filament/admin/resources/ticket.table.columns.customer'))
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('license.serial_number')
-                    ->label('License')
+                    ->label(__('software::filament/admin/resources/ticket.table.columns.license'))
                     ->searchable()
                     ->toggleable(),
 
                 TextColumn::make('program.name')
-                    ->label('Program')
+                    ->label(__('software::filament/admin/resources/ticket.table.columns.program'))
                     ->searchable()
                     ->toggleable(),
 
@@ -199,11 +199,11 @@ class TicketResource extends Resource
                     ->sortable(),
 
                 TextColumn::make('assignedTo.name')
-                    ->label('Assigned To')
+                    ->label(__('software::filament/admin/resources/ticket.table.columns.assigned_to'))
                     ->toggleable(),
 
                 TextColumn::make('updated_at')
-                    ->label('Last Update')
+                    ->label(__('software::filament/admin/resources/ticket.table.columns.last_update'))
                     ->dateTime()
                     ->sortable(),
             ])

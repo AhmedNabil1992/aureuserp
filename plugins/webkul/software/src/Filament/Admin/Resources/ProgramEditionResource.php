@@ -39,7 +39,7 @@ class ProgramEditionResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Program Editions';
+        return __('software::filament/admin/resources/program-edition.navigation.label');
     }
 
     public static function form(Schema $schema): Schema
@@ -54,7 +54,7 @@ class ProgramEditionResource extends Resource
                 ->afterStateUpdated(fn (Set $set): mixed => $set('variant_product_id', null)),
             TextInput::make('name')->required()->maxLength(100),
             Select::make('variant_product_id')
-                ->label('Linked Variant (Required for billing)')
+                ->label(__('software::filament/admin/resources/program-edition.form.fields.linked_variant'))
                 ->options(function (Get $get): array {
                     $programId = $get('program_id');
 
@@ -77,9 +77,9 @@ class ProgramEditionResource extends Resource
                 ->searchable()
                 ->preload()
                 ->nullable()
-                ->helperText('Choose the exact product variant that represents this edition.'),
+                ->helperText(__('software::filament/admin/resources/program-edition.form.helper_text.linked_variant')),
             Select::make('product_id')
-                ->label('Legacy Product Link (Optional)')
+                ->label(__('software::filament/admin/resources/program-edition.form.fields.legacy_product_link'))
                 ->options(fn (): array => Product::query()
                     ->where('type', 'service')
                     ->orderBy('name')
@@ -88,7 +88,7 @@ class ProgramEditionResource extends Resource
                 ->searchable()
                 ->preload()
                 ->nullable()
-                ->helperText('Legacy field kept for backward compatibility.'),
+                ->helperText(__('software::filament/admin/resources/program-edition.form.helper_text.legacy_product_link')),
             TextInput::make('max_devices')->numeric()->minValue(1),
             TextInput::make('license_cost')->numeric(),
             TextInput::make('license_price')->numeric(),
@@ -100,9 +100,9 @@ class ProgramEditionResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->columns([
-            TextColumn::make('program.name')->label('Program')->searchable(),
+            TextColumn::make('program.name')->label(__('software::filament/admin/resources/program-edition.table.columns.program'))->searchable(),
             TextColumn::make('name')->searchable(),
-            TextColumn::make('variantProduct.name')->label('Variant')->searchable(),
+            TextColumn::make('variantProduct.name')->label(__('software::filament/admin/resources/program-edition.table.columns.variant'))->searchable(),
             TextColumn::make('max_devices')->numeric(),
             TextColumn::make('license_price')->money('EGP'),
             TextColumn::make('license_cost')->money('EGP'),
