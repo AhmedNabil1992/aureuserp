@@ -27,6 +27,8 @@ class TicketEventResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-chat-bubble-oval-left-ellipsis';
 
+    protected static ?int $navigationSort = 2;
+
     protected static ?string $cluster = Support::class;
 
     public static function form(Schema $schema): Schema

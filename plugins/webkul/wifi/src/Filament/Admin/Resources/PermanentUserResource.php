@@ -3,6 +3,8 @@
 namespace Webkul\Wifi\Filament\Admin\Resources;
 
 use BackedEnum;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\SelectFilter;
@@ -10,6 +12,7 @@ use Filament\Tables\Table;
 use Webkul\Wifi\Filament\Admin\Resources\PermanentUserResource\Pages\ListPermanentUsers;
 use Webkul\Wifi\Models\Cloud;
 use Webkul\Wifi\Models\PermanentUser;
+use Webkul\Wifi\Services\PermanentUserService;
 
 class PermanentUserResource extends Resource
 {
@@ -70,7 +73,29 @@ class PermanentUserResource extends Resource
                     ->searchable()
                     ->preload(),
             ])
-            ->recordActions([])
+            ->recordActions([
+                Action::make('delete')
+                    ->label(__('wifi::filament/resources/permanent_user.actions.delete'))
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->action(function (PermanentUser $record): void {
+                        try {
+                            app(PermanentUserService::class)->delete($record);
+
+                            Notification::make()
+                                ->title(__('wifi::filament/resources/permanent_user.messages.deleted_success'))
+                                ->success()
+                                ->send();
+                        } catch (\Throwable $exception) {
+                            Notification::make()
+                                ->title(__('wifi::filament/resources/permanent_user.messages.deleted_failed'))
+                                ->body($exception->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
+            ])
             ->toolbarActions([]);
     }
 

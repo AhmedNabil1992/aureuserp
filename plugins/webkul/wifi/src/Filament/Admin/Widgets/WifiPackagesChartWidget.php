@@ -29,7 +29,7 @@ class WifiPackagesChartWidget extends ChartWidget
             ->get();
 
         $salesByPackage = WifiPurchase::query()
-            ->selectRaw('wifi_package_id, SUM(quantity) as total_quantity')
+            ->selectRaw('wifi_package_id, COUNT(quantity) as total_quantity')
             ->whereBetween('created_at', [$startOfMonth, $now])
             ->groupBy('wifi_package_id')
             ->pluck('total_quantity', 'wifi_package_id');

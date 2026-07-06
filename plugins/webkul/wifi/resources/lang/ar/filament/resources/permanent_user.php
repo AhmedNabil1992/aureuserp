@@ -2,25 +2,53 @@
 
 return [
     'navigation' => [
-        'title' => 'Permanent Users',
+        'title' => 'المستخدمون الدائمون',
     ],
 
-    'model-label'        => 'Permanent User',
-    'plural-model-label' => 'Permanent Users',
+    'model-label'        => 'مستخدم دائم',
+    'plural-model-label' => 'المستخدمون الدائمون',
+
+    'actions' => [
+        'create' => 'إنشاء مستخدم دائم',
+        'delete' => 'حذف المستخدم',
+    ],
+
+    'form' => [
+        'fields' => [
+            'username'   => 'اسم المستخدم',
+            'password'   => 'كلمة المرور',
+            'cloud_id'   => 'السحابة',
+            'realm'      => 'النطاق',
+            'profile_id' => 'الباقة',
+        ],
+        'helpers' => [
+            'username' => 'يجب أن يتكون من حروف وأرقام فقط، ولا يقل عن 5 أحرف ولا يزيد عن 20 حرفًا',
+            'password' => 'يجب أن تتكون من حروف وأرقام فقط، ولا تقل عن 5 أحرف ولا تزيد عن 20 حرفًا',
+        ],
+    ],
+
+    'messages' => [
+        'created_success'  => 'تم إنشاء المستخدم بنجاح',
+        'created_failed'   => 'فشل إنشاء المستخدم',
+        'deleted_success'  => 'تم حذف المستخدم بنجاح',
+        'deleted_failed'   => 'فشل حذف المستخدم',
+        'api_missing'      => 'إعدادات واجهة المستخدمين الدائمين غير مكتملة.',
+        'invalid_data'     => 'السحابة أو النطاق أو الباقة المحددة غير صالحة.',
+    ],
 
     'table' => [
         'columns' => [
-            'id'       => 'ID',
-            'name'     => 'Name',
-            'cloud'    => 'Cloud',
-            'realm'    => 'Realm',
-            'profile'  => 'Profile',
-            'active'   => 'Active',
-            'created'  => 'Created',
-            'modified' => 'Modified',
+            'id'       => 'المعرف',
+            'name'     => 'اسم المستخدم',
+            'cloud'    => 'السحابة',
+            'realm'    => 'النطاق',
+            'profile'  => 'الباقة',
+            'active'   => 'نشط',
+            'created'  => 'تاريخ الإنشاء',
+            'modified' => 'تاريخ التعديل',
         ],
         'filters' => [
-            'cloud_id' => 'Cloud',
+            'cloud_id' => 'السحابة',
         ],
     ],
 ];

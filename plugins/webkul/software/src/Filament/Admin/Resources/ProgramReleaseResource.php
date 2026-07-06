@@ -28,6 +28,8 @@ class ProgramReleaseResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-arrow-down-tray';
 
+    protected static ?int $navigationSort = 4;
+
     protected static ?string $cluster = Catalog::class;
 
     public static function getNavigationGroup(): string

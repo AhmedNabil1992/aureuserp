@@ -35,6 +35,8 @@ class TicketResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-chat-bubble-left-right';
 
+    protected static ?int $navigationSort = 1;
+
     protected static ?string $cluster = Support::class;
 
     protected static ?string $recordTitleAttribute = 'title';

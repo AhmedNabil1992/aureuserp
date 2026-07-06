@@ -13,7 +13,7 @@ class ManageLicenseDevices extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make()->label('New Device')->icon('heroicon-o-plus-circle'),
+            // CreateAction::make()->label('New Device')->icon('heroicon-o-plus-circle'),
         ];
     }
 }

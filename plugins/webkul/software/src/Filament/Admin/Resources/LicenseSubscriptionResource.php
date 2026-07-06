@@ -27,6 +27,8 @@ class LicenseSubscriptionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-calendar-days';
 
+    protected static ?int $navigationSort = 2;
+
     protected static ?string $cluster = Licensing::class;
 
     public static function form(Schema $schema): Schema
@@ -51,10 +53,10 @@ class LicenseSubscriptionResource extends Resource
             TextColumn::make('end_date')->date(),
             IconColumn::make('is_active')->boolean(),
         ])->recordActions([
-            EditAction::make(),
+            // EditAction::make(),
             DeleteAction::make(),
         ])->toolbarActions([
-            DeleteBulkAction::make(),
+            // DeleteBulkAction::make(),
         ]);
     }
 

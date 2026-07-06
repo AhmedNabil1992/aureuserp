@@ -22,7 +22,7 @@ class WifiStatsWidget extends BaseWidget
         $now = Carbon::now('Africa/Cairo');
 
         $startOfToday = $now->copy()->startOfDay();
-        $startOfWeek = $now->copy()->startOfWeek();
+        $startOfWeek = $now->copy()->startOfWeek(Carbon::SATURDAY);
         $startOfMonth = $now->copy()->startOfMonth();
 
         $voucherSalesToday = (int) VoucherSale::query()

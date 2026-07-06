@@ -26,6 +26,8 @@ class LicenseDeviceResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-computer-desktop';
 
+    protected static ?int $navigationSort = 1;
+
     protected static ?string $cluster = Licensing::class;
 
     public static function form(Schema $schema): Schema
@@ -49,14 +51,21 @@ class LicenseDeviceResource extends Resource
         return $table->columns([
             TextColumn::make('license.serial_number')->label('License')->searchable(),
             TextColumn::make('computer_id')->searchable(),
+            TextColumn::make('license_key')->searchable(),
+            TextColumn::make('bios_id')->searchable(),
+            TextColumn::make('disk_id')->searchable(),
+            TextColumn::make('base_id')->searchable(),
+            TextColumn::make('video_id')->searchable(),
+            TextColumn::make('mac_id')->searchable(),
             TextColumn::make('device_name')->searchable(),
             IconColumn::make('is_primary')->boolean(),
+            TextColumn::make('created_at')->dateTime()->sortable(),
             TextColumn::make('updated_at')->dateTime()->sortable(),
         ])->recordActions([
             EditAction::make(),
             DeleteAction::make(),
         ])->toolbarActions([
-            DeleteBulkAction::make(),
+            // DeleteBulkAction::make(),
         ]);
     }
 
