@@ -36,6 +36,8 @@ class PackagingResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-gift';
 
+    protected static ?int $navigationSort = 5;
+
     protected static bool $shouldRegisterNavigation = true;
 
     public static function getNavigationLabel(): string

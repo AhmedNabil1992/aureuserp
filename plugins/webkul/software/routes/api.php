@@ -5,6 +5,7 @@ use Webkul\Software\Http\Controllers\API\Legacy\ClientLegacyController;
 use Webkul\Software\Http\Controllers\API\Legacy\LicenseLegacyController;
 use Webkul\Software\Http\Controllers\API\Legacy\LocationLegacyController;
 use Webkul\Software\Http\Controllers\API\Legacy\ProductLegacyController;
+use Webkul\Software\Http\Controllers\API\Legacy\UpdateLegacyController;
 use Webkul\Software\Http\Controllers\API\V1\CustomerNotificationController;
 use Webkul\Software\Http\Controllers\API\V1\FcmTokenController;
 use Webkul\Software\Http\Controllers\API\V1\TicketController;
@@ -42,6 +43,8 @@ Route::prefix('api')->middleware(['App\Http\Middleware\VerifyLegacyApiKey'])->gr
     Route::post('/insert-licenses', [LicenseLegacyController::class, 'insertLicenses']);
     Route::post('/insert-keys', [LicenseLegacyController::class, 'insertKeys']);
     Route::post('/license-info', [LicenseLegacyController::class, 'licenseInfo']);
+    Route::post('/sync-license-activity', [UpdateLegacyController::class, 'syncActivity']);
+    Route::post('/check-for-update', [UpdateLegacyController::class, 'checkForUpdate']);
     Route::post('/LicGen/info', [LicenseLegacyController::class, 'licenseInfo']);
     Route::match(['get', 'post'], '/client-id', [ClientLegacyController::class, 'getClientId']);
     Route::get('/product', [ProductLegacyController::class, 'getProduct']);

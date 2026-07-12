@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Webkul\Product\Models\Product;
+use Webkul\Software\Services\CatalogProductSyncService;
 
 class ProgramEdition extends Model
 {
@@ -16,7 +17,6 @@ class ProgramEdition extends Model
 
     protected $fillable = [
         'program_id',
-        'product_id',
         'variant_product_id',
         'name',
         'max_devices',
@@ -34,14 +34,22 @@ class ProgramEdition extends Model
         'annual_renewal'  => 'decimal:2',
     ];
 
+    protected static function booted(): void
+    {
+        static::saved(function (self $edition): void {
+            if (! $edition->wasRecentlyCreated
+                && ! $edition->wasChanged(['name', 'program_id', 'license_price', 'variant_product_id'])
+                && filled($edition->variant_product_id)) {
+                return;
+            }
+
+            app(CatalogProductSyncService::class)->syncEdition($edition);
+        });
+    }
+
     public function program(): BelongsTo
     {
         return $this->belongsTo(Program::class, 'program_id');
-    }
-
-    public function product(): BelongsTo
-    {
-        return $this->belongsTo(Product::class, 'product_id');
     }
 
     public function variantProduct(): BelongsTo
@@ -52,5 +60,10 @@ class ProgramEdition extends Model
     public function licenses(): HasMany
     {
         return $this->hasMany(License::class, 'edition_id');
+    }
+
+    public function featureRules(): HasMany
+    {
+        return $this->hasMany(ProgramEditionFeature::class, 'program_edition_id')->orderBy('sort_order');
     }
 }

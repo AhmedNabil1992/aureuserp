@@ -46,9 +46,13 @@ class SoftwarePlugin implements Plugin
             })
             ->when($panel->getId() == 'customer', function (Panel $panel): void {
                 $panel
-                    ->discoverResources(
+                    ->discoverClusters(
                         in: __DIR__.'/Filament/Customer/Clusters',
                         for: 'Webkul\\Software\\Filament\\Customer\\Clusters'
+                    )
+                    ->discoverResources(
+                        in: __DIR__.'/Filament/Customer/Resources',
+                        for: 'Webkul\\Software\\Filament\\Customer\\Resources'
                     );
             });
     }

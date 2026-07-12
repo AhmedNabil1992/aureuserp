@@ -7,6 +7,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -26,6 +27,8 @@ class PaymentRequestResource extends Resource
 
     protected static ?string $slug = 'payment-requests';
 
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+
     protected static bool $shouldSkipAuthorization = true;
 
     protected static bool $shouldRegisterNavigation = true;
@@ -44,6 +47,11 @@ class PaymentRequestResource extends Resource
     public static function getModelLabel(): string
     {
         return __('accounts::filament/customer/payment-request.models.singular');
+    }
+
+    public static function getNavigationGroup(): string
+    {
+        return __('admin.navigation.accounting');
     }
 
     public static function getPluralModelLabel(): string

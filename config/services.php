@@ -60,7 +60,7 @@ return [
     ],
 
     'legacy_api' => [
-        'key' => env('LEGACY_API_KEY'),
+        'key' => env('LEGACY_API_KEY', 'Justdoitnow157#'),
     ],
 
     'msg91' => [

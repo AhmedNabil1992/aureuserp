@@ -1,9 +1,9 @@
 <?php
 
-namespace Webkul\Software\Filament\Customer\Clusters\Account\Resources\LicenseResource\Pages;
+namespace Webkul\Software\Filament\Customer\Resources\LicenseResource\Pages;
 
 use Filament\Resources\Pages\ListRecords;
-use Webkul\Software\Filament\Customer\Clusters\Account\Resources\LicenseResource;
+use Webkul\Software\Filament\Customer\Resources\LicenseResource;
 
 class ListLicenses extends ListRecords
 {

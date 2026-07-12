@@ -1,12 +1,12 @@
 <?php
 
-namespace Webkul\Software\Filament\Customer\Clusters\Account\Resources\TicketResource\Pages;
+namespace Webkul\Software\Filament\Customer\Resources\TicketResource\Pages;
 
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
-use Webkul\Software\Filament\Customer\Clusters\Account\Resources\TicketResource;
+use Webkul\Software\Filament\Customer\Resources\TicketResource;
 use Webkul\Software\Services\TicketService;
 
 class CreateTicket extends CreateRecord

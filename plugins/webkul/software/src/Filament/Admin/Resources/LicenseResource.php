@@ -106,14 +106,25 @@ class LicenseResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->with('latestActivity'))
             ->columns([
-                TextColumn::make('serial_number')->searchable()->sortable(),
+                TextColumn::make('serial_number')->searchable()->sortable()->badge()->copyable(),
                 TextColumn::make('program.slug')->label(__('software::filament/admin/resources/license.table.columns.program'))->searchable(),
                 TextColumn::make('edition.name')->label(__('software::filament/admin/resources/license.table.columns.edition'))->searchable(),
                 TextColumn::make('partner.name')->label(__('software::filament/admin/resources/license.table.columns.partner'))->searchable(),
                 TextColumn::make('partner.phone')->label(__('software::filament/admin/resources/license.table.columns.partner_phone'))->searchable(),
-                TextColumn::make('state.name_ar')->label(__('software::filament/admin/resources/license.table.columns.state'))->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('city.name_ar')->label(__('software::filament/admin/resources/license.table.columns.city'))->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('current_client_version')
+                    ->label('Current Version')
+                    ->state(fn (License $record): ?string => $record->currentClientVersion())
+                    ->placeholder('-')
+                    ->searchable(false),
+                TextColumn::make('last_client_online_at')
+                    ->label('Last Online At')
+                    ->state(fn (License $record) => $record->lastClientOnlineAt())
+                    ->dateTime()
+                    ->placeholder('-'),
+                TextColumn::make('state.name')->label(__('software::filament/admin/resources/license.table.columns.state'))->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('city.name')->label(__('software::filament/admin/resources/license.table.columns.city'))->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('license_plan')->badge(),
                 TextColumn::make('period')->numeric()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('start_date')->date()->toggleable(isToggledHiddenByDefault: true),
@@ -227,7 +238,7 @@ class LicenseResource extends Resource
                         ->label(__('software::filament/admin/resources/license.actions.activate'))
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
-                        ->visible(fn (License $record): bool => ! $record->is_active)
+                        ->visible(fn (License $record): bool => app(LicenseManager::class)->canActivateLicense($record))
                         ->requiresConfirmation()
                         ->action(function (License $record): void {
                             try {

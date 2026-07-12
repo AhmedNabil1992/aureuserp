@@ -2,11 +2,13 @@
 
 namespace Webkul\Software\Services;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Webkul\Software\Enums\LicensePlan;
 use Webkul\Software\Enums\LicenseStatus;
 use Webkul\Software\Models\License;
+use Webkul\Software\Models\LicenseDevice;
 use Webkul\Software\Models\LicenseInvoice;
 use Webkul\Software\Models\ProgramEdition;
 
@@ -15,6 +17,7 @@ class LicenseManager
     public function __construct(
         protected LicenseInvoiceManager $invoiceManager,
         protected SubscriptionManager $subscriptionManager,
+        protected LegacyLicenseKeyGenerator $keyGenerator,
     ) {}
 
     /**
@@ -53,7 +56,8 @@ class LicenseManager
             $invoiceResult = $this->invoiceManager->createInvoice(
                 $updatedLicense,
                 $editionId,
-                $licensePlan
+                $licensePlan,
+                'initial'
             );
 
             // Create Subscriptions
@@ -61,6 +65,8 @@ class LicenseManager
                 $updatedLicense,
                 $editionId
             );
+
+            $this->generateMissingDeviceKeys($updatedLicense);
 
             return [
                 'license'       => $updatedLicense,
@@ -88,7 +94,8 @@ class LicenseManager
             $invoiceResult = $this->invoiceManager->createInvoice(
                 $updatedLicense,
                 $updatedLicense->edition_id,
-                $plan
+                $plan,
+                'renewal'
             );
 
             $this->subscriptionManager->renewForLicense($updatedLicense);
@@ -105,6 +112,10 @@ class LicenseManager
      */
     public function activateLicense(License $license): License
     {
+        if ($reason = $this->getActivationBlockReason($license)) {
+            throw new \RuntimeException($reason);
+        }
+
         $license->update([
             'is_active' => true,
             'status'    => LicenseStatus::Approved,
@@ -113,6 +124,32 @@ class LicenseManager
         $this->subscriptionManager->reactivateForLicense($license);
 
         return $license->refresh();
+    }
+
+    public function canActivateLicense(License $license): bool
+    {
+        return $this->getActivationBlockReason($license) === null;
+    }
+
+    public function getActivationBlockReason(License $license): ?string
+    {
+        if ($license->is_active) {
+            return 'License is already active.';
+        }
+
+        if (! $license->invoices()->exists()) {
+            return 'License cannot be activated before billing.';
+        }
+
+        if ($license->license_plan === LicensePlan::Trial) {
+            return 'Trial licenses cannot be activated manually.';
+        }
+
+        if ($license->end_date instanceof Carbon && $license->end_date->isPast()) {
+            return 'Expired licenses must be renewed before activation.';
+        }
+
+        return null;
     }
 
     /**
@@ -265,5 +302,45 @@ class LicenseManager
         ]);
 
         return $license->refresh();
+    }
+
+    private function generateMissingDeviceKeys(License $license): void
+    {
+        $license->loadMissing(['devices', 'edition']);
+
+        if ($license->devices->isEmpty()) {
+            return;
+        }
+
+        $maxDevices = $license->edition?->max_devices;
+        if ($maxDevices && $license->devices->count() > $maxDevices) {
+            throw new \RuntimeException('Device limit exceeded for the selected edition.');
+        }
+
+        $primaryCount = $license->devices->where('is_primary', true)->count();
+        if ($primaryCount > 1) {
+            throw new \RuntimeException('License has more than one primary device.');
+        }
+
+        if (blank($license->edition?->name)) {
+            throw new \RuntimeException('License edition is required to generate device keys.');
+        }
+
+        $endDate = $license->end_date ?? now();
+
+        $license->devices
+            ->filter(fn (LicenseDevice $device): bool => blank($device->license_key))
+            ->each(function (LicenseDevice $device) use ($license, $endDate): void {
+                $generatedKey = $this->keyGenerator->generate(
+                    productCode: (int) $license->program_id,
+                    type: strtoupper((string) ($license->license_plan?->value ?? LicensePlan::Full->value)),
+                    edition: (string) $license->edition->name,
+                    computerId: (string) $device->computer_id,
+                    endDate: $endDate,
+                    isMain: (bool) $device->is_primary,
+                );
+
+                $device->update(['license_key' => $generatedKey]);
+            });
     }
 }

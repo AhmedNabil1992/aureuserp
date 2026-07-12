@@ -1,7 +1,8 @@
 <?php
 
-namespace Webkul\Software\Filament\Customer\Clusters\Account\Resources;
+namespace Webkul\Software\Filament\Customer\Resources;
 
+use Webkul\Software\Filament\Customer\Clusters\Licensing;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
@@ -9,8 +10,8 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-use Webkul\Software\Filament\Customer\Clusters\Account\Resources\LicenseResource\Pages\ListLicenses;
-use Webkul\Software\Filament\Customer\Clusters\Account\Resources\LicenseResource\Pages\ViewLicense;
+use Webkul\Software\Filament\Customer\Resources\LicenseResource\Pages\ListLicenses;
+use Webkul\Software\Filament\Customer\Resources\LicenseResource\Pages\ViewLicense;
 use Webkul\Software\Models\License;
 
 class LicenseResource extends Resource
@@ -30,6 +31,11 @@ class LicenseResource extends Resource
         return __('software::filament/customer/license.navigation.label');
     }
 
+    public static function getNavigationGroup(): string
+    {
+        return __('admin.navigation.software');
+    }
+    
     public static function getModelLabel(): string
     {
         return __('software::filament/customer/license.models.singular');
@@ -62,14 +68,6 @@ class LicenseResource extends Resource
                 TextColumn::make('status')
                     ->label(__('software::filament/customer/license.table.columns.status'))
                     ->badge()
-                    ->formatStateUsing(fn ($state) => __('software::filament/customer/license.statuses.'.$state))
-                    ->color(fn ($state) => match ($state) {
-                        'active'    => 'success',
-                        'inactive'  => 'gray',
-                        'suspended' => 'warning',
-                        'expired'   => 'danger',
-                        default     => 'gray',
-                    })
                     ->sortable(),
 
                 TextColumn::make('start_date')

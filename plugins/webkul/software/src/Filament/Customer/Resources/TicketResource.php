@@ -1,6 +1,6 @@
 <?php
 
-namespace Webkul\Software\Filament\Customer\Clusters\Account\Resources;
+namespace Webkul\Software\Filament\Customer\Resources;
 
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\FileUpload;
@@ -18,12 +18,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Software\Enums\TicketPriority;
 use Webkul\Software\Enums\TicketStatus;
-use Webkul\Software\Filament\Customer\Clusters\Account\Resources\TicketResource\Pages\CreateTicket;
-use Webkul\Software\Filament\Customer\Clusters\Account\Resources\TicketResource\Pages\ListTickets;
-use Webkul\Software\Filament\Customer\Clusters\Account\Resources\TicketResource\Pages\ViewTicket;
+use Webkul\Software\Filament\Customer\Resources\TicketResource\Pages\CreateTicket;
+use Webkul\Software\Filament\Customer\Resources\TicketResource\Pages\ListTickets;
+use Webkul\Software\Filament\Customer\Resources\TicketResource\Pages\ViewTicket;
 use Webkul\Software\Models\License;
 use Webkul\Software\Models\Ticket;
-use Webkul\Website\Filament\Customer\Clusters\Account;
 
 class TicketResource extends Resource
 {
@@ -32,8 +31,6 @@ class TicketResource extends Resource
     protected static ?string $slug = 'support-tickets';
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-chat-bubble-left-right';
-
-    // protected static ?string $cluster = Account::class;
 
     protected static ?int $navigationSort = 10;
 
@@ -49,6 +46,11 @@ class TicketResource extends Resource
     public static function getModelLabel(): string
     {
         return __('software::filament/customer/ticket.models.singular');
+    }
+
+    public static function getNavigationGroup(): string
+    {
+        return __('admin.navigation.software');
     }
 
     public static function form(Schema $schema): Schema

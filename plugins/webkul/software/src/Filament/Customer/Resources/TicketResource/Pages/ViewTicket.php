@@ -1,6 +1,6 @@
 <?php
 
-namespace Webkul\Software\Filament\Customer\Clusters\Account\Resources\TicketResource\Pages;
+namespace Webkul\Software\Filament\Customer\Resources\TicketResource\Pages;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
@@ -11,7 +11,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Webkul\Software\Enums\TicketPriority;
 use Webkul\Software\Enums\TicketStatus;
-use Webkul\Software\Filament\Customer\Clusters\Account\Resources\TicketResource;
+use Webkul\Software\Filament\Customer\Resources\TicketResource;
 use Webkul\Software\Livewire\TicketConversationPanel;
 use Webkul\Software\Models\Ticket;
 

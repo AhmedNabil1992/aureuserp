@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webkul\Product\Models\Product;
 use Webkul\Security\Models\User;
+use Webkul\Software\Services\CatalogProductSyncService;
 
 class Program extends Model
 {
@@ -29,6 +30,19 @@ class Program extends Model
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
+    protected static function booted(): void
+    {
+        static::saved(function (self $program): void {
+            if (! $program->wasRecentlyCreated
+                && ! $program->wasChanged(['name', 'product_id'])
+                && filled($program->product_id)) {
+                return;
+            }
+
+            app(CatalogProductSyncService::class)->syncProgram($program);
+        });
+    }
 
     public function editions(): HasMany
     {

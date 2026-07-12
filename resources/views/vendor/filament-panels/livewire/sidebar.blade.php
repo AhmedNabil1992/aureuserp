@@ -4,7 +4,7 @@
         $isRtl = __('filament-panels::layout.direction') === 'rtl';
         $isSidebarCollapsibleOnDesktop = filament()->isSidebarCollapsibleOnDesktop();
         $isSidebarFullyCollapsibleOnDesktop = filament()->isSidebarFullyCollapsibleOnDesktop();
-        $isAdminPanel = filament()->getCurrentPanel()->getId() === 'admin';
+        $isAdminPanel = in_array(filament()->getCurrentPanel()->getId(), ['admin', 'customer']);
     @endphp
 
     {{-- format-ignore-start --}}

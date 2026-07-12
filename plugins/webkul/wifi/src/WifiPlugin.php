@@ -43,6 +43,26 @@ class WifiPlugin implements Plugin
                         in: __DIR__.'/Filament/Admin/Widgets',
                         for: 'Webkul\\Wifi\\Filament\\Admin\\Widgets'
                     );
+            })
+            ->when($panel->getId() == 'customer', function (Panel $panel): void {
+                $panel
+                    ->discoverClusters(
+                        in: __DIR__.'/Filament/Customer/Clusters',
+                        for: 'Webkul\\Wifi\\Filament\\Customer\\Clusters'
+                    )
+                    ->discoverResources(
+                        in: __DIR__.'/Filament/Customer/Resources',
+                        for: 'Webkul\\Wifi\\Filament\\Customer\\Resources'
+                    )
+                    ->discoverPages(
+                        in: __DIR__.'/Filament/Customer/Pages',
+                        for: 'Webkul\\Wifi\\Filament\\Customer\\Pages'
+                    )
+                    ->discoverWidgets(
+                        in: __DIR__.'/Filament/Customer/Widgets',
+                        for: 'Webkul\\Wifi\\Filament\\Customer\\Widgets'
+                    );
+
             });
     }
 

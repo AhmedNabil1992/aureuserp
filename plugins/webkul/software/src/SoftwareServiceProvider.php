@@ -60,6 +60,7 @@ class SoftwareServiceProvider extends PackageServiceProvider
                 '2026_04_19_000029_create_software_ticket_attachments_table',
                 '2026_05_02_000031_create_fcm_tokens_table',
                 '2026_05_02_000032_create_software_customer_notifications_table',
+                '2026_07_07_000033_create_software_program_edition_features_table',
             ])
             ->runsMigrations()
             ->hasInstallCommand(function (InstallCommand $command): void {

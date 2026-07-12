@@ -1,10 +1,10 @@
 <?php
 
-namespace Webkul\Software\Filament\Customer\Clusters\Account\Resources\TicketResource\Pages;
+namespace Webkul\Software\Filament\Customer\Resources\TicketResource\Pages;
 
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
-use Webkul\Software\Filament\Customer\Clusters\Account\Resources\TicketResource;
+use Webkul\Software\Filament\Customer\Resources\TicketResource;
 
 class ListTickets extends ListRecords
 {

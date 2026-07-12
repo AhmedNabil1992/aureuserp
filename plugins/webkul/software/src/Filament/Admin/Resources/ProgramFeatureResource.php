@@ -51,7 +51,7 @@ class ProgramFeatureResource extends Resource
                 ->options(collect(ServiceType::cases())->mapWithKeys(fn (ServiceType $case): array => [
                     $case->value => ucfirst(str_replace('_', ' ', $case->value)),
                 ])->all())
-                ->nullable()
+                ->required()
                 ->helperText(__('software::filament/admin/resources/program-feature.form.helper_text.subscription_type')),
             Select::make('product_id')
                 ->label(__('software::filament/admin/resources/program-feature.form.fields.service_product'))
@@ -73,11 +73,12 @@ class ProgramFeatureResource extends Resource
     {
         return $table->columns([
             TextColumn::make('program.name')->label(__('software::filament/admin/resources/program-feature.table.columns.program'))->searchable(),
-            TextColumn::make('name')->searchable(),
+            TextColumn::make('name')->label(__('software::filament/admin/resources/program-feature.table.columns.name'))->searchable(),
             TextColumn::make('service_type')->badge()->label(__('software::filament/admin/resources/program-feature.table.columns.subscription_type')),
             TextColumn::make('product.name')->label(__('software::filament/admin/resources/program-feature.table.columns.service_product'))->searchable(),
-            TextColumn::make('amount')->numeric(),
-            TextColumn::make('updated_at')->dateTime()->sortable(),
+            TextColumn::make('amount')->label(__('software::filament/admin/resources/program-feature.table.columns.amount'))->numeric(),
+            TextColumn::make('created_at')->label(__('software::filament/admin/resources/program-feature.table.columns.created_at'))->dateTime()->sortable(),
+            TextColumn::make('updated_at')->label(__('software::filament/admin/resources/program-feature.table.columns.updated_at'))->dateTime()->sortable(),
         ])->recordActions([
             EditAction::make(),
             DeleteAction::make(),

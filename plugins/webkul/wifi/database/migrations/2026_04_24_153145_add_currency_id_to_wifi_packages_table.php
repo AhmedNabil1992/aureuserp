@@ -11,16 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('wifi_packages', function (Blueprint $table): void {
-            $table->foreignId('currency_id')->nullable()->after('product_id')->constrained('currencies')->nullOnDelete();
-        });
+        if (! Schema::hasColumn('wifi_packages', 'currency_id')) {
+            Schema::table('wifi_packages', function (Blueprint $table): void {
+                $table->foreignId('currency_id')->nullable()->after('product_id')->constrained('currencies')->nullOnDelete();
+            });
+        }
     }
 
     public function down(): void
     {
-        Schema::table('wifi_packages', function (Blueprint $table): void {
-            $table->dropForeign(['currency_id']);
-            $table->dropColumn('currency_id');
-        });
+        if (Schema::hasColumn('wifi_packages', 'currency_id')) {
+            Schema::table('wifi_packages', function (Blueprint $table): void {
+                $table->dropConstrainedForeignId('currency_id');
+            });
+        }
     }
 };

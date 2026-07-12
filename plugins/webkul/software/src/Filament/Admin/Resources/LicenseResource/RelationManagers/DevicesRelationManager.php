@@ -15,7 +15,6 @@ use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Webkul\Software\Models\LicenseDevice;
 use Webkul\Software\Services\LegacyLicenseKeyGenerator;
@@ -127,11 +126,8 @@ class DevicesRelationManager extends RelationManager
                                 'IsMain'      => $record->is_primary ? 1 : 0,
                             ];
 
-                            $endpoint = 'http://127.0.0.1:82/api/LicGen/Generate';
-                            $internalKey = null;
-
                             try {
-                                $internalKey = app(LegacyLicenseKeyGenerator::class)->generate(
+                                $generatedKey = app(LegacyLicenseKeyGenerator::class)->generate(
                                     productCode: (int) $payload['ProductCode'],
                                     type: (string) $payload['Type'],
                                     edition: (string) $payload['Edition'],
@@ -139,64 +135,8 @@ class DevicesRelationManager extends RelationManager
                                     endDate: Carbon::parse((string) $payload['EndDate']),
                                     isMain: (bool) $payload['IsMain'],
                                 );
-                            } catch (\Throwable $exception) {
-                                Log::warning('Internal legacy license key generation failed (shadow mode)', [
-                                    'license_id' => $license->id,
-                                    'device_id'  => $record->id,
-                                    'payload'    => $payload,
-                                    'message'    => $exception->getMessage(),
-                                ]);
-                            }
-
-                            try {
-                                $response = Http::timeout(20)->post($endpoint, $payload);
-
-                                if (! $response->successful()) {
-                                    Log::warning('License key generation failed', [
-                                        'license_id' => $license->id,
-                                        'device_id'  => $record->id,
-                                        'status'     => $response->status(),
-                                        'payload'    => $payload,
-                                        'response'   => $response->body(),
-                                    ]);
-
-                                    Notification::make()
-                                        ->title(__('software::filament/license-devices.notifications.generate_failed.title'))
-                                        ->body(__('software::filament/license-devices.notifications.generate_failed.body'))
-                                        ->danger()
-                                        ->send();
-
-                                    return;
-                                }
-
-                                $generatedKey = $response->json('LicenseKey')
-                                    ?? $response->json('licenseKey');
-
-                                if (! is_string($generatedKey) || blank($generatedKey)) {
-                                    Log::warning('License key generation returned empty key', [
-                                        'license_id' => $license->id,
-                                        'device_id'  => $record->id,
-                                        'payload'    => $payload,
-                                        'response'   => $response->json(),
-                                    ]);
-
-                                    Notification::make()
-                                        ->title(__('software::filament/license-devices.notifications.generate_failed.title'))
-                                        ->body(__('software::filament/license-devices.notifications.generate_failed.empty_key'))
-                                        ->danger()
-                                        ->send();
-
-                                    return;
-                                }
 
                                 $record->update(['license_key' => $generatedKey]);
-
-                                if (is_string($internalKey) && filled($internalKey)) {
-                                    Log::info('Internal legacy generator produced shadow key', [
-                                        'license_id' => $license->id,
-                                        'device_id'  => $record->id,
-                                    ]);
-                                }
 
                                 Log::info('License key generated', [
                                     'license_id' => $license->id,

@@ -43,13 +43,13 @@ class MaintenancePlugin implements Plugin
                     ->discoverWidgets(
                         in: __DIR__.'/Filament/Widgets',
                         for: 'Webkul\\Maintenance\\Filament\\Widgets'
+                    )
+                    ->plugin(
+                        FullCalendarPlugin::make()
+                            ->selectable()
+                            ->setPlugins(['multiMonth'])
                     );
-            })
-            ->plugin(
-                FullCalendarPlugin::make()
-                    ->selectable()
-                    ->setPlugins(['multiMonth'])
-            );
+            });
     }
 
     public function boot(Panel $panel): void

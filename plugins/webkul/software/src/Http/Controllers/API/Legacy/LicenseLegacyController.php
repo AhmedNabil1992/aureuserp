@@ -88,7 +88,26 @@ class LicenseLegacyController extends Controller
         $licenseId = (int) $data['License_ID'];
 
         try {
-            $keyId = DB::transaction(function () use ($data, $licenseId): int {
+            $result = DB::transaction(function () use ($data, $licenseId): array {
+                License::query()->whereKey($licenseId)->lockForUpdate()->firstOrFail();
+
+                $device = LicenseDevice::query()
+                    ->where('license_id', $licenseId)
+                    ->where('computer_id', $data['Computer_ID'])
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($device) {
+                    return [
+                        'id'     => (int) $device->id,
+                        'status' => 'exists',
+                    ];
+                }
+
+                $isFirstDevice = ! LicenseDevice::query()
+                    ->where('license_id', $licenseId)
+                    ->exists();
+
                 $device = LicenseDevice::query()->create([
                     'license_id'  => $licenseId,
                     'computer_id' => $data['Computer_ID'],
@@ -97,16 +116,22 @@ class LicenseLegacyController extends Controller
                     'base_id'     => $data['Base_ID'],
                     'video_id'    => $data['Video_ID'],
                     'mac_id'      => $data['Mac_ID'],
+                    'is_primary'  => $isFirstDevice,
+                    'device_name' => $isFirstDevice ? 'Main' : null,
                 ]);
 
-                return (int) $device->id;
+                return [
+                    'id'     => (int) $device->id,
+                    'status' => 'created',
+                ];
             });
 
             return response()->json([
                 'success' => true,
-                'message' => 'Inserted',
+                'message' => $result['status'] === 'exists' ? 'Computer ID already exists.' : 'Inserted',
                 'data'    => [
-                    'result' => $keyId,
+                    'result' => $result['id'],
+                    'status' => $result['status'],
                 ],
             ]);
         } catch (Throwable $exception) {

@@ -7,7 +7,7 @@
         $hasTopNavigation = filament()->hasTopNavigation();
         $hasNavigation = filament()->hasNavigation();
         $hasTenancy = filament()->hasTenancy();
-        $isAdminPanel = filament()->getCurrentPanel()->getId() === 'admin';
+        $isAdminPanel = in_array(filament()->getCurrentPanel()->getId(), ['admin', 'customer']);
     @endphp
 
     <nav class="fi-topbar">

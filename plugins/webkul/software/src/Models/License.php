@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Webkul\Partner\Models\Partner;
 use Webkul\Security\Models\User;
 use Webkul\Software\Enums\LicensePlan;
@@ -116,6 +117,16 @@ class License extends Model
     public function latestActivity(): HasOne
     {
         return $this->hasOne(LicenseActivity::class, 'license_id')->latestOfMany('last_online_at');
+    }
+
+    public function currentClientVersion(): ?string
+    {
+        return $this->latestActivity?->current_version;
+    }
+
+    public function lastClientOnlineAt(): ?Carbon
+    {
+        return $this->latestActivity?->last_online_at;
     }
 
     public function tickets(): HasMany

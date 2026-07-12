@@ -45,6 +45,8 @@ class AttributeResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-swatch';
 
+    protected static ?int $navigationSort = 4;
+
     protected static bool $shouldRegisterNavigation = true;
 
     protected static bool $isGloballySearchable = false;

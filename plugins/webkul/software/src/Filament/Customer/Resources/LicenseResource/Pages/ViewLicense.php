@@ -1,6 +1,6 @@
 <?php
 
-namespace Webkul\Software\Filament\Customer\Clusters\Account\Resources\LicenseResource\Pages;
+namespace Webkul\Software\Filament\Customer\Resources\LicenseResource\Pages;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
@@ -9,7 +9,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Webkul\Software\Filament\Customer\Clusters\Account\Resources\LicenseResource;
+use Webkul\Software\Filament\Customer\Resources\LicenseResource;
 
 class ViewLicense extends ViewRecord
 {
@@ -41,14 +41,7 @@ class ViewLicense extends ViewRecord
                                 TextEntry::make('status')
                                     ->label(__('software::filament/customer/license.pages.view.fields.status'))
                                     ->badge()
-                                    ->formatStateUsing(fn ($state) => __('software::filament/customer/license.statuses.'.$state))
-                                    ->color(fn ($state) => match ($state) {
-                                        'active'    => 'success',
-                                        'inactive'  => 'gray',
-                                        'suspended' => 'warning',
-                                        'expired'   => 'danger',
-                                        default     => 'gray',
-                                    }),
+                                    ,
 
                                 TextEntry::make('start_date')
                                     ->label(__('software::filament/customer/license.pages.view.fields.start_date'))

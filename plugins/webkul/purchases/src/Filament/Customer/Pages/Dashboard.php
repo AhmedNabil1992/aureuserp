@@ -10,6 +10,11 @@ class Dashboard extends \Filament\Pages\Dashboard
 
     protected static ?int $navigationSort = -10;
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.dashboard');
+    }
+
     public function getWidgets(): array
     {
         $widgets = parent::getWidgets();

@@ -6,6 +6,7 @@ use App\Http\Middleware\SetLocale;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -37,6 +38,27 @@ class CustomerPanelProvider extends PanelProvider
             ->brandLogoHeight('2rem')
             ->colors([
                 'primary' => Color::Blue,
+            ])
+            ->topNavigation()
+            ->navigationGroups([
+                NavigationGroup::make()
+                    ->label(fn (): string => __('admin.navigation.dashboard'))
+                    ->icon('icon-dashboard'),
+                NavigationGroup::make()
+                    ->label(fn (): string => __('admin.navigation.software'))
+                    ->icon('heroicon-o-cpu-chip'),
+                NavigationGroup::make()
+                    ->label(fn (): string => __('admin.navigation.wifi'))
+                    ->icon('heroicon-o-wifi'),
+                NavigationGroup::make()
+                    ->label(fn (): string => __('admin.navigation.accounting'))
+                    ->icon('icon-accounting'),
+                NavigationGroup::make()
+                    ->label(fn (): string => __('admin.navigation.website'))
+                    ->icon('icon-website'),
+                NavigationGroup::make()
+                    ->label(fn (): string => __('admin.navigation.purchase'))
+                    ->icon('icon-purchases'),
             ])
             ->maxContentWidth(Width::Full)
             ->renderHook(
