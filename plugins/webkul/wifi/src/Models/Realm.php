@@ -27,6 +27,7 @@ class Realm extends Model
     {
         return [
             'id'       => 'integer',
+            'name'     => 'string',
             'cloud_id' => 'integer',
         ];
     }
@@ -44,5 +45,10 @@ class Realm extends Model
     public function vouchers(): HasMany
     {
         return $this->hasMany(Voucher::class, 'realm_id', 'id');
+    }
+
+    public function permanentUsers(): HasMany
+    {
+        return $this->hasMany(PermanentUser::class, 'realm_id', 'id');
     }
 }

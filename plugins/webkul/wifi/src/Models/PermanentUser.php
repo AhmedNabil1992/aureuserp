@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Webkul\Wifi\Models\Cloud;
+use Webkul\Wifi\Models\Realm;
+use Webkul\Wifi\Models\Profile;
 
 class PermanentUser extends Model
 {
@@ -46,5 +49,15 @@ class PermanentUser extends Model
     public function topUps(): HasMany
     {
         return $this->hasMany(TopUp::class, 'permanent_user_id', 'id');
+    }
+
+    public function realms(): BelongsTo
+    {
+        return $this->belongsTo(Realm::class, 'realm_id', 'id');
+    }
+
+    public function profiles(): BelongsTo
+    {
+        return $this->belongsTo(Profile::class, 'profile_id', 'id');
     }
 }

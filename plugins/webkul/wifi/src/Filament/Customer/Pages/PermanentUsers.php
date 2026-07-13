@@ -11,6 +11,10 @@ use Filament\Facades\Filament;
 use Webkul\Wifi\Models\WifiPartnerCloud;
 use Webkul\Wifi\Models\PermanentUser;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\Action;
+use Filament\Tables\Columns\IconColumn;
+use Webkul\Wifi\Services\PermanentUserService;
+use Filament\Notifications\Notification;
 
 class PermanentUsers extends Page implements HasTable
 {
@@ -61,15 +65,35 @@ class PermanentUsers extends Page implements HasTable
         return $table
             ->query($query)
             ->columns([
+                TextColumn::make('cloud.name')->label('Cloud'),    
+                TextColumn::make('realms.name')->label('Realm'),
                 TextColumn::make('username')->searchable()->sortable(),
-                TextColumn::make('cloud.name')->label('Cloud')->searchable()->sortable(),
-
+                TextColumn::make('profiles.name')->label('Profile'),
+                TextColumn::make('last_accept_time')->label('Last Accept Time')->dateTime()->sortable()->since()->dateTimeTooltip(),
+                TextColumn::make('last_reject_time')->label('Last Reject Time')->dateTime()->sortable()->since()->dateTimeTooltip(),
+                TextColumn::make('last_accept_nas')->label('Last Accept NAS')->searchable()->sortable(),
+                TextColumn::make('last_reject_nas')->label('Last Reject NAS')->searchable()->sortable(),
+                TextColumn::make('last_reject_message')->label('Last Reject Message')->searchable()->sortable(),
+                TextColumn::make('created')->label('Created')->dateTime()->sortable()->since()->dateTimeTooltip(),
+                TextColumn::make('modified')->label('Modified')->dateTime()->sortable()->since()->dateTimeTooltip(),
+                IconColumn::make('active')->label('Active')->boolean()->sortable(),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                //
+                Action::make('delete')
+                    ->label('Delete')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->action(function (PermanentUser $record) {
+                        app(PermanentUserService::class)->delete($record);
+                        Notification::make()
+                            ->title('Permanent User deleted successfully')
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->bulkActions([
                 //
