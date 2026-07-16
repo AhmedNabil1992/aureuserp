@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Software\Filament\Customer\Resources\LicenseResource\Pages\ListLicenses;
 use Webkul\Software\Filament\Customer\Resources\LicenseResource\Pages\ViewLicense;
 use Webkul\Software\Models\License;
+use Filament\Facades\Filament;
+use Illuminate\Support\Facades\Schema;
 
 class LicenseResource extends Resource
 {
@@ -44,6 +46,21 @@ class LicenseResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return __('software::filament/customer/license.models.plural');
+    }
+
+    public static function canAccess(): bool
+    {
+        $user = Filament::auth()->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        if (! Schema::hasTable('software_licenses')) {
+            return false;
+        }
+
+        return License::where('partner_id', $user->id)->exists();
     }
 
     public static function table(Table $table): Table

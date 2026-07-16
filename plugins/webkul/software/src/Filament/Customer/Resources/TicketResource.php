@@ -23,7 +23,8 @@ use Webkul\Software\Filament\Customer\Resources\TicketResource\Pages\ListTickets
 use Webkul\Software\Filament\Customer\Resources\TicketResource\Pages\ViewTicket;
 use Webkul\Software\Models\License;
 use Webkul\Software\Models\Ticket;
-
+use Filament\Facades\Filament;
+use Illuminate\Support\Facades\Schema As IlluminateSchema;
 class TicketResource extends Resource
 {
     protected static ?string $model = Ticket::class;
@@ -51,6 +52,21 @@ class TicketResource extends Resource
     public static function getNavigationGroup(): string
     {
         return __('admin.navigation.software');
+    }
+
+    public static function canAccess(): bool
+    {
+        $user = Filament::auth()->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        if (! IlluminateSchema::hasTable('software_licenses')) {
+            return false;
+        }
+
+        return License::where('partner_id', $user->id)->exists();
     }
 
     public static function form(Schema $schema): Schema

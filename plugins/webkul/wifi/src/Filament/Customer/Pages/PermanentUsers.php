@@ -15,6 +15,11 @@ use Filament\Actions\Action;
 use Filament\Tables\Columns\IconColumn;
 use Webkul\Wifi\Services\PermanentUserService;
 use Filament\Notifications\Notification;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Webkul\Wifi\Models\Cloud;
+use Webkul\Wifi\Models\Realm;
+use Webkul\Wifi\Models\Profile;
 
 class PermanentUsers extends Page implements HasTable
 {
@@ -98,5 +103,87 @@ class PermanentUsers extends Page implements HasTable
             ->bulkActions([
                 //
             ]);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('create_user')
+                ->label('إضافة مستخدم جديد') // اسم الزرار المكتوب فوق
+                ->icon('heroicon-o-user-plus')
+                ->button() // لجعل الرابط يظهر كـ زر ملوّن بارز
+                ->modalHeading('إنشاء مستخدم دائم جديد')
+                ->modalWidth('md')
+                ->form([
+                    TextInput::make('username')->label('اسم المستخدم')->required()->regex('/^[a-zA-Z0-9]+$/')
+                        ->minLength(5)
+                        ->maxLength(20)
+                        ->unique(PermanentUser::class, 'username', fn($record) => $record ? $record->id : null)
+                        ->helperText('يجب أن يتكون من حروف وأرقام فقط،لا يقل عن 5 احرف ولا يزيد عن 20 حرفًا'),
+                    TextInput::make('password')->label('كلمة المرور')->required()
+                        ->regex('/^[a-zA-Z0-9]+$/')
+                        ->minLength(5)
+                        ->maxLength(20)
+                        ->helperText('يجب أن تتكون من حروف وأرقام فقط،لا يقل عن 5 احرف ولا يزيد عن 20 حرفًا'),
+
+                    // حقل اختيار الـ Cloud المتاحة لهذا الـ Partner فقط
+                    Select::make('cloud_id')
+                        ->label('السحابة')
+                        ->options(function() {
+                            $user = Filament::auth()->user();
+                            if (! $user) return [];
+                            
+                            $cloudIds = WifiPartnerCloud::where('partner_id', $user->id)->pluck('cloud_id')->toArray();
+                            return Cloud::whereIn('id', $cloudIds)->pluck('name', 'id');
+                        })
+                        ->required(),
+
+                    // حقل اختيار الـ Realm المتاحة للـ Clouds الخاصة بالـ Partner فقط لضمان الأمان
+                    Select::make('realm_id')
+                        ->label('Realm')
+                        ->options(function() {
+                            $user = Filament::auth()->user();
+                            if (! $user) return [];
+
+                            $cloudIds = WifiPartnerCloud::where('partner_id', $user->id)->pluck('cloud_id')->toArray();
+                            return Realm::whereIn('cloud_id', $cloudIds)->pluck('name', 'id');
+                        })
+                        ->required(),
+
+                    // حقل اختيار الـ Profile المتاحة للـ Clouds الخاصة بالـ Partner
+                    Select::make('profile_id')
+                        ->label('Profile')
+                        ->options(function() {
+                            $user = Filament::auth()->user();
+                            if (! $user) return [];
+
+                            $cloudIds = WifiPartnerCloud::where('partner_id', $user->id)->pluck('cloud_id')->toArray();
+                            return Profile::whereIn('id', [
+                                334,
+                                1292,
+                                1293,
+                                632,
+                                288,
+                                1570,
+                            ])->pluck('name', 'id');
+                        })
+                        ->required(),
+                ])
+                // الأكشن اللي هيتنفذ في الداتا بيز عند الضغط على زر الحفظ جوة الـ Modal
+                ->action(function (array $data) {
+                    PermanentUser::create([
+                        'username'   => $data['username'],
+                        'cloud_id'   => $data['cloud_id'],
+                        'realm_id'   => $data['realm_id'],
+                        'profile_id' => $data['profile_id'],
+                        'active'     => true, // تفعيله تلقائياً عند الإنشاء
+                    ]);
+
+                    Notification::make()
+                        ->title('تم إنشاء المستخدم بنجاح')
+                        ->success()
+                        ->send();
+                }),
+        ];
     }
 }

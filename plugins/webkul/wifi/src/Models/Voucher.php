@@ -5,6 +5,7 @@ namespace Webkul\Wifi\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Voucher extends Model
 {
@@ -62,5 +63,10 @@ class Voucher extends Model
     public function batchItems(): HasMany
     {
         return $this->hasMany(Voucher::class, 'batch', 'batch');
+    }
+
+    public function cloud(): BelongsTo
+    {
+        return $this->belongsTo(Cloud::class, 'cloud_id', 'id');
     }
 }
