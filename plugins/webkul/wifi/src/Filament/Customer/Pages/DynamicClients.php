@@ -28,10 +28,17 @@ class DynamicClients extends Page implements HasTable
 
     // protected static ?string $cluster = WiFiCluster::class;
 
-    protected static ?string $title = 'Dynamic Clients';
-
+    protected static ?int $navigationSort = 1;
+    public static function getNavigationLabel(): string
+    {
+        return __('wifi::filament/customer/pages/dynamicclient.title');
+    }
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-wifi';
 
+    public static function getmodelLabel(): string
+    {
+        return __('wifi::filament/customer/pages/dynamicclient.title');
+    }
     public static function getNavigationGroup(): string
     {
         return __('admin.navigation.wifi');
@@ -70,11 +77,11 @@ class DynamicClients extends Page implements HasTable
         return $table
             ->query($query)
             ->columns([
-                TextColumn::make('cloud.name')->label('Cloud')->searchable()->sortable(),
-                TextColumn::make('dynamicClientRealms.realm.name')->searchable()->sortable()->placeholder('Available to All'),
-                TextColumn::make('name')->searchable()->sortable(),
-                TextColumn::make('nasidentifier')->searchable()->sortable(),
-                TextColumn::make('last_contact')->sortable()
+                TextColumn::make('cloud.name')->label(__('wifi::filament/customer/pages/dynamicclient.table.columns.cloud'))->searchable()->sortable(),
+                TextColumn::make('dynamicClientRealms.realm.name')->label(__('wifi::filament/customer/pages/dynamicclient.table.columns.realm'))->searchable()->sortable()->placeholder('Available to All'),
+                TextColumn::make('name')->label(__('wifi::filament/customer/pages/dynamicclient.table.columns.name'))->searchable()->sortable(),
+                TextColumn::make('nasidentifier')->label(__('wifi::filament/customer/pages/dynamicclient.table.columns.nasidentifier'))->searchable()->sortable(),
+                TextColumn::make('last_contact')->label(__('wifi::filament/customer/pages/dynamicclient.table.columns.last_contact'))->sortable()
                     ->badge()
                     ->color(function ($state) {
                         if ($state) {
@@ -92,15 +99,15 @@ class DynamicClients extends Page implements HasTable
                         return 'secondary'; // gray
                     })
                     ->since()->dateTimeTooltip()->weight(FontWeight::Bold),
-                TextColumn::make('last_contact_ip')->sortable(),
-                IconColumn::make('Picture')
-                    ->label('Picture Uploaded')
+                TextColumn::make('last_contact_ip')->label(__('wifi::filament/customer/pages/dynamicclient.table.columns.last_contact_ip'))->sortable(),
+                IconColumn::make('picture')
+                    ->label(__('wifi::filament/customer/pages/dynamicclient.table.columns.picture'))
                     ->getStateUsing(function ($record) {
                         return ! empty($record->Picture);
                     })
                     ->boolean(),
                 IconColumn::make('active')
-                    ->label('Active')
+                    ->label(__('wifi::filament/customer/pages/dynamicclient.table.columns.active'))
                     ->sortable()
                     ->boolean()
                     ->trueIcon(Heroicon::OutlinedCheckBadge)
@@ -108,7 +115,7 @@ class DynamicClients extends Page implements HasTable
             ])
             ->filters([
                 SelectFilter::make('realm')
-                    ->label('Realm')
+                    ->label(__('wifi::filament/customer/pages/dynamicclient.filters.realm'))
                     ->options(function () use ($cloudIds) {
                         try {
                             // استخراج كلاس الـ Realm ديناميكياً لتفادي مشاكل الـ Namespace والـ Prefixes للـ Packages
@@ -147,8 +154,8 @@ class DynamicClients extends Page implements HasTable
             ])
             ->actions([
                 Action::make('edit_picture')
-                    ->label('تعديل الصورة')
-                    ->modalHeading('تعديل صورة لوجو الكروت فقط')
+                    ->label(__('wifi::filament/customer/pages/dynamicclient.actions.title'))
+                    ->modalHeading(__('wifi::filament/customer/pages/dynamicclient.actions.modal_heading'))
                     ->modalWidth('md')
                     // السطر ده عشان يقرأ الصورة القديمة ويوريها للمستخدم أول ما يفتح الـ Modal
                     ->fillForm(fn ($record) => [
@@ -156,7 +163,7 @@ class DynamicClients extends Page implements HasTable
                     ])
                     ->form([
                         FileUpload::make('Picture')
-                            ->label('اختر الصورة الجديدة')
+                            ->label(__('wifi::filament/customer/pages/dynamicclient.actions.fileupload_placeholder'))
                             ->image()
                             ->directory('dynamic-clients')
                             ->maxSize(1024)

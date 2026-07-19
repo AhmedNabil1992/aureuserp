@@ -77,6 +77,32 @@ class PermanentUserService
         return $this->validateResponse($response, 'Failed to delete permanent user.');
     }
 
+    /**
+     * @return array<string, mixed>
+     */
+    public function addtopup(array $data): array
+    {
+        $endpoint = $this->resolveEndpoint('topup');
+        $token = (string) config('services.wifi_voucher.token');
+
+        $payload = [
+            'permanent_user_id' => (int) $data['permanent_user_id'],
+            'type' => strtolower((string) $data['type']),
+            'value' => (int) $data['value'],
+            'data_unit' => strtolower((string) $data['data_unit']),
+            'comment' => (string) ($data['comment'] ?? ''),
+            'token' => $token,
+            'cloud_id' => (int) $data['cloud_id'],
+        ];
+
+        $response = Http::asForm()
+            ->timeout(30)
+            ->post($endpoint, $payload);
+
+        return $this->validateResponse($response, 'Failed to add top-up.');
+
+    }
+
     private function resolveEndpoint(string $action): string
     {
         $configuredEndpoint = (string) config("services.wifi_voucher.permanent_user_{$action}_endpoint");
@@ -94,6 +120,7 @@ class PermanentUserService
         return match ($action) {
             'add'    => str_replace('/vouchers/add.json', '/permanent-users/add.json', $voucherEndpoint),
             'delete' => str_replace('/vouchers/add.json', '/permanent-users/delete.json', $voucherEndpoint),
+            'topup'  => str_replace('/vouchers/add.json', '/top-ups/add.json', $voucherEndpoint),
             default  => $voucherEndpoint,
         };
     }

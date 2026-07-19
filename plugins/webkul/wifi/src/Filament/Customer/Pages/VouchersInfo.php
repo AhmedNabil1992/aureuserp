@@ -24,8 +24,13 @@ class VouchersInfo extends Page implements HasTable
     protected string $view = 'wifi::filament.customer.pages.vouchers-info';
 
     public string $activeTab = 'all';
-    protected static ?string $title = 'Vouchers Info';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('wifi::filament/customer/pages/voucherinfo.navigation.title');
+    }
+
+    protected static ?int $navigationSort = 2;
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-information-circle';
     
     public static function getNavigationGroup(): string
@@ -123,12 +128,12 @@ class VouchersInfo extends Page implements HasTable
         return $table
             ->query($query)
             ->columns([
-                TextColumn::make('cloud.name')->label('Cloud'),    
-                TextColumn::make('realm')->label('Realm'),
-                TextColumn::make('batch')->label('إسم الملف')->sortable()->searchable(),
-                TextColumn::make('name')->searchable()->sortable(),
-                TextColumn::make('profile')->label('Profile'),
-                TextColumn::make('status')->label('Status')->badge()->sortable()->color(function ($state) {
+                TextColumn::make('cloud.name')->label(__('wifi::filament/customer/pages/voucherinfo.table.columns.cloud'))->searchable()->sortable(),    
+                TextColumn::make('realm')->label(__('wifi::filament/customer/pages/voucherinfo.table.columns.realm'))->searchable()->sortable(),
+                TextColumn::make('batch')->label(__('wifi::filament/customer/pages/voucherinfo.table.columns.batch'))->sortable()->searchable(),
+                TextColumn::make('name')->label(__('wifi::filament/customer/pages/voucherinfo.table.columns.name'))->searchable()->sortable(),
+                TextColumn::make('profile')->label(__('wifi::filament/customer/pages/voucherinfo.table.columns.profile'))->searchable()->sortable(),
+                TextColumn::make('status')->label(__('wifi::filament/customer/pages/voucherinfo.table.columns.status'))->badge()->sortable()->color(function ($state) {
                         if ($state) {
                             if ($state == 'new') {
                                 return 'success'; // green
@@ -153,7 +158,7 @@ class VouchersInfo extends Page implements HasTable
                         return $replacements[$state] ?? $state;
                     }),
                 TextColumn::make('perc_time_used')
-                    ->label('نسبة الوقت المستخدم')
+                    ->label(__('wifi::filament/customer/pages/voucherinfo.table.columns.perc_time_used'))
                     ->badge()
                     ->color(function ($state) {
                         if ($state <= 25) {
@@ -169,7 +174,7 @@ class VouchersInfo extends Page implements HasTable
                     ->formatStateUsing(function ($state) {
                         return $state . '%';
                     }),
-                TextColumn::make('perc_data_used')->label('نسبة البيانات المستخدمة')
+                TextColumn::make('perc_data_used')->label(__('wifi::filament/customer/pages/voucherinfo.table.columns.perc_data_used'))
                     ->badge()
                     ->color(function ($state) {
                         if ($state <= 25) {
@@ -185,15 +190,15 @@ class VouchersInfo extends Page implements HasTable
                     ->formatStateUsing(function ($state) {
                         return $state . '%';
                     }),
-                TextColumn::make('last_accept_time')->label('Last Accept Time')->dateTime()->sortable()->since()->dateTimeTooltip(),
-                TextColumn::make('last_reject_time')->label('Last Reject Time')->dateTime()->sortable()->since()->dateTimeTooltip(),
-                TextColumn::make('last_accept_nas')->label('Last Accept NAS')->searchable()->sortable(),
-                TextColumn::make('last_reject_nas')->label('Last Reject NAS')->searchable()->sortable(),
-                TextColumn::make('last_reject_message')->label('Last Reject Message')->sortable(),
-                TextColumn::make('expire')->label('تاريخ الانتهاء')->since()->dateTimeTooltip()->weight(FontWeight::Bold),
-                TextColumn::make('time_valid')->label('وقت الصلاحية'),
-                TextColumn::make('created')->label('Created')->dateTime()->sortable()->since()->dateTimeTooltip(),
-                TextColumn::make('modified')->label('Modified')->dateTime()->sortable()->since()->dateTimeTooltip(),
+                TextColumn::make('last_accept_time')->label(__('wifi::filament/customer/pages/voucherinfo.table.columns.last_accept_time'))->dateTime()->sortable()->since()->dateTimeTooltip(),
+                TextColumn::make('last_reject_time')->label(__('wifi::filament/customer/pages/voucherinfo.table.columns.last_reject_time'))->dateTime()->sortable()->since()->dateTimeTooltip(),
+                TextColumn::make('last_accept_nas')->label(__('wifi::filament/customer/pages/voucherinfo.table.columns.last_accept_nas'))->searchable()->sortable(),
+                TextColumn::make('last_reject_nas')->label(__('wifi::filament/customer/pages/voucherinfo.table.columns.last_reject_nas'))->searchable()->sortable(),
+                TextColumn::make('last_reject_message')->label(__('wifi::filament/customer/pages/voucherinfo.table.columns.last_reject_message'))->sortable(),
+                TextColumn::make('expire')->label(__('wifi::filament/customer/pages/voucherinfo.table.columns.expires'))->since()->dateTimeTooltip()->weight(FontWeight::Bold),
+                TextColumn::make('time_valid')->label(__('wifi::filament/customer/pages/voucherinfo.table.columns.time_valid')),
+                TextColumn::make('created')->label(__('wifi::filament/customer/pages/voucherinfo.table.columns.created'))->dateTime()->sortable()->since()->dateTimeTooltip(),
+                TextColumn::make('modified')->label(__('wifi::filament/customer/pages/voucherinfo.table.columns.modified'))->dateTime()->sortable()->since()->dateTimeTooltip(),
             ])
             ->filters([
                 
@@ -201,13 +206,13 @@ class VouchersInfo extends Page implements HasTable
             ->actions([
                 // 2. إضافة أكشن الـ POPUP لعرض تفاصيل استهلاك الراديوس (Radacct)
                 Action::make('view_usage')
-                    ->label('تفاصيل الاستهلاك')
+                    ->label(__('wifi::filament/customer/pages/voucherinfo.table.actions.view'))
                     ->icon('heroicon-o-chart-bar')
                     ->color('info')
-                    ->modalHeading(fn ($record) => "سجل استهلاك الكارت: {$record->name}")
+                    ->modalHeading(fn ($record) => __("wifi::filament/customer/pages/voucherinfo.view.title") . ": {$record->name}")
                     ->modalWidth('5xl')
                     ->modalSubmitAction(false) // إخفاء زر الحفظ لأنه عرض فقط
-                    ->modalCancelActionLabel('إغلاق')
+                    ->modalCancelActionLabel(__('wifi::filament/customer/pages/voucherinfo.view.cancel'))
                     ->form(function ($record) {
                         // جلب الجلسات الخاصة بـ username الكارت الحالي من موديل Radacct
                         $sessions = \Webkul\Wifi\Models\Radacct::where('username', $record->name)
@@ -219,7 +224,7 @@ class VouchersInfo extends Page implements HasTable
                                 ->label('')
                                 ->content(function () use ($sessions) {
                                     if ($sessions->isEmpty()) {
-                                        return new HtmlString('<div class="p-4 text-center text-gray-500 dark:text-gray-400">لا توجد سجلات استهلاك أو اتصالات نشطة لهذا الكارت حتى الآن.</div>');
+                                        return new HtmlString('<div class="p-4 text-center text-gray-500 dark:text-gray-400">' . __('wifi::filament/customer/pages/voucherinfo.view.no_record') . '</div>');
                                     }
 
                                     // بناء جدول Tailwind CSS متوافق مع النظام والـ Dark Mode
@@ -227,12 +232,12 @@ class VouchersInfo extends Page implements HasTable
                                     $html .= '<table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm text-right dir-rtl" style="direction: rtl;">';
                                     $html .= '<thead class="bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold">';
                                     $html .= '<tr>
-                                        <th class="px-4 py-3 text-center">عنوان الماك (MAC)</th>
-                                        <th class="px-4 py-3">وقت بدء الاتصال</th>
-                                        <th class="px-4 py-3">وقت الانتهاء</th>
-                                        <th class="px-4 py-3 text-center">مدة الجلسة</th>
-                                        <th class="px-4 py-3 text-center">التحميل (Download)</th>
-                                        <th class="px-4 py-3 text-center">الرفع (Upload)</th>
+                                        <th class="px-4 py-3 text-center">' . __('wifi::filament/customer/pages/voucherinfo.view.table.mac') . '</th>
+                                        <th class="px-4 py-3">' . __('wifi::filament/customer/pages/voucherinfo.view.table.start_time') . '</th>
+                                        <th class="px-4 py-3">' . __('wifi::filament/customer/pages/voucherinfo.view.table.stop_time') . '</th>
+                                        <th class="px-4 py-3 text-center">' . __('wifi::filament/customer/pages/voucherinfo.view.table.session_time') . '</th>
+                                        <th class="px-4 py-3 text-center">' . __('wifi::filament/customer/pages/voucherinfo.view.table.data_in') . '</th>
+                                        <th class="px-4 py-3 text-center">' . __('wifi::filament/customer/pages/voucherinfo.view.table.data_out') . '</th>
                                     </tr></thead>';
                                     $html .= '<tbody class="divide-y divide-gray-200 dark:divide-gray-700 text-gray-600 dark:text-gray-400">';
 

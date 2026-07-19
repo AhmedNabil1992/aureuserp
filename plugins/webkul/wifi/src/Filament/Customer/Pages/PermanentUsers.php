@@ -29,8 +29,11 @@ class PermanentUsers extends Page implements HasTable
 
     // protected static ?string $cluster = WiFiCluster::class;
 
-    protected static ?string $title = 'Permanent Users';
-
+    public static function getNavigationLabel(): string
+    {
+        return __('wifi::filament/customer/pages/permanentuser.title');
+    }
+    protected static ?int $navigationSort = 3;
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-users';
 
     public static function getNavigationGroup(): string
@@ -70,32 +73,32 @@ class PermanentUsers extends Page implements HasTable
         return $table
             ->query($query)
             ->columns([
-                TextColumn::make('cloud.name')->label('Cloud'),    
-                TextColumn::make('realms.name')->label('Realm'),
-                TextColumn::make('username')->searchable()->sortable(),
-                TextColumn::make('profiles.name')->label('Profile'),
-                TextColumn::make('last_accept_time')->label('Last Accept Time')->dateTime()->sortable()->since()->dateTimeTooltip(),
-                TextColumn::make('last_reject_time')->label('Last Reject Time')->dateTime()->sortable()->since()->dateTimeTooltip(),
-                TextColumn::make('last_accept_nas')->label('Last Accept NAS')->searchable()->sortable(),
-                TextColumn::make('last_reject_nas')->label('Last Reject NAS')->searchable()->sortable(),
-                TextColumn::make('last_reject_message')->label('Last Reject Message')->searchable()->sortable(),
-                TextColumn::make('created')->label('Created')->dateTime()->sortable()->since()->dateTimeTooltip(),
-                TextColumn::make('modified')->label('Modified')->dateTime()->sortable()->since()->dateTimeTooltip(),
-                IconColumn::make('active')->label('Active')->boolean()->sortable(),
+                TextColumn::make('cloud.name')->label(__('wifi::filament/customer/pages/permanentuser.table.columns.cloud'))->searchable()->sortable(),    
+                TextColumn::make('realms.name')->label(__('wifi::filament/customer/pages/permanentuser.table.columns.realm')),
+                TextColumn::make('username')->label(__('wifi::filament/customer/pages/permanentuser.table.columns.username'))->searchable()->sortable(),
+                TextColumn::make('profiles.name')->label(__('wifi::filament/customer/pages/permanentuser.table.columns.profile')),
+                TextColumn::make('last_accept_time')->label(__('wifi::filament/customer/pages/permanentuser.table.columns.last_accept_time'))->dateTime()->sortable()->since()->dateTimeTooltip(),
+                TextColumn::make('last_reject_time')->label(__('wifi::filament/customer/pages/permanentuser.table.columns.last_reject_time'))->dateTime()->sortable()->since()->dateTimeTooltip(),
+                TextColumn::make('last_accept_nas')->label(__('wifi::filament/customer/pages/permanentuser.table.columns.last_accept_nas'))->searchable()->sortable(),
+                TextColumn::make('last_reject_nas')->label(__('wifi::filament/customer/pages/permanentuser.table.columns.last_reject_nas'))->searchable()->sortable(),
+                TextColumn::make('last_reject_message')->label(__('wifi::filament/customer/pages/permanentuser.table.columns.last_reject_message'))->searchable()->sortable(),
+                TextColumn::make('created')->label(__('wifi::filament/customer/pages/permanentuser.table.columns.created'))->dateTime()->sortable()->since()->dateTimeTooltip(),
+                TextColumn::make('modified')->label(__('wifi::filament/customer/pages/permanentuser.table.columns.modified'))->dateTime()->sortable()->since()->dateTimeTooltip(),
+                IconColumn::make('active')->label(__('wifi::filament/customer/pages/permanentuser.table.columns.active'))->boolean()->sortable(),
             ])
             ->filters([
                 //
             ])
             ->actions([
                 Action::make('delete')
-                    ->label('Delete')
+                    ->label(__('wifi::filament/customer/pages/permanentuser.actions.delete'))
                     ->icon('heroicon-o-trash')
                     ->color('danger')
                     ->requiresConfirmation()
                     ->action(function (PermanentUser $record) {
                         app(PermanentUserService::class)->delete($record);
                         Notification::make()
-                            ->title('Permanent User deleted successfully')
+                            ->title(__('wifi::filament/customer/pages/permanentuser.notifications.delete.success'))
                             ->success()
                             ->send();
                     }),
@@ -109,26 +112,26 @@ class PermanentUsers extends Page implements HasTable
     {
         return [
             Action::make('create_user')
-                ->label('إضافة مستخدم جديد') // اسم الزرار المكتوب فوق
+                ->label(__('wifi::filament/customer/pages/permanentuser.headeractions.label')) // اسم الزرار المكتوب فوق
                 ->icon('heroicon-o-user-plus')
                 ->button() // لجعل الرابط يظهر كـ زر ملوّن بارز
-                ->modalHeading('إنشاء مستخدم دائم جديد')
+                ->modalHeading(__('wifi::filament/customer/pages/permanentuser.headeractions.create'))
                 ->modalWidth('md')
                 ->form([
-                    TextInput::make('username')->label('اسم المستخدم')->required()->regex('/^[a-zA-Z0-9]+$/')
+                    TextInput::make('username')->label(__('wifi::filament/customer/pages/permanentuser.headeractions.form.username'))->required()->regex('/^[a-zA-Z0-9]+$/')
                         ->minLength(5)
                         ->maxLength(20)
                         ->unique(PermanentUser::class, 'username', fn($record) => $record ? $record->id : null)
-                        ->helperText('يجب أن يتكون من حروف وأرقام فقط،لا يقل عن 5 احرف ولا يزيد عن 20 حرفًا'),
-                    TextInput::make('password')->label('كلمة المرور')->required()
+                        ->helperText(__('wifi::filament/customer/pages/permanentuser.headeractions.form.username_helper')),
+                    TextInput::make('password')->label(__('wifi::filament/customer/pages/permanentuser.headeractions.form.password'))->required()
                         ->regex('/^[a-zA-Z0-9]+$/')
                         ->minLength(5)
                         ->maxLength(20)
-                        ->helperText('يجب أن تتكون من حروف وأرقام فقط،لا يقل عن 5 احرف ولا يزيد عن 20 حرفًا'),
+                        ->helperText(__('wifi::filament/customer/pages/permanentuser.headeractions.form.password_helper')),
 
                     // حقل اختيار الـ Cloud المتاحة لهذا الـ Partner فقط
                     Select::make('cloud_id')
-                        ->label('السحابة')
+                        ->label(__('wifi::filament/customer/pages/permanentuser.headeractions.form.cloud'))
                         ->options(function() {
                             $user = Filament::auth()->user();
                             if (! $user) return [];
@@ -140,7 +143,7 @@ class PermanentUsers extends Page implements HasTable
 
                     // حقل اختيار الـ Realm المتاحة للـ Clouds الخاصة بالـ Partner فقط لضمان الأمان
                     Select::make('realm_id')
-                        ->label('Realm')
+                        ->label(__('wifi::filament/customer/pages/permanentuser.headeractions.form.realm'))
                         ->options(function() {
                             $user = Filament::auth()->user();
                             if (! $user) return [];
@@ -152,7 +155,7 @@ class PermanentUsers extends Page implements HasTable
 
                     // حقل اختيار الـ Profile المتاحة للـ Clouds الخاصة بالـ Partner
                     Select::make('profile_id')
-                        ->label('Profile')
+                        ->label(__('wifi::filament/customer/pages/permanentuser.headeractions.form.profile'))
                         ->options(function() {
                             $user = Filament::auth()->user();
                             if (! $user) return [];
@@ -171,16 +174,10 @@ class PermanentUsers extends Page implements HasTable
                 ])
                 // الأكشن اللي هيتنفذ في الداتا بيز عند الضغط على زر الحفظ جوة الـ Modal
                 ->action(function (array $data) {
-                    PermanentUser::create([
-                        'username'   => $data['username'],
-                        'cloud_id'   => $data['cloud_id'],
-                        'realm_id'   => $data['realm_id'],
-                        'profile_id' => $data['profile_id'],
-                        'active'     => true, // تفعيله تلقائياً عند الإنشاء
-                    ]);
+                    
 
                     Notification::make()
-                        ->title('تم إنشاء المستخدم بنجاح')
+                        ->title(__('wifi::filament/customer/pages/permanentuser.headeractions.notifications.create.success'))
                         ->success()
                         ->send();
                 }),

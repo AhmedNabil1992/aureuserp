@@ -36,6 +36,7 @@ class TopUp extends Model
             'permanent_user_id' => 'integer',
             'data'              => 'integer',
             'time'              => 'integer',
+            'type'              => 'string',
             'days_to_use'       => 'integer',
             'created'           => 'datetime',
             'updated'           => 'datetime',
