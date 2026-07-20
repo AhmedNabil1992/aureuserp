@@ -34,6 +34,7 @@ use Webkul\TimeOff\TimeOffServiceProvider;
 use Webkul\Timesheet\TimesheetServiceProvider;
 use Webkul\Website\WebsiteServiceProvider;
 use Webkul\Wifi\WifiServiceProvider;
+use Webkul\Psmonitor\PsmonitorServiceProvider;
 
 // use App\Providers\AppServiceProvider;
 // use App\Providers\Filament\AdminPanelProvider;
@@ -100,4 +101,5 @@ return [
     WifiServiceProvider::class,
     WebsiteServiceProvider::class,
     PluginManagerServiceProvider::class,
+    PsmonitorServiceProvider::class,
 ];

@@ -56,9 +56,12 @@ class CustomerPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label(fn (): string => __('admin.navigation.website'))
                     ->icon('icon-website'),
+                // NavigationGroup::make()
+                //     ->label(fn (): string => __('admin.navigation.purchase'))
+                //     ->icon('icon-purchases'),
                 NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.purchase'))
-                    ->icon('icon-purchases'),
+                    ->label(fn (): string => __('admin.navigation.psmonitor'))
+                    ->icon('icon-settings'),
             ])
             ->maxContentWidth(Width::Full)
             ->renderHook(

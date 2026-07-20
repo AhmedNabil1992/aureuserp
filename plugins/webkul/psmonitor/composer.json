@@ -1,0 +1,30 @@
+{
+    "name": "webkul/psmonitor",
+    "description": "PlayStation Monitor plugin for customer to monitor their PlayStation  branch status.",
+    "authors": [
+        {
+            "name": "eTech",
+            "email": "admin@etech-valley.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webkul\\Psmonitor\\PsmonitorServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Webkul\\Psmonitor\\": "src/",
+            "Webkul\\Psmonitor\\Database\\Factories\\": "database/factories/",
+            "Webkul\\Psmonitor\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Webkul\\Psmonitor\\Tests\\": "tests/"
+        }
+    }
+}

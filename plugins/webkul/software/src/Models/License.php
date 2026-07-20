@@ -15,6 +15,7 @@ use Webkul\Software\Enums\LicensePlan;
 use Webkul\Software\Enums\LicenseStatus;
 use Webkul\Support\Models\City;
 use Webkul\Support\Models\State;
+use Illuminate\Database\Eloquent\Builder;
 
 class License extends Model
 {
@@ -133,4 +134,48 @@ class License extends Model
     {
         return $this->hasMany(Ticket::class, 'license_id');
     }
+
+    public function hasRemoteServer(): bool
+    {
+        return !empty($this->server_ip);
+    }
+
+    public function isRemoteAccessible(): bool
+    {
+        if (! $this->IsActive || ! $this->hasRemoteServer()) {
+            return false;
+        }
+
+        if (! $this->hasActiveRemoteSubscription()) {
+            return false;
+        }
+
+        if ($this->LicenseType === 'FULL' || $this->EndDate === null) {
+            return true;
+        }
+
+        return $this->EndDate->isToday() || $this->EndDate->isFuture();
+    }
+
+    public function hasActiveRemoteSubscription(): bool
+    {
+        return $this->subscriptions()
+            ->ofType('remote')
+            ->activeNow()
+            ->exists();
+    }
+
+    public function scopeRemoteAccessible(Builder $query): Builder
+    {
+        return $query->where('is_active', true)
+            ->whereNotNull('server_ip')
+            ->whereHas('subscriptions', function (Builder $subQuery): void {
+                $subQuery->ofType('remote')->activeNow();
+            });
+    }
+
+    
+
+
+    
 }

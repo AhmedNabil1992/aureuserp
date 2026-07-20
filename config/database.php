@@ -111,6 +111,22 @@ return [
             // 'encrypt' => env('DB_ENCRYPT', 'yes'),
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
+        
+        'ps_sqlsrv' => [
+            'driver' => 'sqlsrv',
+            'url' => env('DB_URL'),
+            'host' => env('PS_Host', 'localhost'),
+            'port' => env('PS_Port', '1433'),
+            'database' => env('PS_Database', 'laravel'),
+            'username' => env('PS_Username', 'root'),
+            'password' => env('PS_Password', ''),
+            'charset' => env('PS_Charset', 'utf8'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'login_timeout' => (int) env('PS_DB_LOGIN_TIMEOUT', 30),
+            // 'encrypt' => env('DB_ENCRYPT', 'yes'),
+            // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
+        ],
 
     ],
 

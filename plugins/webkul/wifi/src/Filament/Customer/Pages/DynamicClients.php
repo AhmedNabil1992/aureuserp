@@ -19,6 +19,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
+use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
 class DynamicClients extends Page implements HasTable
 {
