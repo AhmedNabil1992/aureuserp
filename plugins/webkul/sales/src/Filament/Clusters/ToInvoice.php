@@ -3,6 +3,7 @@
 namespace Webkul\Sale\Filament\Clusters;
 
 use Filament\Clusters\Cluster;
+use Webkul\Support\Enums\NavigationGroup;
 
 class ToInvoice extends Cluster
 {
@@ -13,8 +14,8 @@ class ToInvoice extends Cluster
         return __('sales::filament/clusters/to-invoice.navigation.title');
     }
 
-    public static function getNavigationGroup(): string
+    public static function getNavigationGroup(): string | \UnitEnum
     {
-        return __('admin.navigation.sale');
+        return NavigationGroup::Sale;
     }
 }

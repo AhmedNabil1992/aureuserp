@@ -61,8 +61,9 @@ return [
                 'title' => 'Pricing',
 
                 'fields' => [
-                    'price' => 'Price',
-                    'cost'  => 'Cost',
+                    'price'           => 'Price',
+                    'cost'            => 'Cost',
+                    'uom-placeholder' => 'UOM',
                 ],
             ],
 

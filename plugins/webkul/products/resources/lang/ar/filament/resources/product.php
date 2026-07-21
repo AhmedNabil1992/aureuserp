@@ -60,8 +60,9 @@ return [
                 'title' => 'التسعير',
 
                 'fields' => [
-                    'price' => 'السعر',
-                    'cost'  => 'التكلفة',
+                    'price'           => 'السعر',
+                    'cost'            => 'التكلفة',
+                    'uom-placeholder' => 'وحدة القياس',
                 ],
             ],
 

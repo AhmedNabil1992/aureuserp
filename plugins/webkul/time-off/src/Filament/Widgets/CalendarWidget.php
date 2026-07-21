@@ -130,6 +130,7 @@ class CalendarWidget extends FullCalendarWidget
                                 ->title(__('time-off::filament/widgets/calendar-widget.notifications.employee-not-found.title'))
                                 ->body(__('time-off::filament/widgets/calendar-widget.notifications.employee-not-found.body'))
                                 ->send();
+
                             $action->cancel();
                         }
 
@@ -146,7 +147,7 @@ class CalendarWidget extends FullCalendarWidget
                             ->send();
 
                         $action->cancel();
-                    } catch (Halt|Cancel $exception) {
+                    } catch (Halt | Cancel $exception) {
                         throw $exception;
                     } catch (Throwable $exception) {
                         report($exception);
@@ -228,7 +229,7 @@ class CalendarWidget extends FullCalendarWidget
                             ->send();
 
                         $action->cancel();
-                    } catch (Halt|Cancel $exception) {
+                    } catch (Halt | Cancel $exception) {
                         throw $exception;
                     } catch (Throwable $exception) {
                         report($exception);

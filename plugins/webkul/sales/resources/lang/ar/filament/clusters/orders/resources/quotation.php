@@ -90,6 +90,12 @@ return [
                                 'body'  => 'لا يمكن حذف المنتجات من أمر بيع مؤكد.',
                             ],
                         ],
+
+                        'actions' => [
+                            'open-product' => [
+                                'tooltip' => 'فتح المنتج',
+                            ],
+                        ],
                     ],
 
                     'product-optional' => [
@@ -116,6 +122,7 @@ return [
                             'actions' => [
                                 'tooltip' => [
                                     'add-order-line' => 'إضافة بند طلب',
+                                    'already-added' => 'تمت الإضافة إلى الطلب',
                                 ],
 
                                 'notifications' => [
@@ -196,6 +203,7 @@ return [
         'columns' => [
             'number'             => 'الرقم',
             'status'             => 'الحالة',
+            'delivery-status'    => 'حالة التسليم',
             'invoice-status'     => 'حالة الفاتورة',
             'creation-date'      => 'تاريخ الإنشاء',
             'commitment-date'    => 'تاريخ الالتزام',
@@ -207,6 +215,12 @@ return [
             'amount-tax'         => 'مبلغ الضريبة',
             'amount-total'       => 'المبلغ الإجمالي',
             'customer-reference' => 'مرجع العميل',
+        ],
+
+        'summarizers' => [
+            'total'        => 'الإجمالي',
+            'taxes'        => 'الضرائب',
+            'total-amount' => 'المبلغ الإجمالي',
         ],
 
         'filters' => [
@@ -319,6 +333,8 @@ return [
                             'product-variants'    => 'متغيرات المنتج',
                             'product-simple'      => 'منتج بسيط',
                             'quantity'            => 'الكمية',
+                            'qty-delivered'       => 'الكمية المسلّمة',
+                            'qty-invoiced'        => 'الكمية المفوترة',
                             'uom'                 => 'وحدة القياس',
                             'lead-time'           => 'وقت التسليم',
                             'packaging-qty'       => 'كمية التغليف',

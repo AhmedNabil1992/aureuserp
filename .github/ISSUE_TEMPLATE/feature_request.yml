@@ -8,7 +8,7 @@ body:
     attributes:
       label: 🧩 Problem Description
       description: |
-        Is your feature request related to a problem? Please explain clearly.  
+        Is your feature request related to a problem? Please explain clearly.
         _Example: "I'm always frustrated when I have to manually enter data for every invoice..."_
       placeholder: Describe the problem or limitation you're facing.
     validations:

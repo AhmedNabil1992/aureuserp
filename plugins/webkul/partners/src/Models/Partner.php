@@ -22,12 +22,13 @@ use Webkul\Security\Models\User;
 use Webkul\Security\Traits\HasPermissionScope;
 use Webkul\Support\Models\City;
 use Webkul\Support\Models\Company;
+use Webkul\Support\Models\Concerns\HasContributedAttributes;
 use Webkul\Support\Models\Country;
 use Webkul\Support\Models\State;
 
 class Partner extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
-    use HasChatter, HasFactory, HasLogActivity, HasPermissionScope, Notifiable, SoftDeletes;
+    use HasChatter, HasContributedAttributes, HasFactory, HasLogActivity, HasPermissionScope, Notifiable, SoftDeletes;
 
     public const ACTIVITY_PLAN_PLUGIN = 'partners';
 

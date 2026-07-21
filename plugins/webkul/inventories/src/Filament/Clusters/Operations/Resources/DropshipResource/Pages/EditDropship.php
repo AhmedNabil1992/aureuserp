@@ -20,6 +20,8 @@ class EditDropship extends EditRecord
 
     protected static string $resource = DropshipResource::class;
 
+    protected ?bool $hasDatabaseTransactions = true;
+
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('edit', ['record' => $this->getRecord()]);
@@ -83,5 +85,7 @@ class EditDropship extends EditRecord
     public function updateForm(): void
     {
         $this->fillForm();
+
+        $this->rememberData();
     }
 }

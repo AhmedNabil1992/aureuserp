@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Http\Middleware\ApplyBrandSettings;
 use App\Http\Middleware\SetLocale;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Actions\Action;
@@ -9,7 +10,6 @@ use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -24,6 +24,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Webkul\Manufacturing\ManufacturingPlugin;
+use Webkul\Support\Enums\NavigationGroup;
 use Webkul\Support\Filament\Pages\Profile;
 use Webkul\Support\GlobalSearchProvider;
 
@@ -51,79 +52,18 @@ class AdminPanelProvider extends PanelProvider
             ->topNavigation()
             ->maxContentWidth(Width::Full)
             ->databaseNotifications()
+            ->databaseNotificationsPolling('30s')
             ->userMenuItems([
                 'profile' => Action::make('profile')
                     ->label(fn () => Auth::user()?->name)
                     ->url(fn (): string => Profile::getUrl()),
+                'quick-navigation' => Action::make('quick-navigation')
+                ->label(__('welcome.user_menu.quick')) // ترجمة النص
+                ->icon('heroicon-o-magnifying-glass') // أيقونة البحث
+                // هنبعت الـ Event للويندو عشان يفتح المودال
+                ->url('javascript:window.dispatchEvent(new CustomEvent("open-quick-navigation"))'),
             ])
-            ->navigationGroups([
-                NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.dashboard'))
-                    ->icon('icon-dashboard'),
-                NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.contact'))
-                    ->icon('icon-contacts'),
-                NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.sale'))
-                    ->icon('icon-sales'),
-                NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.purchase'))
-                    ->icon('icon-purchases'),
-                NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.maintenance'))
-                    ->icon('icon-maintenance'),
-                NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.manufacturing'))
-                    ->icon('icon-manufacturing'),
-                NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.inventory'))
-                    ->icon('icon-inventories'),
-                NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.invoice'))
-                    ->icon('icon-invoices'),
-                NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.accounting'))
-                    ->icon('icon-accounting'),
-                NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.product'))
-                    ->icon('icon-products'),
-                NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.project'))
-                    ->icon('icon-projects'),
-                NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.employee'))
-                    ->icon('icon-employees'),
-                NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.time-off'))
-                    ->icon('icon-time-offs'),
-                NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.recruitment'))
-                    ->icon('icon-recruitments'),
-                NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.software'))
-                    ->icon('heroicon-o-cpu-chip'),
-                NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.articles'))
-                    ->icon('heroicon-o-book-open'),
-                NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.leads'))
-                    ->icon('heroicon-o-user-group'),
-                NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.marketing'))
-                    ->icon('heroicon-o-megaphone'),
-                NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.wifi'))
-                    ->icon('heroicon-o-wifi'),
-                NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.website'))
-                    ->icon('icon-website'),
-                NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.plugin'))
-                    ->icon('icon-plugin'),
-                NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.setting'))
-                    ->icon('icon-settings'),
-            ])
+            ->navigationGroups(NavigationGroup::class)
             ->plugins([
                 ManufacturingPlugin::make(),
                 FilamentShieldPlugin::make()
@@ -157,6 +97,7 @@ class AdminPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
                 SetLocale::class,
+                ApplyBrandSettings::class,
             ])
             ->authMiddleware([
                 Authenticate::class,

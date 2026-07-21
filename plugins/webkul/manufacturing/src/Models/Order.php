@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Facades\Auth;
+use Webkul\Chatter\Traits\HasChatter;
+use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Inventory\Enums\LocationType;
 use Webkul\Inventory\Enums\ManufactureStep;
 use Webkul\Inventory\Enums\MoveState;
@@ -34,7 +36,7 @@ use Webkul\Support\Models\UOM;
 
 class Order extends Model
 {
-    use HasFactory, HasPermissionScope;
+    use HasChatter, HasFactory, HasLogActivity, HasPermissionScope;
 
     protected $table = 'manufacturing_orders';
 
@@ -79,6 +81,7 @@ class Order extends Model
         'is_locked'          => 'boolean',
         'quantity'           => 'decimal:4',
         'quantity_producing' => 'decimal:4',
+        'product_uom_qty'    => 'decimal:4',
         'deadline_at'        => 'datetime',
         'started_at'         => 'datetime',
         'finished_at'        => 'datetime',
@@ -101,6 +104,21 @@ class Order extends Model
     public function getModelTitle(): string
     {
         return __('manufacturing::models/order.title');
+    }
+
+    public function getChatterResponsibles(): array
+    {
+        return ['assignedUser'];
+    }
+
+    protected function getLogAttributeLabels(): array
+    {
+        return [
+            'quantity_producing' => __('manufacturing::models/order.log-attributes.product-qty'),
+            'state'              => __('manufacturing::models/order.log-attributes.state'),
+            'reservation_state'  => __('manufacturing::models/order.log-attributes.reservation-state'),
+            'assignedUser.name'  => __('manufacturing::models/order.log-attributes.assigned-user'),
+        ];
     }
 
     public function product(): BelongsTo
@@ -727,7 +745,7 @@ class Order extends Model
                 $byproduct->uom_id,
                 $byproduct->operation_id,
                 $byproduct->id,
-                $byproduct->cost_share
+                $byproduct->cost_share ?? 0
             );
         }
 
@@ -776,26 +794,26 @@ class Order extends Model
         bool $manualConsumption = false
     ): array {
         return [
-            'sort'                       => 10,
-            'name'                       => 'New',
-            'scheduled_at'               => $this->started_at,
-            'deadline'                   => $this->started_at,
-            'bom_line_id'                => $bomLineId,
-            'operation_type_id'          => $this->operation_type_id,
-            'product_id'                 => $productId,
-            'product_uom_qty'            => $productUomQty,
-            'uom_id'                     => $uomId,
-            'source_location_id'         => $this->source_location_id,
-            'destination_location_id'    => $this->production_location_id,
-            'raw_material_order_id'      => $this->id,
-            'company_id'                 => $this->company_id,
-            'mo_operation_id'            => $operationId,
-            'procure_method'             => ProcureMethod::MAKE_TO_STOCK,
-            'origin'                     => $this->getOrigin(),
-            'warehouse_id'               => $this->sourceLocation->warehouse_id,
-            'procurement_group_id'       => $this->procurementGroup?->id,
-            'propagate_cancel'           => $this->propagate_cancel,
-            'manual_consumption'         => $manualConsumption,
+            'sort'                    => 10,
+            'name'                    => 'New',
+            'scheduled_at'            => $this->started_at,
+            'deadline'                => $this->started_at,
+            'bom_line_id'             => $bomLineId,
+            'operation_type_id'       => $this->operation_type_id,
+            'product_id'              => $productId,
+            'product_uom_qty'         => $productUomQty,
+            'uom_id'                  => $uomId,
+            'source_location_id'      => $this->source_location_id,
+            'destination_location_id' => $this->production_location_id,
+            'raw_material_order_id'   => $this->id,
+            'company_id'              => $this->company_id,
+            'mo_operation_id'         => $operationId,
+            'procure_method'          => ProcureMethod::MAKE_TO_STOCK,
+            'origin'                  => $this->getOrigin(),
+            'warehouse_id'            => $this->sourceLocation->warehouse_id,
+            'procurement_group_id'    => $this->procurementGroup?->id,
+            'propagate_cancel'        => $this->propagate_cancel,
+            'manual_consumption'      => $manualConsumption,
         ];
     }
 
@@ -1312,7 +1330,7 @@ class Order extends Model
         if ($hasUnavailable) {
             $componentsAvailabilityState = 'unavailable';
 
-            $componentsAvailability = __('manufacturing::system.order.components-availability.unavailable');
+            $componentsAvailability = __('manufacturing::system.order.components-availability.not-available');
 
             return [
                 $componentsAvailabilityState,

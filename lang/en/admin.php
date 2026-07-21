@@ -25,5 +25,7 @@ return [
         'plugin'        => 'Plugins',
         'setting'       => 'Settings',
         'psmonitor'     => 'PS Monitor',
+        'help'          => 'Help',
+        'barcode'       => 'Barcode',
     ],
 ];

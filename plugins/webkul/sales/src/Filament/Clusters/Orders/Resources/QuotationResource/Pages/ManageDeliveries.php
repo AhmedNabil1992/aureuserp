@@ -39,6 +39,6 @@ class ManageDeliveries extends ManageRelatedRecords
 
     public static function getNavigationBadge($parameters = []): ?string
     {
-        return Livewire::current()->getRecord()->deliveries()->count();
+        return Livewire::current()->getRecord()->operations()->count();
     }
 }

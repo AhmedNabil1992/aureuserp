@@ -190,6 +190,24 @@ export default function fullCalendar({
 
             const calendar = new Calendar(this.$el, calendarOptions);
 
+            if (eventClassNames !== null && eventClassNames !== undefined) {
+                calendarOptions.eventClassNames = eventClassNames;
+            }
+
+            if (typeof eventContent === "function") {
+                calendarOptions.eventContent = eventContent;
+            }
+
+            if (typeof eventDidMount === "function") {
+                calendarOptions.eventDidMount = eventDidMount;
+            }
+
+            if (typeof eventWillUnmount === "function") {
+                calendarOptions.eventWillUnmount = eventWillUnmount;
+            }
+
+            const calendar = new Calendar(this.$el, calendarOptions);
+
             calendar.render();
 
             window.addEventListener("full-calendar--refresh", () =>

@@ -90,6 +90,12 @@ return [
                                 'body'  => 'Products cannot be deleted from a confirmed sales order.',
                             ],
                         ],
+
+                        'actions' => [
+                            'open-product' => [
+                                'tooltip' => 'Open product',
+                            ],
+                        ],
                     ],
 
                     'product-optional' => [
@@ -116,6 +122,7 @@ return [
                             'actions' => [
                                 'tooltip' => [
                                     'add-order-line' => 'Add Order Line',
+                                    'already-added'  => 'Already Added To Order',
                                 ],
 
                                 'notifications' => [
@@ -196,6 +203,7 @@ return [
         'columns' => [
             'number'             => 'Number',
             'status'             => 'Status',
+            'delivery-status'    => 'Delivery Status',
             'invoice-status'     => 'Invoice Status',
             'creation-date'      => 'Creation Date',
             'commitment-date'    => 'Commitment Date',
@@ -207,6 +215,12 @@ return [
             'amount-tax'         => 'Amount Tax',
             'amount-total'       => 'Amount Total',
             'customer-reference' => 'Customer Reference',
+        ],
+
+        'summarizers' => [
+            'total'        => 'Total',
+            'taxes'        => 'Taxes',
+            'total-amount' => 'Total Amount',
         ],
 
         'filters' => [
@@ -319,7 +333,9 @@ return [
                             'product-variants'    => 'Product Variants',
                             'product-simple'      => 'Product Simple',
                             'quantity'            => 'Quantity',
-                            'uom'                 => 'Unit Of Measure',
+                            'qty-delivered'       => 'Delivered',
+                            'qty-invoiced'        => 'Invoiced',
+                            'uom'                 => 'UOM',
                             'lead-time'           => 'Lead Time',
                             'packaging-qty'       => 'Packaging Quantity',
                             'packaging'           => 'Packaging',

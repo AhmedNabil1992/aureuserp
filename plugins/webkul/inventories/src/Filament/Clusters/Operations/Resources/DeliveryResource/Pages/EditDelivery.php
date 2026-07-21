@@ -22,6 +22,8 @@ class EditDelivery extends EditRecord
 
     protected static string $resource = DeliveryResource::class;
 
+    protected ?bool $hasDatabaseTransactions = true;
+
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('edit', ['record' => $this->getRecord()]);
@@ -86,5 +88,7 @@ class EditDelivery extends EditRecord
     public function updateForm(): void
     {
         $this->fillForm();
+
+        $this->rememberData();
     }
 }

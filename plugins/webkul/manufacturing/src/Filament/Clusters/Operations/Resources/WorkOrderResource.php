@@ -78,7 +78,7 @@ class WorkOrderResource extends Resource
             return true;
         }
 
-        return app(OperationSettings::class)->enable_work_orders;
+        return settings(OperationSettings::class)->enable_work_orders;
     }
 
     public static function getModelLabel(): string
@@ -282,12 +282,13 @@ class WorkOrderResource extends Resource
         return $table
             ->reorderableColumns()
             ->modifyQueryUsing(fn (Builder $query) => $query
+                ->with('manufacturingOrder')
                 ->orderBy('sort')
                 ->orderBy('calendar_leave_id')
                 ->orderBy('started_at')
                 ->orderBy('id'))
             ->columns([
-                TextColumn::make('operation.name')
+                TextColumn::make('name')
                     ->label(__('manufacturing::filament/clusters/operations/resources/work-order.table.columns.operation'))
                     ->searchable(),
                 TextColumn::make('workCenter.name')
