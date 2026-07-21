@@ -20,10 +20,11 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
+use Webkul\Wifi\Filament\Customer\Concerns\HasWifiAccess;
 
 class DynamicClients extends Page implements HasTable
 {
-    use InteractsWithTable;
+    use InteractsWithTable,HasWifiAccess;
 
     protected string $view = 'wifi::filament.customer.clusters.wi-fi.pages.dynamic-clients';
 
@@ -45,20 +46,20 @@ class DynamicClients extends Page implements HasTable
         return __('admin.navigation.wifi');
     }
 
-    public static function canAccess(): bool
-    {
-        $user = Filament::auth()->user();
+    // public static function canAccess(): bool
+    // {
+    //     $user = Filament::auth()->user();
 
-        if (! $user) {
-            return false;
-        }
+    //     if (! $user) {
+    //         return false;
+    //     }
 
-        if (! Schema::hasTable('wifi_partner_clouds')) {
-            return false;
-        }
+    //     if (! Schema::hasTable('wifi_partner_clouds')) {
+    //         return false;
+    //     }
 
-        return WifiPartnerCloud::where('partner_id', $user->id)->exists();
-    }
+    //     return WifiPartnerCloud::where('partner_id', $user->id)->exists();
+    // }
 
     public function table(Table $table): Table
     {
