@@ -43,10 +43,12 @@ return [
                 'is_active'     => 'Active',
             ],
             'subscriptions' => [
+                'title' => 'Active Subscriptions',
                 'columns' => [
                     'feature_name' => 'Service Name',
-                    'start_date'   => 'From',
-                    'end_date'     => 'To',
+                    'service_type' => 'Service Type',
+                    'start_date'   => 'Start Date',
+                    'end_date'     => 'End Date',
                     'status'       => 'Status',
                 ],
             ],

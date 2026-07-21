@@ -2,11 +2,6 @@
 
 namespace Webkul\Psmonitor\Models;
 
-use Webkul\Psmonitor\Models\RemoteModel;
-use Webkul\Software\Models\License;
-use InvalidArgumentException;
-use Webkul\Psmonitor\Models\PlayWait;
-
 class Shifts extends RemoteModel
 {
     protected $table = 'shift_mgt';
@@ -34,9 +29,9 @@ class Shifts extends RemoteModel
         'Customer_Minus',
         'Customer_Credit',
         'Credit_AMT',
-        'Remain_AMT', // Computed as (((((((([Start_AMT]+[Playstation])+[Sales_AMT])+[Customer_Add])+[Income_History])+[Tax_History])+[Services_History])-(((([Purchase_AMT]+[Expenses_AMT])+[Discount])+[Customer_Credit])+[Customer_Minus]))-[Credit_AMT])
+        'Remain_AMT',
         'Actual_Amt',
-        'Different', // Computed as (((((((([Start_AMT]+[Playstation])+[Sales_AMT])+[Customer_Add])+[Income_History])+[Tax_History])+[Services_History])-(((([Purchase_AMT]+[Expenses_AMT])+[Discount])+[Customer_Credit])+[Customer_Minus]))-[Actual_AMT])
+        'Different',
         'Status', // Open , Close
         'Notify', // True , False
     ];
@@ -66,14 +61,6 @@ class Shifts extends RemoteModel
         'Status' => 'string',
         'Notify' => 'boolean',
     ];
-    public static function forLicense(License $license)
-    {
-        if (! $license->isRemoteAccessible()) {
-            throw new InvalidArgumentException('The provided license cannot be used for remote SQL Server access.');
-        }
-
-        return static::onHost($license->Server_IP, config('remote_access.remote_database', 'pstm'));
-    }
 
     public function playWaits()
     {

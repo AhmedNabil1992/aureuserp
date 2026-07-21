@@ -2,11 +2,6 @@
 
 namespace Webkul\Psmonitor\Models;
 
-use Webkul\Psmonitor\Models\RemoteModel;
-use Webkul\Psmonitor\Models\ItemMaster;
-use Webkul\Software\Models\License;
-use InvalidArgumentException;
-
 class Categories extends RemoteModel
 {
     protected $table = 'categiores';
@@ -19,6 +14,7 @@ class Categories extends RemoteModel
         'Remark',
         'IsActive',
     ];
+
     protected $casts = [
         'ID' => 'integer',
         'Cate_Name' => 'string',
@@ -29,14 +25,5 @@ class Categories extends RemoteModel
     public function items()
     {
         return $this->hasMany(ItemMaster::class, 'Group_ID', 'ID');
-    }
-
-    public static function forLicense(License $license)
-    {
-        if (! $license->isRemoteAccessible()) {
-            throw new InvalidArgumentException('The provided license cannot be used for remote SQL Server access.');
-        }
-
-        return static::onHost($license->Server_IP, config('remote_access.remote_database', 'pstm'));
     }
 }

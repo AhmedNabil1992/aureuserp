@@ -7,8 +7,22 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
+use InvalidArgumentException;
+use Webkul\Software\Models\License;
+
 abstract class RemoteModel extends Model
 {
+    /**
+     * استخدم الموديل بناءً على ترخيص العميل
+     */
+    public static function forLicense(License $license)
+    {
+        if (! $license->isRemoteAccessible()) {
+            throw new InvalidArgumentException('The provided license cannot be used for remote SQL Server access.');
+        }
+
+        return static::onHost($license->server_ip, config('remote_access.remote_database', 'pstm'));
+    }
     /**
      * إعداد اتصال SQL Server بناءً على IP (وداتابيز اختيارية)
      */
@@ -121,6 +135,29 @@ abstract class RemoteModel extends Model
         $parsedHost = trim($parsedHost);
 
         return [$parsedHost, $port];
+    }
+
+    /**
+     * Return a query builder that is guaranteed to return zero rows
+     * without touching any real database. Used as a safe fallback when
+     * the remote SQL Server connection is unavailable.
+     */
+    public static function emptyQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        $connName = 'ps_null_connection';
+
+        if (! Config::has("database.connections.{$connName}")) {
+            Config::set("database.connections.{$connName}", [
+                'driver'   => 'sqlite',
+                'database' => ':memory:',
+                'prefix'   => '',
+            ]);
+        }
+
+        $instance = new static;
+        $instance->setConnection($connName);
+
+        return $instance->newQuery()->whereRaw('0 = 1');
     }
 
     /**

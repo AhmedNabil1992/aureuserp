@@ -2,10 +2,6 @@
 
 namespace Webkul\Psmonitor\Models;
 
-use Webkul\Psmonitor\Models\RemoteModel;
-use Webkul\Software\Models\License;
-use InvalidArgumentException;
-
 class Device extends RemoteModel
 {
     protected $table = 'devices';
@@ -54,14 +50,5 @@ class Device extends RemoteModel
     public function deviceType()
     {
         return $this->belongsTo(DeviceType::class, 'Device_Type', 'ID');
-    }
-
-    public static function forLicense(License $license)
-    {
-        if (! $license->isRemoteAccessible()) {
-            throw new InvalidArgumentException('The provided license cannot be used for remote SQL Server access.');
-        }
-
-        return static::onHost($license->Server_IP, config('remote_access.remote_database', 'pstm'));
     }
 }

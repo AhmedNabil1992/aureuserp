@@ -7,8 +7,6 @@ use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 use Webkul\Software\Filament\Customer\Resources\LicenseResource;
 
 class ViewLicense extends ViewRecord
@@ -40,8 +38,7 @@ class ViewLicense extends ViewRecord
 
                                 TextEntry::make('status')
                                     ->label(__('software::filament/customer/license.pages.view.fields.status'))
-                                    ->badge()
-                                    ,
+                                    ->badge(),
 
                                 TextEntry::make('start_date')
                                     ->label(__('software::filament/customer/license.pages.view.fields.start_date'))
@@ -61,37 +58,5 @@ class ViewLicense extends ViewRecord
                     ])
                     ->columnSpan(['lg' => 2]),
             ]);
-    }
-
-    public function subscriptionsTable(Table $table): Table
-    {
-        return $table
-            ->model($this->record->subscriptions())
-            ->columns([
-                TextColumn::make('feature.name')
-                    ->label(__('software::filament/customer/license.pages.view.subscriptions.columns.feature_name'))
-                    ->searchable()
-                    ->sortable(),
-
-                TextColumn::make('start_date')
-                    ->label(__('software::filament/customer/license.pages.view.subscriptions.columns.start_date'))
-                    ->date('Y-m-d')
-                    ->sortable(),
-
-                TextColumn::make('end_date')
-                    ->label(__('software::filament/customer/license.pages.view.subscriptions.columns.end_date'))
-                    ->date('Y-m-d')
-                    ->sortable(),
-
-                TextColumn::make('is_active')
-                    ->label(__('software::filament/customer/license.pages.view.subscriptions.columns.status'))
-                    ->badge()
-                    ->formatStateUsing(fn ($state) => $state
-                        ? __('software::filament/customer/license.statuses.active')
-                        : __('software::filament/customer/license.statuses.inactive'))
-                    ->color(fn ($state) => $state ? 'success' : 'gray'),
-            ])
-            ->paginated([10, 25])
-            ->defaultSort('start_date', 'desc');
     }
 }

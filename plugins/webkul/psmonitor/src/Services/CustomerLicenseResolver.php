@@ -2,10 +2,10 @@
 
 namespace Webkul\Psmonitor\Services;
 
-use Webkul\Partner\Models\Partner;
-use Webkul\Software\Models\License;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
+use Webkul\Partner\Models\Partner;
+use Webkul\Software\Models\License;
 
 class CustomerLicenseResolver
 {
@@ -15,7 +15,7 @@ class CustomerLicenseResolver
     {
         return License::query()
             ->where('partner_id', $customer->id)
-            ->where('status', 'active')
+            ->remoteAccessible()
             ->orderBy('created_at', 'desc')
             ->get();
     }
@@ -25,9 +25,11 @@ class CustomerLicenseResolver
         return $this->resolveRemoteLicenseForProducts($customer, null, $licenseId);
     }
 
-    public function resolveRemoteLicenseForProducts(Partner $customer, array $productIds = null, ?int $licenseId = null): ?License
+    public function resolveRemoteLicenseForProducts(Partner $customer, ?array $productIds = null, ?int $licenseId = null): ?License
     {
-        $query = $customer->licenses()->remoteAccessible();
+        $query = License::query()
+            ->where('partner_id', $customer->id)
+            ->remoteAccessible();
 
         $normalizedProductIds = collect($productIds ?? [])
             ->filter(fn ($id) => is_numeric($id))
@@ -36,13 +38,12 @@ class CustomerLicenseResolver
             ->all();
 
         if (! empty($normalizedProductIds)) {
-            $query->whereIn('ProductID', $normalizedProductIds);
+            $query->whereIn('program_id', $normalizedProductIds);
         }
 
         $targetLicenseId = $licenseId ?? $this->getSelectedLicenseId();
 
-        // Clone base query to try preferred license first, then fall back to any available.
-        $preferred = (clone $query)->orderByDesc('IsActive')->orderBy('Company_Name');
+        $preferred = (clone $query)->orderByDesc('is_active')->orderBy('company_name');
 
         if ($targetLicenseId !== null) {
             $license = (clone $preferred)->whereKey($targetLicenseId)->first();
@@ -51,8 +52,6 @@ class CustomerLicenseResolver
                 return $license;
             }
 
-            // Selected license doesn't match this product filter — clear stale session value
-            // and fall through to return the first available license for this product.
             if ($this->getSelectedLicenseId() === $targetLicenseId) {
                 $this->forgetSelectedLicense();
             }
@@ -61,7 +60,7 @@ class CustomerLicenseResolver
         $license = $preferred->first();
 
         if (! $license) {
-            throw new InvalidArgumentException('No license with an active Remote_Sub subscription is available for this customer.');
+            throw new InvalidArgumentException('No license with an active remote subscription is available for this customer.');
         }
 
         return $license;

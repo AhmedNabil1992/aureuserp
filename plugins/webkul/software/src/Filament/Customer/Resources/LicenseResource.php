@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Software\Filament\Customer\Resources\LicenseResource\Pages\ListLicenses;
 use Webkul\Software\Filament\Customer\Resources\LicenseResource\Pages\ViewLicense;
+use Webkul\Software\Filament\Customer\Resources\LicenseResource\RelationManagers\SubscriptionsRelationManager;
 use Webkul\Software\Models\License;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Schema;
@@ -132,6 +133,13 @@ class LicenseResource extends Resource
                     ->where('partner_id', $partnerId)
                     ->orderByDesc('created_at');
             });
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            SubscriptionsRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

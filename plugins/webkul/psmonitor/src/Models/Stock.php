@@ -2,11 +2,6 @@
 
 namespace Webkul\Psmonitor\Models;
 
-use Webkul\Psmonitor\Models\RemoteModel;
-use Webkul\Psmonitor\Models\ItemMaster;
-use Webkul\Software\Models\License;
-use InvalidArgumentException;
-
 class Stock extends RemoteModel
 {
     protected $table = 'stock';
@@ -24,17 +19,8 @@ class Stock extends RemoteModel
         'Quantity' => 'integer',
     ];
 
-    public static function forLicense(License $license)
-    {
-        if (! $license->isRemoteAccessible()) {
-            throw new InvalidArgumentException('The provided license cannot be used for remote SQL Server access.');
-        }
-
-        return static::onHost($license->Server_IP, config('remote_access.remote_database', 'pstm'));
-    }
-
     public function item()
     {
         return $this->belongsTo(ItemMaster::class, 'Barcode', 'Code');
     }
-    }
+}

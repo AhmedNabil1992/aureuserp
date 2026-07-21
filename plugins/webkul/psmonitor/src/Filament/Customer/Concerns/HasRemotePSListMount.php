@@ -22,7 +22,7 @@ trait HasRemotePSListMount
 
             $license = app(CustomerLicenseResolver::class)->resolveRemoteLicense($customer);
 
-            if (! RemoteModel::canConnectToHost($license->Server_IP)) {
+            if (! RemoteModel::canConnectToHost($license->server_ip)) {
                 Notification::make()
                     ->title('تعذّر الاتصال بالسيرفر')
                     ->body('السيرفر الريموت غير متاح حالياً، يرجى المحاولة لاحقاً.')

@@ -61,8 +61,8 @@ class CustomerPanelProvider extends PanelProvider
                 //     ->label(fn (): string => __('admin.navigation.purchase'))
                 //     ->icon('icon-purchases'),
                 NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.psmonitor'))
-                    ->icon('icon-settings'),
+                    ->label(fn (): string => __('psmonitor::filament/customer/navigation.group'))
+                    ->icon('heroicon-o-computer-desktop'),
             ])
             ->maxContentWidth(Width::Full)
             ->renderHook(

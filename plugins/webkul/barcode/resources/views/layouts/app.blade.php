@@ -102,6 +102,6 @@
 
         @livewireScripts
         @filamentScripts(withCore: true)
-        <x-nativephp-remote::bridge-scripts />
+        {{-- <x-nativephp-remote::bridge-scripts /> --}}
     </body>
 </html>

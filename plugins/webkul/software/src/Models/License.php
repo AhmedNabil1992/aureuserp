@@ -142,7 +142,7 @@ class License extends Model
 
     public function isRemoteAccessible(): bool
     {
-        if (! $this->IsActive || ! $this->hasRemoteServer()) {
+        if (! $this->is_active || ! $this->hasRemoteServer()) {
             return false;
         }
 
@@ -150,17 +150,17 @@ class License extends Model
             return false;
         }
 
-        if ($this->LicenseType === 'FULL' || $this->EndDate === null) {
+        if ($this->license_plan === LicensePlan::Full || $this->end_date === null) {
             return true;
         }
 
-        return $this->EndDate->isToday() || $this->EndDate->isFuture();
+        return $this->end_date->isToday() || $this->end_date->isFuture();
     }
 
     public function hasActiveRemoteSubscription(): bool
     {
         return $this->subscriptions()
-            ->ofType('remote')
+            ->whereIn('service_type', ['remote', 'follow_up'])
             ->activeNow()
             ->exists();
     }
@@ -169,8 +169,9 @@ class License extends Model
     {
         return $query->where('is_active', true)
             ->whereNotNull('server_ip')
+            ->where('server_ip', '!=', '')
             ->whereHas('subscriptions', function (Builder $subQuery): void {
-                $subQuery->ofType('remote')->activeNow();
+                $subQuery->whereIn('service_type', ['remote', 'follow_up'])->activeNow();
             });
     }
 

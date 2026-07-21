@@ -1,11 +1,12 @@
 <?php
 
-namespace Webkul\PSMonitor\Filament\Customer\Widgets;
+namespace Webkul\Psmonitor\Filament\Customer\Widgets;
 
-use Webkul\PSMonitor\Services\CustomerLicenseResolver;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
+use Webkul\Psmonitor\Services\CustomerLicenseResolver;
+use Webkul\Software\Models\License;
 
 class LicenseSelectorWidget extends Widget
 {
@@ -20,7 +21,7 @@ class LicenseSelectorWidget extends Widget
     {
         $this->selected_license_id = app(CustomerLicenseResolver::class)->getSelectedLicenseId();
     }
-    
+
     public function getLicenseOptions(): array
     {
         $customer = Auth::guard('customer')->user();
@@ -31,7 +32,9 @@ class LicenseSelectorWidget extends Widget
 
         return app(CustomerLicenseResolver::class)
             ->getAccessibleLicenses($customer)
-            ->mapWithKeys(fn ($license) => [$license->getKey() => $license->Company_Name])
+            ->mapWithKeys(fn (License $license) => [
+                $license->getKey() => $license->company_name ?: ($license->serial_number ?: __('psmonitor::filament/customer/widgets/license-selector.default_branch', ['id' => $license->getKey()])),
+            ])
             ->toArray();
     }
 
@@ -43,15 +46,15 @@ class LicenseSelectorWidget extends Widget
             return;
         }
 
-        $license = $customer->licenses()
+        $license = License::query()
+            ->where('partner_id', $customer->id)
             ->remoteAccessible()
-            ->where('ID', $licenseId)
+            ->where('id', $licenseId)
             ->first();
 
         if ($license) {
             app(CustomerLicenseResolver::class)->rememberSelectedLicense($license);
             $this->selected_license_id = $licenseId;
-            // Use JavaScript to reload page properly (avoids Livewire GET redirect issue)
             $this->dispatch('refreshPage');
         }
     }
@@ -59,14 +62,9 @@ class LicenseSelectorWidget extends Widget
     #[On('refreshPage')]
     public function refreshPage(): void
     {
-        // This will trigger a real page reload via browser
         $this->js('window.location.href = window.location.href;');
     }
 
-    /**
-     * Only render when multiple licenses available.
-     * Widget is only explicitly added to specific Pages via getHeaderWidgets().
-     */
     public static function canView(): bool
     {
         if (request()->routeIs('filament.customer.pages.dashboard')) {
@@ -79,7 +77,6 @@ class LicenseSelectorWidget extends Widget
             return false;
         }
 
-        // Only show if there's more than one accessible license
         return app(CustomerLicenseResolver::class)
             ->getAccessibleLicenses($customer)
             ->count() > 1;

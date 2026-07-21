@@ -43,10 +43,12 @@ return [
                 'is_active'     => 'مفعل',
             ],
             'subscriptions' => [
+                'title' => 'الاشتراكات والخدمات المفعلة',
                 'columns' => [
                     'feature_name' => 'اسم الخدمة',
-                    'start_date'   => 'من',
-                    'end_date'     => 'إلى',
+                    'service_type' => 'نوع الخدمة',
+                    'start_date'   => 'تاريخ البداية',
+                    'end_date'     => 'تاريخ النهاية',
                     'status'       => 'الحالة',
                 ],
             ],

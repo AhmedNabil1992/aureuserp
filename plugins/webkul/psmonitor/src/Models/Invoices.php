@@ -2,11 +2,6 @@
 
 namespace Webkul\Psmonitor\Models;
 
-use Webkul\Psmonitor\Models\RemoteModel;
-use Webkul\Software\Models\License;
-use InvalidArgumentException;
-use Webkul\Psmonitor\Models\Customers;
-
 class Invoices extends RemoteModel
 {
     protected $table = 'invoices';
@@ -27,6 +22,7 @@ class Invoices extends RemoteModel
         'Username',
         'Customer_ID',
     ];
+
     protected $casts = [
         'ID' => 'integer',
         'Invoice_No' => 'string',
@@ -41,18 +37,9 @@ class Invoices extends RemoteModel
         'Username' => 'string',
         'Customer_ID' => 'string',
     ];
-    public static function forLicense(License $license)
-    {
-        if (! $license->isRemoteAccessible()) {
-            throw new InvalidArgumentException('The provided license cannot be used for remote SQL Server access.');
-        }
-
-        return static::onHost($license->Server_IP, config('remote_access.remote_database', 'pstm'));
-    }
 
     public function customer()
     {
         return $this->belongsTo(Customers::class, 'Customer_ID', 'C_Card');
     }
-
 }
