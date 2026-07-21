@@ -18,6 +18,7 @@ use Webkul\Software\Filament\Admin\Widgets\SoftwareSubscriptionStatusChartWidget
 use Webkul\Software\Filament\Admin\Widgets\SoftwareSubscriptionTypesChartWidget;
 use Webkul\Software\Filament\Admin\Widgets\SoftwareTicketStatusChartWidget;
 use Webkul\Software\Filament\Admin\Widgets\SoftwareTopProgramsWidget;
+use Webkul\Support\Enums\NavigationGroup;
 
 class SoftwareDashboard extends BaseDashboard
 {
@@ -36,9 +37,9 @@ class SoftwareDashboard extends BaseDashboard
         return __('software::filament/admin/pages/dashboard.navigation_label');
     }
 
-    public static function getNavigationGroup(): string
+    public static function getNavigationGroup(): \UnitEnum
     {
-        return __('admin.navigation.dashboard');
+        return NavigationGroup::Dashboard;
     }
 
     public static function getNavigationIcon(): string|BackedEnum|Htmlable|null

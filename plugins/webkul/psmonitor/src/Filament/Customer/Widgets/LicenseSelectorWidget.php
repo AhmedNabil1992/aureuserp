@@ -9,7 +9,7 @@ use Livewire\Attributes\On;
 
 class LicenseSelectorWidget extends Widget
 {
-    protected static string $view = 'psmonitor::filament.customer.widgets.license-selector-widget';
+    protected string $view = 'psmonitor::filament.customer.widgets.license-selector-widget';
 
     protected static bool $isLazy = false;
 

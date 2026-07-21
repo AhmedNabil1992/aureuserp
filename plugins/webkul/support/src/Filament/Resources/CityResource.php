@@ -24,6 +24,7 @@ use Webkul\Support\Filament\Resources\CityResource\Pages\ListCities;
 use Webkul\Support\Models\City;
 use Webkul\Support\Models\Country;
 use Webkul\Support\Models\State;
+use Webkul\Support\Enums\NavigationGroup;
 
 class CityResource extends Resource
 {
@@ -31,9 +32,9 @@ class CityResource extends Resource
 
     protected static ?string $slug = 'settings/cities';
 
-    public static function getNavigationGroup(): string
+    public static function getNavigationGroup(): \UnitEnum
     {
-        return __('admin.navigation.setting');
+        return NavigationGroup::Setting;
     }
 
     public static function getNavigationLabel(): string

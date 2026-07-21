@@ -9,6 +9,7 @@ use Illuminate\Contracts\Support\Htmlable;
 use Webkul\Wifi\Filament\Admin\Widgets\WifiDynamicClientsStateChartWidget;
 use Webkul\Wifi\Filament\Admin\Widgets\WifiPackagesChartWidget;
 use Webkul\Wifi\Filament\Admin\Widgets\WifiStatsWidget;
+use Webkul\Support\Enums\NavigationGroup;
 
 class WifiDashboard extends BaseDashboard
 {
@@ -28,9 +29,9 @@ class WifiDashboard extends BaseDashboard
         return __('wifi::filament/pages/dashboard.navigation.title');
     }
 
-    public static function getNavigationGroup(): string
+    public static function getNavigationGroup(): \UnitEnum
     {
-        return __('admin.navigation.dashboard');
+        return NavigationGroup::Dashboard;
     }
 
     public static function getNavigationIcon(): string|BackedEnum|Htmlable|null

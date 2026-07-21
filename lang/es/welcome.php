@@ -68,4 +68,7 @@ return [
             'contact' => 'Contáctanos',
         ],
     ],
+    'user_menu' => [
+        'quick' => 'Navegación rápida',
+    ],
 ];
