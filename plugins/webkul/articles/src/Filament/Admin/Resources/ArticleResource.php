@@ -43,6 +43,7 @@ use Webkul\Article\Filament\Admin\Resources\ArticleResource\Pages\EditArticle;
 use Webkul\Article\Filament\Admin\Resources\ArticleResource\Pages\ListArticles;
 use Webkul\Article\Filament\Admin\Resources\ArticleResource\Pages\ViewArticle;
 use Webkul\Article\Models\Article;
+use Webkul\Support\Enums\NavigationGroup;
 
 class ArticleResource extends Resource
 {
@@ -59,9 +60,9 @@ class ArticleResource extends Resource
         return __('articles::filament/admin/resources/article.navigation.title');
     }
 
-    public static function getNavigationGroup(): string
+    public static function getNavigationGroup(): string | \UnitEnum
     {
-        return __('admin.navigation.articles');
+        return NavigationGroup::Articles;
     }
 
     public static function getNavigationIcon(): string

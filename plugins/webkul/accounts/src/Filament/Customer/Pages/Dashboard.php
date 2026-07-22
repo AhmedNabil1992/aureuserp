@@ -1,6 +1,6 @@
 <?php
 
-namespace Webkul\Purchase\Filament\Customer\Pages;
+namespace Webkul\Account\Filament\Customer\Pages;
 
 use Webkul\Account\Filament\Customer\Widgets\AvailableBalanceWidget;
 
@@ -8,7 +8,7 @@ class Dashboard extends \Filament\Pages\Dashboard
 {
     protected static string $routePath = 'dashboard';
 
-    protected static ?int $navigationSort = -10;
+    protected static ?int $navigationSort = 1;
 
     public static function getNavigationGroup(): ?string
     {

@@ -53,7 +53,12 @@ class AccountPlugin implements Plugin
                     ->discoverWidgets(
                         in: __DIR__.'/Filament/Customer/Widgets',
                         for: 'Webkul\\Account\\Filament\\Customer\\Widgets'
+                    )
+                    ->discoverPages(
+                        in: __DIR__.'/Filament/Customer/Pages',
+                        for: 'Webkul\\Account\\Filament\\Customer\\Pages'
                     );
+
             });
     }
 

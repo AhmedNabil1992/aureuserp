@@ -24,7 +24,7 @@ use Webkul\Payment\PaymentServiceProvider;
 use Webkul\PluginManager\PluginManagerServiceProvider;
 use Webkul\Product\ProductServiceProvider;
 use Webkul\Project\ProjectServiceProvider;
-use Webkul\Purchases\PurchaseServiceProvider;
+use Webkul\Purchase\PurchaseServiceProvider;
 use Webkul\Recruitment\RecruitmentServiceProvider;
 use Webkul\Sale\SaleServiceProvider;
 use Webkul\Security\SecurityServiceProvider;
@@ -36,6 +36,8 @@ use Webkul\Timesheet\TimesheetServiceProvider;
 use Webkul\Website\WebsiteServiceProvider;
 use Webkul\Wifi\WifiServiceProvider;
 use Webkul\Psmonitor\PsmonitorServiceProvider;
+use Webkul\Article\ArticleServiceProvider;
+use Webkul\Lead\LeadServiceProvider;
 
 // use App\Providers\AppServiceProvider;
 // use App\Providers\Filament\AdminPanelProvider;
@@ -104,4 +106,6 @@ return [
     WebsiteServiceProvider::class,
     PluginManagerServiceProvider::class,
     PsmonitorServiceProvider::class,
+    ArticleServiceProvider::class,
+    LeadServiceProvider::class,
 ];

@@ -5,6 +5,7 @@
     'barcodeUrl' => null,
 ])
 
+{{-- 
 @if (filled($subtitle))
     <native:top-bar
         title="{{ $title }}"
@@ -46,4 +47,5 @@
             />
         @endif
     </native:top-bar>
-@endif
+@endif 
+--}}

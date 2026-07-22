@@ -2,6 +2,7 @@
     $items = \Webkul\Barcode\Support\Navigation::items();
 @endphp
 
+{{-- 
 <native:side-nav>
     <native:side-nav-header
         title="{{ __('barcode::app.title') }}"
@@ -22,3 +23,4 @@
         />
     @endforeach
 </native:side-nav>
+--}}

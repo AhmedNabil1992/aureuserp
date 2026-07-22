@@ -26,6 +26,7 @@ use Webkul\Article\Filament\Admin\Resources\TagResource\Pages\CreateTag;
 use Webkul\Article\Filament\Admin\Resources\TagResource\Pages\EditTag;
 use Webkul\Article\Filament\Admin\Resources\TagResource\Pages\ListTags;
 use Webkul\Article\Models\Tag;
+use Webkul\Support\Enums\NavigationGroup;
 
 class TagResource extends Resource
 {
@@ -40,9 +41,9 @@ class TagResource extends Resource
         return __('articles::filament/admin/resources/tag.navigation.title');
     }
 
-    public static function getNavigationGroup(): string
+    public static function getNavigationGroup(): string | \UnitEnum
     {
-        return __('admin.navigation.articles');
+        return NavigationGroup::Articles;
     }
 
     public static function getNavigationIcon(): string

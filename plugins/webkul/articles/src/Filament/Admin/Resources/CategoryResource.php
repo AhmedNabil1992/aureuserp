@@ -29,6 +29,7 @@ use Webkul\Article\Filament\Admin\Resources\CategoryResource\Pages\CreateCategor
 use Webkul\Article\Filament\Admin\Resources\CategoryResource\Pages\EditCategory;
 use Webkul\Article\Filament\Admin\Resources\CategoryResource\Pages\ListCategories;
 use Webkul\Article\Models\Category;
+use Webkul\Support\Enums\NavigationGroup;
 
 class CategoryResource extends Resource
 {
@@ -43,9 +44,9 @@ class CategoryResource extends Resource
         return __('articles::filament/admin/resources/category.navigation.title');
     }
 
-    public static function getNavigationGroup(): string
+    public static function getNavigationGroup(): string | \UnitEnum
     {
-        return __('admin.navigation.articles');
+        return NavigationGroup::Articles;
     }
 
     public static function getNavigationIcon(): string
