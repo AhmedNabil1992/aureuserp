@@ -3,7 +3,7 @@ import Pusher from 'pusher-js';
 window.Pusher = Pusher;
 
 const isHttps = window.location.protocol === 'https:';
-const host = import.meta.env.VITE_REVERB_HOST || window.location.hostname;
+const host = window.location.hostname;
 const port = parseInt(import.meta.env.VITE_REVERB_PORT ?? '8888', 10);
 
 window.Echo = new Echo({
