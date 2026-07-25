@@ -19,6 +19,15 @@ class ViewTicket extends ViewRecord
 {
     protected static string $resource = TicketResource::class;
 
+    public function mount(int|string $record): void
+    {
+        parent::mount($record);
+
+        if ($this->record->is_unread_client) {
+            $this->record->update(['is_unread_client' => false]);
+        }
+    }
+
     public function infolist(Schema $schema): Schema
     {
         return $schema->components([

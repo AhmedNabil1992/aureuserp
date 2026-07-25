@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Storage;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Partner\Database\Factories\PartnerFactory;
+use NotificationChannels\WebPush\HasPushSubscriptions;
 use Webkul\Partner\Enums\AccountType;
 use Webkul\Security\Models\User;
 use Webkul\Security\Traits\HasPermissionScope;
@@ -28,7 +29,7 @@ use Webkul\Support\Models\State;
 
 class Partner extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
-    use HasChatter, HasContributedAttributes, HasFactory, HasLogActivity, HasPermissionScope, Notifiable, SoftDeletes;
+    use HasChatter, HasContributedAttributes, HasFactory, HasLogActivity, HasPermissionScope, HasPushSubscriptions, Notifiable, SoftDeletes;
 
     public const ACTIVITY_PLAN_PLUGIN = 'partners';
 

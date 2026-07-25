@@ -169,39 +169,37 @@
 @push('scripts')
 <script>
     /**
-     * Firebase Realtime Database listener for ticket conversations.
-     * When the server writes to tickets/{id}/last_event, Livewire refreshes
-     * the component — no polling required.
-     *
-     * Config values are injected from the server-side env via json_encode().
+     * Reverb & Firebase Realtime Database listener for ticket conversations.
+     * When a message is broadcasted, Livewire refreshes instantly.
      */
-    const { ref, onValue } = window.firebaseDatabase;
-
     function ticketConversation(ticketId) {
         return {
             _unsubscribe: null,
             init() {
-                if (! window.AureusFirebase?.hasRequiredFirebaseConfig) { return; }
-                if (! window.AureusFirebase?.firebaseConfig?.databaseURL) { return; }
+                // Listen to Reverb broadcast channel
+                if (window.Echo) {
+                    window.Echo.channel('tickets.' + ticketId)
+                        .listen('.TicketMessageSent', () => {
+                            this.$wire.$refresh();
+                        });
+                }
 
-                const db = window.AureusFirebase.getDatabase('ticket-conversation-' + ticketId);
-
-                if (! db) { return; }
-
-                const path = ref(db, 'tickets/' + ticketId + '/last_event');
-
-                let lastEventId = null;
-
-                this._unsubscribe = onValue(path, (snapshot) => {
-                    const data = snapshot.val();
-                    if (! data) { return; }
-
-                    if (lastEventId !== null && data.event_id !== lastEventId) {
-                        // New event arrived — ask Livewire to re-render
-                        this.$wire.$refresh();
+                // Fallback / secondary Firebase RTDB listener
+                if (window.AureusFirebase?.hasRequiredFirebaseConfig && window.AureusFirebase?.firebaseConfig?.databaseURL) {
+                    const db = window.AureusFirebase?.getDatabase('ticket-conversation-' + ticketId);
+                    if (db && window.firebaseDatabase) {
+                        const path = window.firebaseDatabase.ref(db, 'tickets/' + ticketId + '/last_event');
+                        let lastEventId = null;
+                        this._unsubscribe = window.firebaseDatabase.onValue(path, (snapshot) => {
+                            const data = snapshot.val();
+                            if (! data) { return; }
+                            if (lastEventId !== null && data.event_id !== lastEventId) {
+                                this.$wire.$refresh();
+                            }
+                            lastEventId = data.event_id;
+                        });
                     }
-                    lastEventId = data.event_id;
-                });
+                }
             },
             destroy() {
                 if (this._unsubscribe) { this._unsubscribe(); }

@@ -77,15 +77,26 @@ class WifiVoucherBatch extends Model
         return sprintf('%s (%d)', $this->batch_code, $this->quantity ?? 0);
     }
 
+    public static function generateUniqueBatchCode(?int $cloudId): string
+    {
+        $cloudName = $cloudId ? Cloud::find($cloudId)?->name : null;
+        $normalized = $cloudName ? strtoupper(str_replace(' ', '', (string) $cloudName)) : 'WIFI';
+        $prefix = sprintf('%s_%s_', $normalized !== '' ? $normalized : 'WIFI', date('Ymd'));
+
+        do {
+            $code = $prefix . mt_rand(1, 99999);
+        } while (static::where('batch_code', $code)->exists());
+
+        return $code;
+    }
+
     protected static function booted(): void
     {
         static::creating(function (self $batch): void {
             $batch->creator_id ??= Auth::id();
 
             if (blank($batch->batch_code)) {
-                $cloudName = $batch->cloud_id ? Cloud::find($batch->cloud_id)?->name : null;
-                $normalized = $cloudName ? strtoupper(str_replace(' ', '', $cloudName)) : 'WIFI';
-                $batch->batch_code = $normalized.'_'.date('Ymd').'_'.mt_rand(1, 100);
+                $batch->batch_code = static::generateUniqueBatchCode($batch->cloud_id);
             }
         });
 

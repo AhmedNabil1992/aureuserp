@@ -35,7 +35,7 @@ class Topups extends Page implements HasTable
     }
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-user-plus';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 7;
     public static function getNavigationGroup(): string
     {
         return __('admin.navigation.wifi');

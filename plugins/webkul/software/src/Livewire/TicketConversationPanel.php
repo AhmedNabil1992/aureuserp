@@ -35,6 +35,13 @@ class TicketConversationPanel extends Component implements HasActions, HasForms
         $this->canReply = $canReply;
     }
 
+    protected function getListeners(): array
+    {
+        return [
+            "echo:tickets.{$this->ticket->id},.TicketMessageSent" => '$refresh',
+        ];
+    }
+
     public function replyAction(): Action
     {
         return Action::make('reply')

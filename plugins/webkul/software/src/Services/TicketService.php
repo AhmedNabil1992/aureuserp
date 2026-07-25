@@ -2,9 +2,14 @@
 
 namespace Webkul\Software\Services;
 
+use Filament\Notifications\Actions\Action;
+use Filament\Notifications\Notification;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Kreait\Firebase\Contract\Database as FirebaseDatabase;
+use Webkul\Security\Models\User;
+use Webkul\Software\Events\TicketMessageSent;
 use Webkul\Software\Jobs\NotifyTicketUpdate;
 use Webkul\Software\Models\Ticket;
 use Webkul\Software\Models\TicketAttachment;
@@ -38,6 +43,26 @@ class TicketService
 
         $this->saveAttachments($ticket, $filePaths);
 
+        // Broadcast real-time Reverb event
+        TicketMessageSent::dispatch($ticket);
+
+        // Send Filament notification to admins
+        try {
+            $admins = User::all();
+            $adminUrl = \Webkul\Software\Filament\Admin\Resources\TicketResource::getUrl('view', ['record' => $ticket->id]);
+
+            Notification::make()
+                ->title("تذكرة جديدة #{$ticket->ticket_number}")
+                ->body(($ticket->partner?->name ?? 'عميل') . ': ' . strip_tags(Str::limit($ticket->title, 60)))
+                ->actions([
+                    Action::make('view')
+                        ->label('عرض التذكرة')
+                        ->url($adminUrl),
+                ])
+                ->sendToDatabase($admins)
+                ->broadcast($admins);
+        } catch (\Throwable) {}
+
         return $ticket;
     }
 
@@ -57,8 +82,10 @@ class TicketService
 
         $this->saveAttachments($event, $filePaths);
 
+        $isAdminReply = ! empty($data['user_id']);
+
         // Mark ticket as unread for the appropriate side
-        if (! empty($data['user_id'])) {
+        if ($isAdminReply) {
             $ticket->update(['is_unread_client' => true]);
         } else {
             $ticket->update(['is_unread_admin' => true]);
@@ -67,9 +94,45 @@ class TicketService
         // Dispatch push notification via Firebase (queued)
         NotifyTicketUpdate::dispatch($ticket, $event->load(['user', 'partner']));
 
-        // Write a tiny signal to Firebase RTDB so open browser/app sessions
-        // refresh in real-time without polling.
+        // Write a tiny signal to Firebase RTDB
         $this->signalRtdb($ticket, $event);
+
+        // Broadcast real-time Reverb event immediately
+        TicketMessageSent::dispatch($ticket, $event);
+
+        // Send Filament Database & Browser Push notifications
+        try {
+            if ($isAdminReply) {
+                if ($ticket->partner) {
+                    $customerUrl = \Webkul\Software\Filament\Customer\Resources\TicketResource::getUrl('view', ['record' => $ticket->id]);
+
+                    Notification::make()
+                        ->title("رد جديد على التذكرة #{$ticket->ticket_number}")
+                        ->body('فريق الدعم: ' . strip_tags(Str::limit($data['content'] ?? '', 80)))
+                        ->actions([
+                            Action::make('view')
+                                ->label('عرض التذكرة')
+                                ->url($customerUrl),
+                        ])
+                        ->sendToDatabase($ticket->partner)
+                        ->broadcast($ticket->partner);
+                }
+            } else {
+                $admins = User::all();
+                $adminUrl = \Webkul\Software\Filament\Admin\Resources\TicketResource::getUrl('view', ['record' => $ticket->id]);
+
+                Notification::make()
+                    ->title("رد جديد على التذكرة #{$ticket->ticket_number}")
+                    ->body(($ticket->partner?->name ?? 'العميل') . ': ' . strip_tags(Str::limit($data['content'] ?? '', 80)))
+                    ->actions([
+                        Action::make('view')
+                            ->label('عرض التذكرة')
+                            ->url($adminUrl),
+                    ])
+                    ->sendToDatabase($admins)
+                    ->broadcast($admins);
+            }
+        } catch (\Throwable) {}
 
         return $event;
     }

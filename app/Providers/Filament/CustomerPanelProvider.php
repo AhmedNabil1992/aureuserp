@@ -20,6 +20,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Emuniq\FilamentBrowserNotifications\BrowserNotificationsPlugin;
 
 class CustomerPanelProvider extends PanelProvider
 {
@@ -64,7 +65,17 @@ class CustomerPanelProvider extends PanelProvider
                     ->label(fn (): string => __('psmonitor::filament/customer/navigation.group'))
                     ->icon('heroicon-o-computer-desktop'),
             ])
+            ->plugins([
+                BrowserNotificationsPlugin::make()
+                    ->promptDelay(5)           // seconds before showing prompt (default: 2)
+                    ->dismissCooldownDays(14)  // days before re-prompting (default: 7)
+                    ->profileSection(false),   // disable auto-injected profile section
+            ])
             ->maxContentWidth(Width::Full)
+            ->renderHook(
+                PanelsRenderHook::HEAD_START,
+                fn (): string => \Illuminate\Support\Facades\Vite::useBuildDirectory('build')->withEntryPoints(['resources/js/app.js'])->toHtml()
+            )
             ->renderHook(
                 PanelsRenderHook::USER_MENU_BEFORE,
                 fn () => view('filament.components.language-switcher'),

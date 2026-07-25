@@ -33,7 +33,7 @@ class PermanentUsers extends Page implements HasTable
     {
         return __('wifi::filament/customer/pages/permanentuser.title');
     }
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 6;
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-users';
 
     public static function getNavigationGroup(): string

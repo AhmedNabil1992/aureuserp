@@ -101,4 +101,25 @@ class Ticket extends Model
     {
         return $this->morphMany(TicketAttachment::class, 'attachable');
     }
+
+    public function getUnreadCustomerMessagesCountAttribute(): int
+    {
+        if (! $this->is_unread_admin) {
+            return 0;
+        }
+
+        $lastAdminReplyAt = $this->events()
+            ->whereNotNull('user_id')
+            ->max('created_at');
+
+        $query = $this->events()->whereNull('user_id');
+
+        if ($lastAdminReplyAt) {
+            $query->where('created_at', '>', $lastAdminReplyAt);
+        }
+
+        $count = $query->count();
+
+        return max(1, $count);
+    }
 }

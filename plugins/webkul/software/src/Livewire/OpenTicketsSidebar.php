@@ -16,10 +16,17 @@ class OpenTicketsSidebar extends Component
         $this->currentTicketId = $currentTicketId;
     }
 
+    protected function getListeners(): array
+    {
+        return [
+            'echo:tickets.admin-sidebar,.TicketMessageSent' => '$refresh',
+        ];
+    }
+
     public function render(): View
     {
         $tickets = Ticket::query()
-            ->with(['partner'])
+            ->with(['partner', 'events'])
             ->whereIn('status', [TicketStatus::Open->value, TicketStatus::Pending->value])
             ->orderByDesc('is_unread_admin')
             ->orderByDesc('updated_at')

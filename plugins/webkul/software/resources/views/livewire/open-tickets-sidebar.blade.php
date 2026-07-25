@@ -29,6 +29,7 @@
                     \Webkul\Software\Enums\TicketStatus::Pending => 'background-color: #fef9c3; color: #a16207;',
                     default                                       => 'background-color: #f3f4f6; color: #4b5563;',
                 };
+                $unreadCount = $ticket->is_unread_admin ? $ticket->unread_customer_messages_count : 0;
             @endphp
 
             <a
@@ -36,16 +37,20 @@
                 wire:navigate
                 class="ticket-nav-item"
                 data-current="{{ $isCurrent ? 'true' : 'false' }}"
-                data-unread="{{ ($ticket->is_unread_admin && ! $isCurrent) ? 'true' : 'false' }}"
+                data-unread="{{ ($unreadCount > 0 && ! $isCurrent) ? 'true' : 'false' }}"
             >
-                {{-- Top row: ticket # + unread dot --}}
-                <div class="flex items-center gap-1.5 mb-0.5">
+                {{-- Top row: ticket # + unread badge --}}
+                <div class="flex items-center justify-between gap-1.5 mb-0.5">
                     <span
                         class="text-xs font-bold"
                         style="{{ $isCurrent ? 'color: var(--color-primary-600, #2563eb)' : 'color: #9ca3af' }}"
                     >#{{ $ticket->ticket_number }}</span>
 
-                    <span class="ticket-unread-dot"></span>
+                    @if ($unreadCount > 0 && ! $isCurrent)
+                        <span class="inline-flex items-center justify-center px-2 py-0.5 text-[10px] font-bold rounded-full bg-red-500 text-white dark:bg-red-600 dark:text-white shadow-xs">
+                            {{ $unreadCount }} {{ $unreadCount == 1 ? 'رسالة جديدة' : 'رسايل جديدة' }}
+                        </span>
+                    @endif
                 </div>
 
                 {{-- Title --}}
@@ -81,29 +86,15 @@
 @once
 @push('scripts')
 <script>
-    const { ref, onValue } = window.firebaseDatabase;
-
     function openTicketsSidebar() {
         return {
-            _unsubscribers: [],
             init() {
-                if (! window.AureusFirebase?.hasRequiredFirebaseConfig) { return; }
-                if (! window.AureusFirebase?.firebaseConfig?.databaseURL) { return; }
-
-                const db = window.AureusFirebase.getDatabase('sidebar');
-
-                if (! db) { return; }
-
-                // Listen to the root tickets/ node for any update
-                const path = ref(db, 'tickets');
-                const unsub = onValue(path, () => {
-                    this.$wire.$refresh();
-                }, { onlyOnce: false });
-
-                this._unsubscribers.push(unsub);
-            },
-            destroy() {
-                this._unsubscribers.forEach(fn => fn());
+                if (window.Echo) {
+                    window.Echo.channel('tickets.admin-sidebar')
+                        .listen('.TicketMessageSent', () => {
+                            this.$wire.$refresh();
+                        });
+                }
             },
         };
     }

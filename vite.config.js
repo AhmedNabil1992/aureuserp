@@ -7,6 +7,7 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
+                'resources/js/bootstrap.js',
                 'plugins/webkul/barcode/resources/dist/barcode.css',
                 'plugins/webkul/barcode/resources/dist/barcode.js',
             ],

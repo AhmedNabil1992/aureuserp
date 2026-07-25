@@ -3,16 +3,21 @@
 namespace Webkul\Wifi\Filament\Customer\Pages;
 
 use BackedEnum;
+use Filament\Facades\Filament;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Illuminate\Contracts\Support\Htmlable;
-use Filament\Facades\Filament;
-use Webkul\Wifi\Models\WifiPartnerCloud;
 use Illuminate\Support\Facades\Schema;
+use Webkul\Wifi\Filament\Customer\Widgets\AccessPointsStatus;
 use Webkul\Wifi\Filament\Customer\Widgets\QoutaUsage;
+use Webkul\Wifi\Filament\Customer\Widgets\VoucherStatusDistribution;
+use Webkul\Wifi\Filament\Customer\Widgets\WifiConnectedClients;
+use Webkul\Wifi\Filament\Customer\Widgets\WifiStatsOverview;
+use Webkul\Wifi\Models\WifiPartnerCloud;
 
 class WifiDashboard extends BaseDashboard
 {
     protected static string $routePath = 'wifi';
+
     protected static ?int $navigationSort = 2;
 
     public static function canAccess(): bool
@@ -48,9 +53,11 @@ class WifiDashboard extends BaseDashboard
     public function getWidgets(): array
     {
         return [
+            WifiStatsOverview::class,
+            AccessPointsStatus::class,
+            VoucherStatusDistribution::class,
             QoutaUsage::class,
-
+            WifiConnectedClients::class,
         ];
     }
-
 }

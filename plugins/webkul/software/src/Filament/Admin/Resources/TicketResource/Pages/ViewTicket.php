@@ -24,6 +24,15 @@ class ViewTicket extends ViewRecord
 {
     protected static string $resource = TicketResource::class;
 
+    public function mount(int|string $record): void
+    {
+        parent::mount($record);
+
+        if ($this->record->is_unread_admin) {
+            $this->record->update(['is_unread_admin' => false]);
+        }
+    }
+
     protected function getHeaderActions(): array
     {
         return [

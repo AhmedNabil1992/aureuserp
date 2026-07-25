@@ -13,9 +13,11 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Software\Filament\Customer\Resources\LicenseResource\Pages\ListLicenses;
 use Webkul\Software\Filament\Customer\Resources\LicenseResource\Pages\ViewLicense;
 use Webkul\Software\Filament\Customer\Resources\LicenseResource\RelationManagers\SubscriptionsRelationManager;
+use Webkul\Software\Enums\LicensePlan;
 use Webkul\Software\Models\License;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Schema;
+use Filament\Tables\Columns\TextInputColumn;
 
 class LicenseResource extends Resource
 {
@@ -25,7 +27,7 @@ class LicenseResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-key';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 1;
 
     protected static bool $shouldRegisterNavigation = true;
 
@@ -68,41 +70,55 @@ class LicenseResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('serial_number')
-                    ->label(__('software::filament/customer/license.table.columns.serial_number'))
-                    ->searchable()
-                    ->sortable()
-                    ->copyable(),
+                // TextColumn::make('serial_number')
+                //     ->label(__('software::filament/customer/license.table.columns.serial_number'))
+                //     ->searchable()
+                //     ->sortable()
+                //     ->copyable(),
 
                 TextColumn::make('program.name')
                     ->label(__('software::filament/customer/license.table.columns.program_name'))
-                    ->searchable()
-                    ->sortable(),
-
+                    ,
+                TextInputColumn::make('company_name')
+                    ->label(__('software::filament/customer/license.table.columns.company_name'))
+                    ->rules(['required', 'string', 'max:255']),
                 TextColumn::make('edition.name')
                     ->label(__('software::filament/customer/license.table.columns.edition'))
-                    ->sortable(),
-
+                    ,
+                TextColumn::make('state.name')
+                    ->label(__('software::filament/customer/license.table.columns.state'))
+                    ,
+                TextColumn::make('city.name')
+                    ->label(__('software::filament/customer/license.table.columns.city'))
+                    ,
+                TextInputColumn::make('address')
+                    ->label(__('software::filament/customer/license.table.columns.address'))
+                    ->rules(['required', 'string', 'max:255']),
+                TextColumn::make('license_plan')
+                    ->label(__('software::filament/customer/license.table.columns.license_plan'))
+                    ->badge()
+                    ->formatStateUsing(fn ($state) => $state instanceof LicensePlan ? ucfirst($state->value) : (is_string($state) ? ucfirst($state) : '—')),
                 TextColumn::make('status')
                     ->label(__('software::filament/customer/license.table.columns.status'))
                     ->badge()
-                    ->sortable(),
-
+                    ,
                 TextColumn::make('start_date')
                     ->label(__('software::filament/customer/license.table.columns.start_date'))
                     ->date('Y-m-d')
-                    ->sortable(),
-
+                    ,
                 TextColumn::make('end_date')
                     ->label(__('software::filament/customer/license.table.columns.end_date'))
                     ->date('Y-m-d')
-                    ->sortable()
                     ->color(fn ($record) => $record->end_date < now() ? 'danger' : 'success'),
-
+                TextColumn::make('current_client_version')
+                    ->label(__('software::filament/customer/license.table.columns.version'))
+                    ->state(fn (License $record): ?string => $record->currentClientVersion())
+                    ->placeholder('-')
+                    ->searchable(false),
                 TextColumn::make('devices_count')
                     ->label(__('software::filament/customer/license.table.columns.devices_count'))
                     ->counts('devices')
-                    ->sortable(),
+                    ,
             ])
             ->filters([
                 SelectFilter::make('status')

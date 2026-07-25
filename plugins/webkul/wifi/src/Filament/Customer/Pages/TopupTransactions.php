@@ -30,7 +30,7 @@ class TopupTransactions extends Page implements HasTable
         return __('admin.navigation.wifi');
     }
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 8;
 
     public static function canAccess(): bool
     {

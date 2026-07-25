@@ -55,6 +55,8 @@ enum NavigationGroup: string implements HasIcon, HasLabel
 
     case Articles = 'articles';
 
+    case WhattsApp = 'whatts-app';
+
     public function getLabel(): string
     {
         return __('admin.navigation.'.$this->value);
@@ -87,6 +89,7 @@ enum NavigationGroup: string implements HasIcon, HasLabel
             self::Leads         => 'heroicon-o-user-group',
             self::Product       => 'icon-products',
             self::Articles      => 'heroicon-o-book-open',
+            self::WhattsApp     => 'heroicon-o-chat-bubble-left-right',
         };
     }
 }

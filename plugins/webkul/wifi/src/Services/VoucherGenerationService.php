@@ -25,7 +25,7 @@ class VoucherGenerationService
         ?int $minutesValid = null,
         ?CarbonInterface $expireAt = null,
     ): array {
-        $batch->loadMissing(['cloud', 'purchase.package']);
+        $batch->loadMissing(['cloud', 'realm', 'profile', 'purchase.package']);
 
         if (! $batch->cloud_id) {
             throw new RuntimeException('Cloud is required to generate vouchers.');
@@ -91,6 +91,13 @@ class VoucherGenerationService
             ));
         }
 
+        $responseData = $this->decodeResponse($response->body());
+
+        if (isset($responseData['success']) && $responseData['success'] === false) {
+            $msg = $responseData['message'] ?? 'Failed to generate vouchers on RadiusDesk.';
+            throw new RuntimeException(sprintf('Voucher API Error: %s', $msg));
+        }
+
         if ($batch->batch_code !== $batchCode) {
             $batch->batch_code = $batchCode;
             $batch->save();
@@ -100,7 +107,7 @@ class VoucherGenerationService
             'batch_code'   => $batchCode,
             'download_url' => $this->buildDownloadUrl($batchCode),
             'status'       => $response->status(),
-            'response'     => $this->decodeResponse($response->body()),
+            'response'     => $responseData,
         ];
     }
 
@@ -124,23 +131,48 @@ class VoucherGenerationService
             ->value();
 
         $normalizedCloud = $normalizedCloud !== '' ? $normalizedCloud : 'WIFI';
+        $prefix = sprintf('%s_%s_', $normalizedCloud, now()->format('Ymd'));
 
-        return sprintf('%s_%s_%s', $normalizedCloud, now()->format('Ymd'), mt_rand(1, 100));
+        do {
+            $code = $prefix . mt_rand(1, 99999);
+        } while (WifiVoucherBatch::where('batch_code', $code)->exists());
+
+        return $code;
     }
 
-    private function buildDownloadUrl(string $batchCode): ?string
+    public static function buildDownloadUrl(string $batchCode): string
     {
-        if (app('router')->has('wifi.voucher-batches.download')) {
-            return url('wifi/voucher-batches/'.rawurlencode($batchCode).'/download');
-        }
-
-        $baseUrl = (string) config('services.wifi_voucher.download_base_url');
+        $baseUrl = (string) config('services.wifi_voucher.download_base_url', 'https://etech-valley.com/voucher');
 
         if (blank($baseUrl)) {
-            return null;
+            return 'https://etech-valley.com/voucher?batch=' . rawurlencode($batchCode);
         }
 
-        return rtrim($baseUrl, '/').'?batch='.urlencode($batchCode);
+        if (str_contains($baseUrl, '{batch}')) {
+            return str_replace('{batch}', rawurlencode($batchCode), $baseUrl);
+        }
+
+        if (str_contains($baseUrl, 'voucher-batches')) {
+            $cleanBase = rtrim($baseUrl, '/');
+            if (str_ends_with($cleanBase, '/download')) {
+                return $cleanBase . '?batch=' . rawurlencode($batchCode);
+            }
+            return $cleanBase . '/' . rawurlencode($batchCode) . '/download';
+        }
+
+        if (str_contains($baseUrl, '?batch=')) {
+            return rtrim($baseUrl, '=') . '=' . rawurlencode($batchCode);
+        }
+
+        if (str_ends_with($baseUrl, '/')) {
+            return $baseUrl . rawurlencode($batchCode) . '/download';
+        }
+
+        if (str_contains($baseUrl, '?')) {
+            return $baseUrl . '&batch=' . rawurlencode($batchCode);
+        }
+
+        return $baseUrl . '?batch=' . rawurlencode($batchCode);
     }
 
     /**

@@ -25,8 +25,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Webkul\Manufacturing\ManufacturingPlugin;
 use Webkul\Support\Enums\NavigationGroup;
+use WallaceMartinss\FilamentEvolution\FilamentEvolutionPlugin;
 use Webkul\Support\Filament\Pages\Profile;
 use Webkul\Support\GlobalSearchProvider;
+use Emuniq\FilamentBrowserNotifications\BrowserNotificationsPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -66,6 +68,7 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups(NavigationGroup::class)
             ->plugins([
                 ManufacturingPlugin::make(),
+                FilamentEvolutionPlugin::make(),
                 FilamentShieldPlugin::make()
                     ->gridColumns([
                         'default' => 1,
@@ -84,6 +87,10 @@ class AdminPanelProvider extends PanelProvider
                         'default' => 1,
                         'sm'      => 2,
                     ]),
+                BrowserNotificationsPlugin::make()
+                    ->promptDelay(5)           // seconds before showing prompt (default: 2)
+                    ->dismissCooldownDays(14)  // days before re-prompting (default: 7)
+                    ->profileSection(false),   // disable auto-injected profile section
             ])
             ->globalSearch(provider: GlobalSearchProvider::class)
             ->middleware([
@@ -106,6 +113,10 @@ class AdminPanelProvider extends PanelProvider
                 AppAuthentication::make()
                     ->recoverable(),
             ])
+            ->renderHook(
+                PanelsRenderHook::HEAD_START,
+                fn (): string => \Illuminate\Support\Facades\Vite::useBuildDirectory('build')->withEntryPoints(['resources/js/app.js'])->toHtml()
+            )
             ->renderHook(
                 PanelsRenderHook::USER_MENU_BEFORE,
                 fn () => view('filament.components.language-switcher'),

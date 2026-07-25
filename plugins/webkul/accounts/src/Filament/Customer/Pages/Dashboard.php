@@ -17,12 +17,8 @@ class Dashboard extends \Filament\Pages\Dashboard
 
     public function getWidgets(): array
     {
-        $widgets = parent::getWidgets();
-
-        if (class_exists(AvailableBalanceWidget::class) && ! in_array(AvailableBalanceWidget::class, $widgets, true)) {
-            $widgets[] = AvailableBalanceWidget::class;
-        }
-
-        return $widgets;
+        return [
+            AvailableBalanceWidget::class,
+        ];
     }
 }
