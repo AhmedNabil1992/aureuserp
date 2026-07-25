@@ -25,6 +25,12 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->trustProxies(at: '*');
+
+        $middleware->redirectTo(
+            guests: fn (\Illuminate\Http\Request $request) => $request->is('portal*')
+                ? route('filament.customer.auth.login')
+                : route('filament.admin.auth.login')
+        );
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (ValidationException $e, $request) {
