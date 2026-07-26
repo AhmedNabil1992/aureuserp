@@ -14,6 +14,8 @@ return [
             'state' => 'الولاية',
             'city' => 'المدينة',
             'approver' => 'المعتمد',
+            'server_ip' => 'عنوان IP VPN',
+            'address' => 'العنوان',
         ],
     ],
 

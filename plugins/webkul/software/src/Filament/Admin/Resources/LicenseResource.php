@@ -19,6 +19,7 @@ use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Table;
 use Webkul\Software\Enums\LicensePlan;
 use Webkul\Software\Enums\LicenseStatus;
@@ -125,6 +126,7 @@ class LicenseResource extends Resource
                     ->placeholder('-'),
                 TextColumn::make('state.name')->label(__('software::filament/admin/resources/license.table.columns.state'))->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('city.name')->label(__('software::filament/admin/resources/license.table.columns.city'))->toggleable(isToggledHiddenByDefault: true),
+                TextInputColumn::make('address')->label(__('software::filament/admin/resources/license.table.columns.address'))->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('license_plan')->badge(),
                 TextColumn::make('period')->numeric()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('start_date')->date()->toggleable(isToggledHiddenByDefault: true),
@@ -134,6 +136,7 @@ class LicenseResource extends Resource
                 TextColumn::make('requested_at')->dateTime()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('approver.name')->label(__('software::filament/admin/resources/license.table.columns.approver'))->searchable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')->dateTime()->sortable(),
+                TextInputColumn::make('server_ip')->label(__('software::filament/admin/resources/license.table.columns.server_ip'))->toggleable(isToggledHiddenByDefault: true),
             ])
             ->recordUrl(fn (License $record): string => static::getUrl('view', ['record' => $record]))
             ->recordActions([
