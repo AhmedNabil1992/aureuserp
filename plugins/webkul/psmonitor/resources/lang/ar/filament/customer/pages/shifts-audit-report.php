@@ -7,6 +7,8 @@ return [
         'columns' => [
             'shift_no' => 'رقم الشيفت',
             'shift_date' => 'التاريخ',
+            'shift_from' => 'من وقت',
+            'shift_to' => 'إلى وقت',
             'shift_open' => 'فتح بواسطة',
             'shift_close' => 'إغلاق بواسطة',
             'start_amt' => 'درج البداية',
@@ -26,6 +28,9 @@ return [
         'filters' => [
             'from' => 'من تاريخ',
             'until' => 'إلى تاريخ',
+        ],
+        'actions' => [
+            'details' => 'عرض التفاصيل',
         ],
     ],
     'notifications' => [

@@ -7,6 +7,8 @@ return [
         'columns' => [
             'shift_no' => 'Shift No.',
             'shift_date' => 'Date',
+            'shift_from' => 'From Time',
+            'shift_to' => 'To Time',
             'shift_open' => 'Opened By',
             'shift_close' => 'Closed By',
             'start_amt' => 'Opening Cash',
@@ -26,6 +28,9 @@ return [
         'filters' => [
             'from' => 'From Date',
             'until' => 'Until Date',
+        ],
+        'actions' => [
+            'details' => 'View Details',
         ],
     ],
     'notifications' => [

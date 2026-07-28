@@ -3,6 +3,10 @@
 return [
     'title' => 'سجل الخصومات',
     'navigation_group' => 'بلاي ستيشن',
+    'empty_state' => [
+        'heading' => 'لا توجد خصومات',
+        'description' => 'لم يتم العثور على أي خصومات في الفترة المحددة.',
+    ],
     'table' => [
         'columns' => [
             'invoice_no' => 'رقم الفاتورة',

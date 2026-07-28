@@ -3,6 +3,10 @@
 return [
     'title' => 'Discount History',
     'navigation_group' => 'PlayStation',
+    'empty_state' => [
+        'heading' => 'No Discounts Found',
+        'description' => 'No discounts were found for the selected date range.',
+    ],
     'table' => [
         'columns' => [
             'invoice_no' => 'Invoice No.',

@@ -14,6 +14,8 @@ return [
             'state' => 'State',
             'city' => 'City',
             'approver' => 'Approver',
+            'server_ip' => 'VPN IP',
+            'address' => 'Address',
         ],
     ],
 

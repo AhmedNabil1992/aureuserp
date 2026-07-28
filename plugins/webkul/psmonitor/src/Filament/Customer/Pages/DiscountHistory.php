@@ -11,6 +11,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Override;
 use Throwable;
 use Webkul\Partner\Models\Partner;
 use Webkul\Psmonitor\Filament\Customer\Concerns\HasPsLicenseAccess;
@@ -48,6 +49,16 @@ class DiscountHistory extends Page implements HasTable
         return [
             LicenseSelectorWidget::class,
         ];
+    }
+
+    public function getTableEmptyStateHeading(): ?string
+    {
+        return __('psmonitor::filament/customer/pages/discount-history.empty_state.heading');
+    }
+
+    public function getTableEmptyStateDescription(): ?string
+    {
+        return __('psmonitor::filament/customer/pages/discount-history.empty_state.description');
     }
 
     public function table(Table $table): Table
@@ -115,9 +126,12 @@ class DiscountHistory extends Page implements HasTable
                 Filter::make('date_range')
                     ->form([
                         DatePicker::make('from')
-                            ->label(__('psmonitor::filament/customer/pages/discount-history.table.filters.from')),
+                            ->label(__('psmonitor::filament/customer/pages/discount-history.table.filters.from'))
+                            ->default(now()->startOfMonth())
+                            ,
                         DatePicker::make('until')
-                            ->label(__('psmonitor::filament/customer/pages/discount-history.table.filters.until')),
+                            ->label(__('psmonitor::filament/customer/pages/discount-history.table.filters.until'))
+                            ->default(now()),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
