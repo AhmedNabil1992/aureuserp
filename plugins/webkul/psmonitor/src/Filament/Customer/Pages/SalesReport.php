@@ -132,9 +132,11 @@ class SalesReport extends Page implements HasTable
                 Filter::make('date_range')
                     ->form([
                         DatePicker::make('from')
-                            ->label(__('psmonitor::filament/customer/pages/sales-report.table.filters.from')),
+                            ->label(__('psmonitor::filament/customer/pages/sales-report.table.filters.from'))
+                            ->default(now()->startOfMonth()),
                         DatePicker::make('until')
-                            ->label(__('psmonitor::filament/customer/pages/sales-report.table.filters.until')),
+                            ->label(__('psmonitor::filament/customer/pages/sales-report.table.filters.until'))
+                            ->default(now()),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query

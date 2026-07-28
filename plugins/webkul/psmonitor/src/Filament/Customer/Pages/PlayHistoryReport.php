@@ -144,9 +144,11 @@ class PlayHistoryReport extends Page implements HasTable
                 Filter::make('date_range')
                     ->form([
                         DatePicker::make('from')
-                            ->label(__('psmonitor::filament/customer/pages/play-history-report.table.filters.from')),
+                            ->label(__('psmonitor::filament/customer/pages/play-history-report.table.filters.from'))
+                            ->default(now()->startOfMonth()),
                         DatePicker::make('until')
-                            ->label(__('psmonitor::filament/customer/pages/play-history-report.table.filters.until')),
+                            ->label(__('psmonitor::filament/customer/pages/play-history-report.table.filters.until'))
+                            ->default(now()),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query

@@ -1,6 +1,6 @@
 # AI Context
 
-This is a Laravel web application built on the TALL stack, with Filament v3 as a core UI framework.
+This is a Laravel web application built on the TALL stack, with Filament v5 as a core UI framework.
 
 Filament Panels are used to build the ENTIRE application, including the customer-facing App Panel and the Admin Panel.
 

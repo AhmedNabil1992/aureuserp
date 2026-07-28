@@ -2,7 +2,9 @@
 
 namespace Webkul\Psmonitor\Filament\Customer\Pages;
 
+use Carbon\WeekDay;
 use Filament\Forms\Components\DatePicker;
+use Filament\Actions\Action;
 use Filament\Pages\Page;
 use Filament\Tables;
 use Filament\Tables\Columns\Summarizers\Sum;
@@ -51,6 +53,23 @@ class ShiftsAuditReport extends Page implements HasTable
         ];
     }
 
+    // public function getTableActionButtons(): array
+    // {
+    //     return [
+    //         Action::make('details')
+    //             ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.actions.details'))
+    //             ->url(fn (Shifts $record): string => route('psmonitor.customer.shifts-audit-report.details', ['shift_no' => $record->Shift_No]))
+    //             ->icon('heroicon-o-eye')
+    //             ->color('info')
+    //             ->modalHeading(__('psmonitor::filament/customer/pages/shifts-audit-report.table.actions.details'))
+    //             ->modalWidth('5xl')
+    //             ->modalSubmitAction(false)
+    //             ->modalSubmitActionLabel(__('psmonitor::filament/customer/pages/shifts-audit-report.table.actions.details'))
+    //             ->modalContent(fn (Shifts $record): string => view('psmonitor::filament.customer.pages.partials.ps-shift-details', ['shift' => $record])->render())
+    //             ,
+    //     ];
+    // }
+
     public function table(Table $table): Table
     {
         $customer = Auth::guard('customer')->user();
@@ -78,60 +97,59 @@ class ShiftsAuditReport extends Page implements HasTable
 
         return static::applyRemoteTablePagination($table)
             ->query($query)
-            ->defaultSort('ID', 'desc')
+            ->defaultSort('Shift_No', 'desc')
             ->columns([
                 TextColumn::make('Shift_No')
                     ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.columns.shift_no'))
                     ->sortable()
                     ->weight('bold'),
-
                 TextColumn::make('Shift_Date')
                     ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.columns.shift_date'))
-                    ->date()
+                    ->date('Y-m-d')
                     ->sortable(),
-
+                TextColumn::make('Shift_From')
+                    ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.columns.shift_from'))
+                    ->time('h:i A')
+                    ->alignCenter()
+                    ,
+                TextColumn::make('Shift_To')
+                    ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.columns.shift_to'))
+                    ->time('h:i A')
+                    ->alignCenter()
+                    ,
                 TextColumn::make('Shift_Open')
                     ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.columns.shift_open'))
                     ->searchable(),
-
                 TextColumn::make('Shift_Close')
                     ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.columns.shift_close'))
+                    ->placeholder('-')
                     ->searchable(),
-
                 TextColumn::make('Start_AMT')
                     ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.columns.start_amt'))
                     ->numeric(decimalPlaces: 2)
-                    ->sortable(),
-
+                    ,
                 TextColumn::make('Playstation')
                     ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.columns.playstation'))
                     ->numeric(decimalPlaces: 2)
-                    ->sortable()
                     ->summarize(Sum::make()->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.summaries.total_playstation'))),
-
                 TextColumn::make('Sales_AMT')
                     ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.columns.sales_amt'))
                     ->numeric(decimalPlaces: 2)
-                    ->sortable()
                     ->summarize(Sum::make()->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.summaries.total_sales'))),
-
                 TextColumn::make('Expenses_AMT')
                     ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.columns.expenses_amt'))
                     ->numeric(decimalPlaces: 2)
                     ->color('danger')
                     ->sortable()
                     ->summarize(Sum::make()->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.summaries.total_expenses'))),
-
                 TextColumn::make('Remain_AMT')
                     ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.columns.remain_amt'))
                     ->numeric(decimalPlaces: 2)
                     ->sortable(),
-
                 TextColumn::make('Actual_Amt')
                     ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.columns.actual_amt'))
                     ->numeric(decimalPlaces: 2)
                     ->sortable(),
-
                 TextColumn::make('Different')
                     ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.columns.different'))
                     ->numeric(decimalPlaces: 2)
@@ -141,7 +159,6 @@ class ShiftsAuditReport extends Page implements HasTable
                         (float) $state > 0 => 'success',
                         default => 'gray',
                     }),
-
                 TextColumn::make('Status')
                     ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.columns.status'))
                     ->badge()
@@ -155,9 +172,11 @@ class ShiftsAuditReport extends Page implements HasTable
                 Filter::make('date_range')
                     ->form([
                         DatePicker::make('from')
-                            ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.filters.from')),
+                            ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.filters.from'))
+                            ->default(now()->startOfWeek(WeekDay::Saturday)),
                         DatePicker::make('until')
-                            ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.filters.until')),
+                            ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.filters.until'))
+                            ->default(now()),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
@@ -170,6 +189,17 @@ class ShiftsAuditReport extends Page implements HasTable
                                 fn (Builder $query, $date): Builder => $query->whereDate('Shift_Date', '<=', $date),
                             );
                     }),
+            ])
+            ->actions([
+                Action::make('details')
+                    ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.actions.details'))
+                    ->icon('heroicon-o-eye')
+                    ->color('info')
+                    ->modalHeading(__('psmonitor::filament/customer/pages/shifts-audit-report.table.actions.details'))
+                    ->modalWidth('5xl')
+                    ->modalSubmitAction(false)
+                    ->modalSubmitActionLabel(__('psmonitor::filament/customer/pages/shifts-audit-report.table.actions.details'))
+                    ->modalContent(fn (Shifts $record): \Illuminate\Contracts\View\View => view('psmonitor::filament.customer.pages.partials.ps-shift-details', ['shift' => $record])),
             ]);
     }
 }
