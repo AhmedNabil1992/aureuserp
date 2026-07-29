@@ -18,8 +18,38 @@ return [
     'pages' => [
         'view' => [
             'sections' => [
-                'request' => 'Request Details',
+                'request' => 'Payment Request Details',
             ],
+        ],
+    ],
+
+    'table' => [
+        'columns' => [
+            'name'   => 'Reference No',
+            'amount' => 'Amount',
+            'date'   => 'Date',
+            'state'  => 'Status',
+            'memo'   => 'Memo / Notes',
+        ],
+    ],
+
+    'form' => [
+        'fields' => [
+            'amount' => 'Requested Amount',
+            'date'   => 'Request Date',
+            'memo'   => 'Memo / Notes',
+        ],
+    ],
+
+    'infolist' => [
+        'fields' => [
+            'name'           => 'Reference No',
+            'amount'         => 'Amount',
+            'date'           => 'Date',
+            'state'          => 'Status',
+            'journal'        => 'Journal / Bank',
+            'payment_method' => 'Payment Method',
+            'memo'           => 'Memo / Notes',
         ],
     ],
 

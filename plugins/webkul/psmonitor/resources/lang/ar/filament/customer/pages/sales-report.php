@@ -2,7 +2,7 @@
 
 return [
     'title' => 'تقرير المبيعات والفواتير',
-    'navigation_group' => 'مراقبة الفروع',
+    'navigation_group' => 'بلاي ستيشن',
     'table' => [
         'columns' => [
             'date' => 'تاريخ الفاتورة',
@@ -14,6 +14,9 @@ return [
             'total' => 'الصافي النهائي',
             'username' => 'المستخدم',
             'shift_no' => 'رقم الشيفت',
+        ],
+        'actions' => [
+            'details' => 'تفاصيل',
         ],
         'summaries' => [
             'total_amount' => 'إجمالي المبيعات',

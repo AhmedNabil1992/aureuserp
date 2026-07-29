@@ -66,6 +66,11 @@ class CustomerLicenseResolver
         return $license;
     }
 
+    public function hasAccessibleRemoteLicense(Partner $customer): bool
+    {
+        return $this->hasAccessibleRemoteLicenseForProducts($customer, null);
+    }
+
     public function hasAccessibleRemoteLicenseForProducts(Partner $customer, ?array $productIds = null): bool
     {
         try {

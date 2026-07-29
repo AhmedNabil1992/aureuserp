@@ -1,6 +1,6 @@
 <?php
-return[
-    'navigation' => [
-        'title' => 'PS Monitor',
-    ],
-]
+
+return [
+    'title' => 'PlayStation',
+    'navigation_group' => 'PlayStation',
+];

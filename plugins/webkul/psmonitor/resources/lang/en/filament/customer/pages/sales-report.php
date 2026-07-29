@@ -2,34 +2,31 @@
 
 return [
     'title' => 'Sales & Invoices Report',
-    'navigation_group' => 'Branch Monitor',
+    'navigation_group' => 'PlayStation',
     'table' => [
         'columns' => [
-            'date' => 'Invoice Date',
-            'invoice_no' => 'Invoice No.',
-            'amount' => 'Gross Amount',
-            'discount' => 'Discount',
-            'services' => 'Services',
-            'tax' => 'Tax',
-            'total' => 'Net Total',
-            'username' => 'User',
-            'shift_no' => 'Shift No.',
+            'date'       => 'Invoice Date',
+            'invoice_no' => 'Invoice No',
+            'amount'     => 'Sales Amount',
+            'discount'   => 'Discount',
+            'services'   => 'Services',
+            'tax'        => 'Tax',
+            'total'      => 'Net Total',
+            'username'   => 'Username',
+            'shift_no'   => 'Shift No',
+        ],
+        'actions' => [
+            'details' => 'Details',
         ],
         'summaries' => [
-            'total_amount' => 'Total Gross Sales',
+            'total_amount'   => 'Total Sales',
             'total_discount' => 'Total Discounts',
             'total_services' => 'Total Services',
-            'grand_total' => 'Grand Net Total',
+            'grand_total'    => 'Grand Net Total',
         ],
         'filters' => [
-            'from' => 'From Date',
-            'until' => 'Until Date',
-        ],
-    ],
-    'notifications' => [
-        'connection_failed' => [
-            'title' => 'Branch Database Connection Failed',
-            'body' => 'The remote server for the selected branch is currently unreachable.',
+            'from'  => 'From Date',
+            'until' => 'To Date',
         ],
     ],
 ];

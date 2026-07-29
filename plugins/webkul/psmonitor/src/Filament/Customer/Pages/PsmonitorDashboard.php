@@ -2,12 +2,15 @@
 
 namespace Webkul\Psmonitor\Filament\Customer\Pages;
 
-use Filament\Pages\Page;
 use BackedEnum;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Support\Facades\Schema;
 use Webkul\Psmonitor\Filament\Customer\Concerns\HasPsLicenseAccess;
+use Webkul\Psmonitor\Filament\Customer\Widgets\ActiveDevicesOverviewWidget;
+use Webkul\Psmonitor\Filament\Customer\Widgets\LicenseSelectorWidget;
+use Webkul\Psmonitor\Filament\Customer\Widgets\TrxOpenShiftTotalsWidget;
+use Webkul\Psmonitor\Filament\Customer\Widgets\TrxTypeTotalsWidget;
+
 class PsmonitorDashboard extends BaseDashboard
 {
     use HasPsLicenseAccess;
@@ -18,7 +21,12 @@ class PsmonitorDashboard extends BaseDashboard
 
     public static function getNavigationLabel(): string
     {
-        return __('psmonitor::filament/pages/dashboard.navigation.title');
+        return __('psmonitor::filament/customer/pages/dashboard.title');
+    }
+
+    public function getTitle(): string
+    {
+        return __('psmonitor::filament/customer/pages/dashboard.title');
     }
 
     public static function getNavigationIcon(): string|BackedEnum|Htmlable|null
@@ -31,11 +39,19 @@ class PsmonitorDashboard extends BaseDashboard
         return __('admin.navigation.dashboard');
     }
 
-    public function getWidgets(): array
+    public function getHeaderWidgets(): array
     {
         return [
-            
+            LicenseSelectorWidget::class,
         ];
     }
 
+    public function getWidgets(): array
+    {
+        return [
+            ActiveDevicesOverviewWidget::class,
+            TrxOpenShiftTotalsWidget::class,
+            TrxTypeTotalsWidget::class,
+        ];
+    }
 }

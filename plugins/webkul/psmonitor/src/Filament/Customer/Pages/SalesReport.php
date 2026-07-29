@@ -2,6 +2,7 @@
 
 namespace Webkul\Psmonitor\Filament\Customer\Pages;
 
+use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Pages\Page;
 use Filament\Tables;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
 use Webkul\Partner\Models\Partner;
+use Webkul\Psmonitor\Filament\Customer\Actions\ExportToExcelAction;
 use Webkul\Psmonitor\Filament\Customer\Concerns\HasPsLicenseAccess;
 use Webkul\Psmonitor\Filament\Customer\Concerns\HasRemoteTablePaginationForPage;
 use Webkul\Psmonitor\Filament\Customer\Widgets\LicenseSelectorWidget;
@@ -79,10 +81,13 @@ class SalesReport extends Page implements HasTable
         return static::applyRemoteTablePagination($table)
             ->query($query)
             ->defaultSort('ID', 'desc')
+            ->headerActions([
+                ExportToExcelAction::make(),
+            ])
             ->columns([
                 TextColumn::make('Date')
                     ->label(__('psmonitor::filament/customer/pages/sales-report.table.columns.date'))
-                    ->date()
+                    ->date('Y-m-d')
                     ->sortable(),
 
                 TextColumn::make('Invoice_No')
@@ -141,14 +146,27 @@ class SalesReport extends Page implements HasTable
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when(
-                                $data['from'],
+                                $data['from'] ?? null,
                                 fn (Builder $query, $date): Builder => $query->whereDate('Date', '>=', $date),
                             )
                             ->when(
-                                $data['until'],
+                                $data['until'] ?? null,
                                 fn (Builder $query, $date): Builder => $query->whereDate('Date', '<=', $date),
                             );
                     }),
+            ])
+            ->actions([
+                Action::make('details')
+                    ->label(__('psmonitor::filament/customer/pages/sales-report.table.actions.details'))
+                    ->icon('heroicon-o-eye')
+                    ->color('info')
+                    ->modalHeading(fn (Invoices $record): string => __('psmonitor::filament/customer/pages/sales-report.table.actions.details') . ': ' . $record->Invoice_No)
+                    ->modalWidth('5xl')
+                    ->modalSubmitAction(false)
+                    ->modalContent(fn (Invoices $record): \Illuminate\Contracts\View\View => view(
+                        'psmonitor::filament.customer.pages.partials.ps-invoice-details',
+                        ['invoice' => $record]
+                    )),
             ]);
     }
 }

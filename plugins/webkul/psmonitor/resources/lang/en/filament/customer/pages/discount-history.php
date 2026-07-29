@@ -5,27 +5,24 @@ return [
     'navigation_group' => 'PlayStation',
     'empty_state' => [
         'heading' => 'No Discounts Found',
-        'description' => 'No discounts were found for the selected date range.',
+        'description' => 'No discounts were found for the selected period.',
     ],
     'table' => [
         'columns' => [
-            'invoice_no' => 'Invoice No.',
-            'amount' => 'Discount Amount',
-            'reason' => 'Reason',
-            'username' => 'User',
-            'date' => 'Date',
-            'time' => 'Time',
-            'shift_no' => 'Shift No.',
+            'invoice_no' => 'Invoice No',
+            'amount'     => 'Discount Amount',
+            'reason'     => 'Reason',
+            'username'   => 'Username',
+            'date'       => 'Date',
+            'time'       => 'Time',
+            'shift_no'   => 'Shift No',
         ],
         'filters' => [
-            'from' => 'From Date',
-            'until' => 'Until Date',
+            'from'  => 'From Date',
+            'until' => 'To Date',
         ],
-    ],
-    'notifications' => [
-        'connection_failed' => [
-            'title' => 'Branch Database Connection Failed',
-            'body' => 'The remote server for the selected branch is currently unreachable. Please check the shop connection or try again later.',
+        'summaries' => [
+            'total_amount' => 'Total Discounts',
         ],
     ],
 ];

@@ -3,8 +3,8 @@
 namespace Webkul\Psmonitor\Filament\Customer\Pages;
 
 use Carbon\WeekDay;
-use Filament\Forms\Components\DatePicker;
 use Filament\Actions\Action;
+use Filament\Forms\Components\DatePicker;
 use Filament\Pages\Page;
 use Filament\Tables;
 use Filament\Tables\Columns\Summarizers\Sum;
@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
 use Webkul\Partner\Models\Partner;
+use Webkul\Psmonitor\Filament\Customer\Actions\ExportToExcelAction;
 use Webkul\Psmonitor\Filament\Customer\Concerns\HasPsLicenseAccess;
 use Webkul\Psmonitor\Filament\Customer\Concerns\HasRemoteTablePaginationForPage;
 use Webkul\Psmonitor\Filament\Customer\Widgets\LicenseSelectorWidget;
@@ -53,23 +54,6 @@ class ShiftsAuditReport extends Page implements HasTable
         ];
     }
 
-    // public function getTableActionButtons(): array
-    // {
-    //     return [
-    //         Action::make('details')
-    //             ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.actions.details'))
-    //             ->url(fn (Shifts $record): string => route('psmonitor.customer.shifts-audit-report.details', ['shift_no' => $record->Shift_No]))
-    //             ->icon('heroicon-o-eye')
-    //             ->color('info')
-    //             ->modalHeading(__('psmonitor::filament/customer/pages/shifts-audit-report.table.actions.details'))
-    //             ->modalWidth('5xl')
-    //             ->modalSubmitAction(false)
-    //             ->modalSubmitActionLabel(__('psmonitor::filament/customer/pages/shifts-audit-report.table.actions.details'))
-    //             ->modalContent(fn (Shifts $record): string => view('psmonitor::filament.customer.pages.partials.ps-shift-details', ['shift' => $record])->render())
-    //             ,
-    //     ];
-    // }
-
     public function table(Table $table): Table
     {
         $customer = Auth::guard('customer')->user();
@@ -98,6 +82,9 @@ class ShiftsAuditReport extends Page implements HasTable
         return static::applyRemoteTablePagination($table)
             ->query($query)
             ->defaultSort('Shift_No', 'desc')
+            ->headerActions([
+                ExportToExcelAction::make(),
+            ])
             ->columns([
                 TextColumn::make('Shift_No')
                     ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.columns.shift_no'))
@@ -110,13 +97,11 @@ class ShiftsAuditReport extends Page implements HasTable
                 TextColumn::make('Shift_From')
                     ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.columns.shift_from'))
                     ->time('h:i A')
-                    ->alignCenter()
-                    ,
+                    ->alignCenter(),
                 TextColumn::make('Shift_To')
                     ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.columns.shift_to'))
                     ->time('h:i A')
-                    ->alignCenter()
-                    ,
+                    ->alignCenter(),
                 TextColumn::make('Shift_Open')
                     ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.columns.shift_open'))
                     ->searchable(),
@@ -126,8 +111,7 @@ class ShiftsAuditReport extends Page implements HasTable
                     ->searchable(),
                 TextColumn::make('Start_AMT')
                     ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.columns.start_amt'))
-                    ->numeric(decimalPlaces: 2)
-                    ,
+                    ->numeric(decimalPlaces: 2),
                 TextColumn::make('Playstation')
                     ->label(__('psmonitor::filament/customer/pages/shifts-audit-report.table.columns.playstation'))
                     ->numeric(decimalPlaces: 2)
@@ -181,11 +165,11 @@ class ShiftsAuditReport extends Page implements HasTable
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when(
-                                $data['from'],
+                                $data['from'] ?? null,
                                 fn (Builder $query, $date): Builder => $query->whereDate('Shift_Date', '>=', $date),
                             )
                             ->when(
-                                $data['until'],
+                                $data['until'] ?? null,
                                 fn (Builder $query, $date): Builder => $query->whereDate('Shift_Date', '<=', $date),
                             );
                     }),

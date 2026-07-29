@@ -21,6 +21,9 @@ return [
             'from' => 'من تاريخ',
             'until' => 'إلى تاريخ',
         ],
+        'summaries' => [
+            'total_amount' => 'إجمالي الخصومات',
+        ],
     ],
     'notifications' => [
         'connection_failed' => [

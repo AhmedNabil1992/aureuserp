@@ -2,6 +2,6 @@
 
 return [
     'navigation' => [
-        'title' => 'لوحة تحكم واي فاي',
+        'title' => 'واي فاي',
     ],
 ];

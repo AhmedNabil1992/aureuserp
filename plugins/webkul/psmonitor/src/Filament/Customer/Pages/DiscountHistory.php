@@ -5,15 +5,16 @@ namespace Webkul\Psmonitor\Filament\Customer\Pages;
 use Filament\Forms\Components\DatePicker;
 use Filament\Pages\Page;
 use Filament\Tables;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-use Override;
 use Throwable;
 use Webkul\Partner\Models\Partner;
+use Webkul\Psmonitor\Filament\Customer\Actions\ExportToExcelAction;
 use Webkul\Psmonitor\Filament\Customer\Concerns\HasPsLicenseAccess;
 use Webkul\Psmonitor\Filament\Customer\Concerns\HasRemoteTablePaginationForPage;
 use Webkul\Psmonitor\Filament\Customer\Widgets\LicenseSelectorWidget;
@@ -89,6 +90,9 @@ class DiscountHistory extends Page implements HasTable
         return static::applyRemoteTablePagination($table)
             ->query($query)
             ->defaultSort('ID', 'desc')
+            ->headerActions([
+                ExportToExcelAction::make(),
+            ])
             ->columns([
                 TextColumn::make('Invoice_No')
                     ->label(__('psmonitor::filament/customer/pages/discount-history.table.columns.invoice_no'))
@@ -98,7 +102,10 @@ class DiscountHistory extends Page implements HasTable
                 TextColumn::make('Amount')
                     ->label(__('psmonitor::filament/customer/pages/discount-history.table.columns.amount'))
                     ->numeric(decimalPlaces: 2)
-                    ->sortable(),
+                    ->sortable()
+                    ->summarize(
+                        Sum::make()->label(__('psmonitor::filament/customer/pages/discount-history.table.summaries.total_amount'))
+                    ),
 
                 TextColumn::make('Reason')
                     ->label(__('psmonitor::filament/customer/pages/discount-history.table.columns.reason'))
@@ -112,14 +119,17 @@ class DiscountHistory extends Page implements HasTable
 
                 TextColumn::make('Date')
                     ->label(__('psmonitor::filament/customer/pages/discount-history.table.columns.date'))
-                    ->date()
+                    ->date('Y-m-d')
                     ->sortable(),
 
                 TextColumn::make('Time')
-                    ->label(__('psmonitor::filament/customer/pages/discount-history.table.columns.time')),
+                    ->label(__('psmonitor::filament/customer/pages/discount-history.table.columns.time'))
+                    ->time('h:i A')
+                    ->alignCenter(),
 
                 TextColumn::make('Shift_No')
                     ->label(__('psmonitor::filament/customer/pages/discount-history.table.columns.shift_no'))
+                    ->searchable()
                     ->sortable(),
             ])
             ->filters([
@@ -127,8 +137,7 @@ class DiscountHistory extends Page implements HasTable
                     ->form([
                         DatePicker::make('from')
                             ->label(__('psmonitor::filament/customer/pages/discount-history.table.filters.from'))
-                            ->default(now()->startOfMonth())
-                            ,
+                            ->default(now()->startOfMonth()),
                         DatePicker::make('until')
                             ->label(__('psmonitor::filament/customer/pages/discount-history.table.filters.until'))
                             ->default(now()),
@@ -136,11 +145,11 @@ class DiscountHistory extends Page implements HasTable
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when(
-                                $data['from'],
+                                $data['from'] ?? null,
                                 fn (Builder $query, $date): Builder => $query->whereDate('Date', '>=', $date),
                             )
                             ->when(
-                                $data['until'],
+                                $data['until'] ?? null,
                                 fn (Builder $query, $date): Builder => $query->whereDate('Date', '<=', $date),
                             );
                     }),

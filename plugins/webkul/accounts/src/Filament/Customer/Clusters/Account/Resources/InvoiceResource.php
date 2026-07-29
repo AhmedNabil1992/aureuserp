@@ -12,7 +12,7 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
-use Filament\Support\Enums\Size;
+use Filament\Support\Enums\TextSize;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -57,7 +57,7 @@ class InvoiceResource extends Resource
 
     public static function getNavigationGroup(): string
     {
-        return __('accounts::filament/customer/invoice.navigation.group');
+        return __('admin.navigation.accounting');
     }
 
     public static function getPluralModelLabel(): string
@@ -70,33 +70,33 @@ class InvoiceResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label(__('accounts::filament/resources/invoice.table.columns.invoice-number'))
+                    ->label(__('accounts::filament/customer/invoice.table.columns.invoice_number'))
                     ->searchable()
                     ->sortable()
                     ->placeholder('—'),
 
                 TextColumn::make('invoice_date')
-                    ->label(__('accounts::filament/resources/invoice.table.columns.invoice-date'))
+                    ->label(__('accounts::filament/customer/invoice.table.columns.invoice_date'))
                     ->date()
                     ->sortable(),
 
                 TextColumn::make('invoice_date_due')
-                    ->label(__('accounts::filament/resources/invoice.table.columns.due-date'))
+                    ->label(__('accounts::filament/customer/invoice.table.columns.due_date'))
                     ->date()
                     ->sortable(),
 
                 TextColumn::make('amount_total')
-                    ->label(__('accounts::filament/resources/invoice.table.columns.total'))
+                    ->label(__('accounts::filament/customer/invoice.table.columns.total'))
                     ->money(fn (Invoice $record): string => $record->currency?->code ?? Auth::guard('customer')->user()?->company?->currency?->code ?? 'EGP')
                     ->sortable(),
 
                 TextColumn::make('amount_residual')
-                    ->label(__('accounts::filament/resources/invoice.table.columns.amount-due'))
+                    ->label(__('accounts::filament/customer/invoice.table.columns.amount_due'))
                     ->money(fn (Invoice $record): string => $record->currency?->code ?? Auth::guard('customer')->user()?->company?->currency?->code ?? 'EGP')
                     ->sortable(),
 
                 TextColumn::make('state')
-                    ->label(__('accounts::filament/resources/invoice.table.columns.status'))
+                    ->label(__('accounts::filament/customer/invoice.table.columns.status'))
                     ->badge()
                     ->formatStateUsing(fn (MoveState|string|null $state): string => $state instanceof MoveState ? $state->getLabel() : (string) ($state ?? '—'))
                     ->color(fn (MoveState|string|null $state): string => match ($state instanceof MoveState ? $state->value : $state) {
@@ -108,7 +108,7 @@ class InvoiceResource extends Resource
                     ->sortable(),
 
                 TextColumn::make('payment_state')
-                    ->label(__('accounts::filament/resources/invoice.table.columns.payment-status'))
+                    ->label(__('accounts::filament/customer/invoice.table.columns.payment_status'))
                     ->badge()
                     ->formatStateUsing(fn (PaymentState|string|null $state): string => $state instanceof PaymentState ? $state->getLabel() : (string) ($state ?? '—'))
                     ->color(fn (PaymentState|string|null $state): string => $state instanceof PaymentState ? ($state->getColor() ?? 'gray') : 'gray')
@@ -130,12 +130,12 @@ class InvoiceResource extends Resource
                 ->schema([
                     Group::make([
                         TextEntry::make('name')
-                            ->label(__('accounts::filament/resources/invoice.table.columns.invoice-number'))
+                            ->label(__('accounts::filament/customer/invoice.table.columns.invoice_number'))
                             ->weight(FontWeight::Bold)
-                            ->size(Size::Large),
+                            ->size(TextSize::Large),
 
                         TextEntry::make('state')
-                            ->label(__('accounts::filament/resources/invoice.table.columns.status'))
+                            ->label(__('accounts::filament/customer/invoice.table.columns.status'))
                             ->badge()
                             ->formatStateUsing(fn (MoveState|string|null $state): string => $state instanceof MoveState ? $state->getLabel() : (string) ($state ?? '—'))
                             ->color(fn (MoveState|string|null $state): string => match ($state instanceof MoveState ? $state->value : $state) {
@@ -146,7 +146,7 @@ class InvoiceResource extends Resource
                             }),
 
                         TextEntry::make('payment_state')
-                            ->label(__('accounts::filament/resources/invoice.table.columns.payment-status'))
+                            ->label(__('accounts::filament/customer/invoice.table.columns.payment_status'))
                             ->badge()
                             ->formatStateUsing(fn (PaymentState|string|null $state): string => $state instanceof PaymentState ? $state->getLabel() : (string) ($state ?? '—'))
                             ->color(fn (PaymentState|string|null $state): string => $state instanceof PaymentState ? ($state->getColor() ?? 'gray') : 'gray'),
@@ -154,15 +154,15 @@ class InvoiceResource extends Resource
 
                     Group::make([
                         TextEntry::make('invoice_date')
-                            ->label(__('accounts::filament/resources/invoice.table.columns.invoice-date'))
+                            ->label(__('accounts::filament/customer/invoice.table.columns.invoice_date'))
                             ->date(),
 
                         TextEntry::make('invoice_date_due')
-                            ->label(__('accounts::filament/resources/invoice.table.columns.due-date'))
+                            ->label(__('accounts::filament/customer/invoice.table.columns.due_date'))
                             ->date(),
 
                         TextEntry::make('partner.name')
-                            ->label(__('accounts::filament/resources/invoice.form.section.general.fields.customer')),
+                            ->label(__('accounts::filament/customer/invoice.table.columns.customer')),
                     ])->columns(3),
                 ]),
 
@@ -174,7 +174,7 @@ class InvoiceResource extends Resource
                             RepeatableEntry::make('invoiceLines')
                                 ->label(__('accounts::filament/customer/invoice.pages.view.entries.invoice_lines'))
                                 ->table([
-                                    InfolistTableColumn::make('product')
+                                    InfolistTableColumn::make('product.name')
                                         ->label(__('accounts::filament/customer/invoice.pages.view.columns.product')),
                                     InfolistTableColumn::make('quantity')
                                         ->label(__('accounts::filament/customer/invoice.pages.view.columns.quantity')),
@@ -185,7 +185,8 @@ class InvoiceResource extends Resource
                                 ])
                                 ->schema([
                                     TextEntry::make('product.name')
-                                        ->placeholder('-'),
+                                        ->state(fn ($record) => $record->product?->name ?? $record->name ?? '—')
+                                        ->placeholder('—'),
                                     TextEntry::make('quantity')
                                         ->placeholder('0'),
                                     TextEntry::make('price_unit')

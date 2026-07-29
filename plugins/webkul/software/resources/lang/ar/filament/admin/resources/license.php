@@ -8,6 +8,7 @@ return [
     'table' => [
         'columns' => [
             'program' => 'البرنامج',
+            'company_name' => 'الشركة',
             'edition' => 'الإصدار',
             'partner' => 'العميل',
             'partner_phone' => 'هاتف العميل',

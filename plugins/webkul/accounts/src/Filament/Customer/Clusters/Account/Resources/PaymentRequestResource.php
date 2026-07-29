@@ -65,18 +65,18 @@ class PaymentRequestResource extends Resource
             Section::make()
                 ->schema([
                     TextInput::make('amount')
-                        ->label(__('accounts::filament/resources/payment.form.sections.fields.amount'))
+                        ->label(__('accounts::filament/customer/payment-request.form.fields.amount'))
                         ->numeric()
                         ->minValue(0.01)
                         ->maxValue(99999999999)
                         ->required(),
                     DatePicker::make('date')
-                        ->label(__('accounts::filament/resources/payment.form.sections.fields.date'))
+                        ->label(__('accounts::filament/customer/payment-request.form.fields.date'))
                         ->native(false)
                         ->default(now())
                         ->required(),
                     Textarea::make('memo')
-                        ->label(__('accounts::filament/resources/payment.form.sections.fields.memo'))
+                        ->label(__('accounts::filament/customer/payment-request.form.fields.memo'))
                         ->rows(4)
                         ->maxLength(255),
                 ])
@@ -89,26 +89,26 @@ class PaymentRequestResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label(__('accounts::filament/resources/payment.table.columns.name'))
+                    ->label(__('accounts::filament/customer/payment-request.table.columns.name'))
                     ->searchable()
                     ->sortable()
                     ->placeholder('—'),
                 TextColumn::make('amount')
-                    ->label(__('accounts::filament/resources/payment.table.columns.amount'))
+                    ->label(__('accounts::filament/customer/payment-request.table.columns.amount'))
                     ->money(fn (Payment $record): string => $record->currency?->code ?? Auth::guard('customer')->user()?->company?->currency?->code ?? 'EGP')
                     ->sortable(),
                 TextColumn::make('date')
-                    ->label(__('accounts::filament/resources/payment.table.columns.date'))
+                    ->label(__('accounts::filament/customer/payment-request.table.columns.date'))
                     ->date()
                     ->sortable(),
                 TextColumn::make('state')
-                    ->label(__('accounts::filament/resources/payment.table.columns.state'))
+                    ->label(__('accounts::filament/customer/payment-request.table.columns.state'))
                     ->badge()
                     ->formatStateUsing(fn (PaymentStatus|string|null $state): string => $state instanceof PaymentStatus ? $state->getLabel() : (string) ($state ?? '—'))
                     ->color(fn (PaymentStatus|string|null $state): string => $state instanceof PaymentStatus ? ($state->getColor() ?? 'gray') : 'gray')
                     ->sortable(),
                 TextColumn::make('memo')
-                    ->label(__('accounts::filament/resources/payment.form.sections.fields.memo'))
+                    ->label(__('accounts::filament/customer/payment-request.table.columns.memo'))
                     ->limit(50)
                     ->placeholder('—'),
             ])
@@ -127,25 +127,25 @@ class PaymentRequestResource extends Resource
             Section::make(__('accounts::filament/customer/payment-request.pages.view.sections.request'))
                 ->schema([
                     TextEntry::make('name')
-                        ->label(__('accounts::filament/resources/payment.table.columns.name'))
+                        ->label(__('accounts::filament/customer/payment-request.infolist.fields.name'))
                         ->placeholder('—'),
                     TextEntry::make('amount')
-                        ->label(__('accounts::filament/resources/payment.table.columns.amount'))
+                        ->label(__('accounts::filament/customer/payment-request.infolist.fields.amount'))
                         ->money(fn (Payment $record): string => $record->currency?->code ?? Auth::guard('customer')->user()?->company?->currency?->code ?? 'EGP'),
                     TextEntry::make('state')
-                        ->label(__('accounts::filament/resources/payment.table.columns.state'))
+                        ->label(__('accounts::filament/customer/payment-request.infolist.fields.state'))
                         ->badge()
                         ->formatStateUsing(fn (PaymentStatus|string|null $state): string => $state instanceof PaymentStatus ? $state->getLabel() : (string) ($state ?? '—'))
                         ->color(fn (PaymentStatus|string|null $state): string => $state instanceof PaymentStatus ? ($state->getColor() ?? 'gray') : 'gray'),
                     TextEntry::make('date')
-                        ->label(__('accounts::filament/resources/payment.table.columns.date'))
+                        ->label(__('accounts::filament/customer/payment-request.infolist.fields.date'))
                         ->date(),
                     TextEntry::make('journal.name')
-                        ->label(__('accounts::filament/resources/payment.table.columns.journal')),
+                        ->label(__('accounts::filament/customer/payment-request.infolist.fields.journal')),
                     TextEntry::make('paymentMethodLine.name')
-                        ->label(__('accounts::filament/resources/payment.table.columns.payment-method')),
+                        ->label(__('accounts::filament/customer/payment-request.infolist.fields.payment_method')),
                     TextEntry::make('memo')
-                        ->label(__('accounts::filament/resources/payment.form.sections.fields.memo'))
+                        ->label(__('accounts::filament/customer/payment-request.infolist.fields.memo'))
                         ->placeholder('—')
                         ->columnSpanFull(),
                 ])

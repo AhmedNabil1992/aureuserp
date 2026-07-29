@@ -8,6 +8,7 @@ return [
     'table' => [
         'columns' => [
             'program' => 'Program',
+            'company_name' => 'Company Name',
             'edition' => 'Edition',
             'partner' => 'Partner',
             'partner_phone' => 'Partner Phone',

@@ -110,6 +110,7 @@ class LicenseResource extends Resource
             ->modifyQueryUsing(fn ($query) => $query->with('latestActivity'))
             ->columns([
                 TextColumn::make('serial_number')->searchable()->sortable()->badge()->copyable(),
+                TextInputColumn::make('company_name')->label(__('software::filament/admin/resources/license.table.columns.company_name'))->searchable()->sortable(),
                 TextColumn::make('program.slug')->label(__('software::filament/admin/resources/license.table.columns.program'))->searchable(),
                 TextColumn::make('edition.name')->label(__('software::filament/admin/resources/license.table.columns.edition'))->searchable(),
                 TextColumn::make('partner.name')->label(__('software::filament/admin/resources/license.table.columns.partner'))->searchable(),

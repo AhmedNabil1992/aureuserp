@@ -2,6 +2,6 @@
 
 return [
     'navigation' => [
-        'title' => 'Wi-Fi Dashboard',
+        'title' => 'Wi-Fi',
     ],
 ];

@@ -10,12 +10,12 @@ use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
 use Webkul\Partner\Models\Partner;
+use Webkul\Psmonitor\Filament\Customer\Actions\ExportToExcelAction;
 use Webkul\Psmonitor\Filament\Customer\Concerns\HasPsLicenseAccess;
 use Webkul\Psmonitor\Filament\Customer\Concerns\HasRemoteTablePaginationForPage;
 use Webkul\Psmonitor\Filament\Customer\Widgets\LicenseSelectorWidget;
@@ -81,10 +81,13 @@ class PlayHistoryReport extends Page implements HasTable
         return static::applyRemoteTablePagination($table)
             ->query($query)
             ->defaultSort('ID', 'desc')
+            ->headerActions([
+                ExportToExcelAction::make(),
+            ])
             ->columns([
                 TextColumn::make('TRX_Date')
                     ->label(__('psmonitor::filament/customer/pages/play-history-report.table.columns.trx_date'))
-                    ->date()
+                    ->date('Y-m-d')
                     ->sortable(),
 
                 TextColumn::make('Invoice_No')
@@ -153,11 +156,11 @@ class PlayHistoryReport extends Page implements HasTable
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when(
-                                $data['from'],
+                                $data['from'] ?? null,
                                 fn (Builder $query, $date): Builder => $query->whereDate('TRX_Date', '>=', $date),
                             )
                             ->when(
-                                $data['until'],
+                                $data['until'] ?? null,
                                 fn (Builder $query, $date): Builder => $query->whereDate('TRX_Date', '<=', $date),
                             );
                     }),
