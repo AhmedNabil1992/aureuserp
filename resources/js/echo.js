@@ -5,7 +5,6 @@ window.Pusher = Pusher;
 const host = window.location.hostname;
 const port = parseInt(import.meta.env.VITE_REVERB_PORT ?? '8888', 10);
 const scheme = import.meta.env.VITE_REVERB_SCHEME ?? 'http';
-const isHttps = scheme === 'https';
 
 window.Echo = new Echo({
     broadcaster: 'reverb',
@@ -13,6 +12,6 @@ window.Echo = new Echo({
     wsHost: host,
     wsPort: port,
     wssPort: port,
-    forceTLS: false,
+    forceTLS: scheme === 'https',
     enabledTransports: ['ws', 'wss'],
 });
