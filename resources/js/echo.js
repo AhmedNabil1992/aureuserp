@@ -13,6 +13,6 @@ window.Echo = new Echo({
     wsHost: host,
     wsPort: port,
     wssPort: port,
-    forceTLS: isHttps,
+    forceTLS: false,
     enabledTransports: ['ws', 'wss'],
 });
