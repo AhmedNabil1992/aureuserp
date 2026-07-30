@@ -3,8 +3,7 @@ import Pusher from 'pusher-js';
 window.Pusher = Pusher;
 
 const host = window.location.hostname;
-const port = parseInt(import.meta.env.VITE_REVERB_PORT ?? '8888', 10);
-const scheme = import.meta.env.VITE_REVERB_SCHEME ?? 'http';
+const port = parseInt(import.meta.env.VITE_REVERB_PORT ?? '8080', 10);
 
 window.Echo = new Echo({
     broadcaster: 'reverb',
@@ -12,6 +11,6 @@ window.Echo = new Echo({
     wsHost: host,
     wsPort: port,
     wssPort: port,
-    forceTLS: scheme === 'https',
-    enabledTransports: ['ws', 'wss'],
+    forceTLS: false,
+    enabledTransports: ['ws'],
 });
