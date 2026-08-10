@@ -35,6 +35,7 @@ class License extends Model
         'license_plan',
         'status',
         'period',
+        'max_free_device_resets',
         'start_date',
         'end_date',
         'is_active',
@@ -46,13 +47,14 @@ class License extends Model
     ];
 
     protected $casts = [
-        'license_plan'   => LicensePlan::class,
-        'status'         => LicenseStatus::class,
-        'period'         => 'integer',
-        'start_date'     => 'date',
-        'end_date'       => 'date',
-        'is_active'      => 'boolean',
-        'requested_at'   => 'datetime',
+        'license_plan'           => LicensePlan::class,
+        'status'                 => LicenseStatus::class,
+        'period'                 => 'integer',
+        'max_free_device_resets' => 'integer',
+        'start_date'             => 'date',
+        'end_date'               => 'date',
+        'is_active'              => 'boolean',
+        'requested_at'           => 'datetime',
     ];
 
     public function program(): BelongsTo
@@ -175,8 +177,23 @@ class License extends Model
             });
     }
 
-    
+    public function trashedDevicesCount(): int
+    {
+        return $this->devices()->onlyTrashed()->count();
+    }
 
+    public function maxFreeResets(): int
+    {
+        return $this->max_free_device_resets ?? 1;
+    }
 
-    
+    public function hasFreeDeviceResetAvailable(): bool
+    {
+        return $this->trashedDevicesCount() < $this->maxFreeResets();
+    }
+
+    public function deviceResetFee(): float
+    {
+        return (float) ($this->edition?->device_reset_fee ?? 0.00);
+    }
 }

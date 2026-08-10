@@ -13,10 +13,13 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Webkul\Software\Models\LicenseDevice;
+use Webkul\Software\Models\LicenseInvoice;
 use Webkul\Software\Services\LegacyLicenseKeyGenerator;
 
 class DevicesRelationManager extends RelationManager
@@ -61,13 +64,16 @@ class DevicesRelationManager extends RelationManager
                             ->update(['is_primary' => false]);
                     }),
             ])
+            ->filters([
+                TrashedFilter::make(),
+            ])
             ->headerActions([])
             ->recordActions([
                 ActionGroup::make([
                     Action::make('generateKey')
                         ->label(__('software::filament/license-devices.actions.generate_key.label'))
                         ->icon('heroicon-o-key')
-                        ->visible(fn (LicenseDevice $record): bool => blank($record->license_key))
+                        ->visible(fn (LicenseDevice $record): bool => blank($record->license_key) && ! $record->trashed())
                         ->action(function (LicenseDevice $record): void {
                             $license = $this->getOwnerRecord();
 
@@ -168,7 +174,7 @@ class DevicesRelationManager extends RelationManager
                         ->label(__('software::filament/license-devices.actions.cancel_key.label'))
                         ->icon('heroicon-o-no-symbol')
                         ->color('warning')
-                        ->visible(fn (LicenseDevice $record): bool => filled($record->license_key))
+                        ->visible(fn (LicenseDevice $record): bool => filled($record->license_key) && ! $record->trashed())
                         ->requiresConfirmation()
                         ->action(function (LicenseDevice $record): void {
                             if (blank($record->license_key)) {
@@ -193,6 +199,69 @@ class DevicesRelationManager extends RelationManager
                                 ->body(__('software::filament/license-devices.notifications.cancel_success.body'))
                                 ->success()
                                 ->send();
+                        }),
+                    Action::make('replaceDevice')
+                        ->label('Replace Device')
+                        ->icon('heroicon-o-arrow-path')
+                        ->color('danger')
+                        ->visible(fn (LicenseDevice $record): bool => ! $record->trashed())
+                        ->requiresConfirmation()
+                        ->modalHeading('Replace Device / Soft Delete')
+                        ->modalDescription(function (LicenseDevice $record): string {
+                            $license = $this->getOwnerRecord();
+                            $isFree = $license->hasFreeDeviceResetAvailable();
+                            $fee = $license->deviceResetFee();
+
+                            if ($isFree) {
+                                return 'This device replacement is FREE (1/1 free replacement quota). Soft-deleting this device will release the slot for a new device.';
+                            }
+
+                            return sprintf('Free replacement quota has been used for this license. Replacing this device will incur a reset fee of %s EGP. An invoice will be generated upon confirmation.', number_format($fee, 2));
+                        })
+                        ->action(function (LicenseDevice $record): void {
+                            $license = $this->getOwnerRecord();
+                            $isFree = $license->hasFreeDeviceResetAvailable();
+                            $fee = $license->deviceResetFee();
+
+                            $record->delete();
+
+                            Log::info('Device replaced', [
+                                'license_id' => $license->id,
+                                'device_id'  => $record->id,
+                                'is_free'    => $isFree,
+                                'fee'        => $fee,
+                            ]);
+
+                            if ($isFree) {
+                                Notification::make()
+                                    ->title('Device Replaced (Free)')
+                                    ->body('Device soft-deleted successfully using the free replacement quota.')
+                                    ->success()
+                                    ->send();
+                            } else {
+                                if ($fee > 0) {
+                                    LicenseInvoice::create([
+                                        'license_id'      => $license->id,
+                                        'program_id'      => $license->program_id,
+                                        'edition_id'      => $license->edition_id,
+                                        'license_plan'    => $license->license_plan?->value ?? 'full',
+                                        'invoice_number'  => 'RST-'.now()->timestamp.'-'.$license->id,
+                                        'item_name'       => 'Device Replacement Fee (Computer: '.$record->computer_id.')',
+                                        'quantity'        => 1,
+                                        'unit_price'      => $fee,
+                                        'amount'          => $fee,
+                                        'billed_by'       => Auth::id(),
+                                        'billed_at'       => now(),
+                                        'notes'           => 'Paid device replacement fee for computer ID: '.$record->computer_id,
+                                    ]);
+                                }
+
+                                Notification::make()
+                                    ->title('Device Replaced (Paid)')
+                                    ->body(sprintf('Device soft-deleted. Reset fee invoice created for %s EGP.', number_format($fee, 2)))
+                                    ->warning()
+                                    ->send();
+                            }
                         }),
                     DeleteAction::make()->label(__('software::filament/license-devices.actions.delete.label')),
                 ])->label(__('software::filament/license-devices.actions.group_label'))->icon('heroicon-o-ellipsis-horizontal'),

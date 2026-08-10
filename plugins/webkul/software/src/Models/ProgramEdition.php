@@ -22,16 +22,18 @@ class ProgramEdition extends Model
         'max_devices',
         'license_cost',
         'license_price',
+        'device_reset_fee',
         'monthly_renewal',
         'annual_renewal',
     ];
 
     protected $casts = [
-        'max_devices'     => 'integer',
-        'license_cost'    => 'decimal:2',
-        'license_price'   => 'decimal:2',
-        'monthly_renewal' => 'decimal:2',
-        'annual_renewal'  => 'decimal:2',
+        'max_devices'      => 'integer',
+        'license_cost'     => 'decimal:2',
+        'license_price'    => 'decimal:2',
+        'device_reset_fee' => 'decimal:2',
+        'monthly_renewal'  => 'decimal:2',
+        'annual_renewal'   => 'decimal:2',
     ];
 
     protected static function booted(): void
