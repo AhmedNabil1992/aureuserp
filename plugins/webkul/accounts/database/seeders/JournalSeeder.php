@@ -133,7 +133,7 @@ class JournalSeeder extends Seeder
             ],
             [
                 'id'                       => 5,
-                'default_account_id'       => 46,
+                'default_account_id'       => 45,
                 'suspense_account_id'      => 47,
                 'sort'                     => null,
                 'currency_id'              => $currency?->id,
@@ -160,7 +160,7 @@ class JournalSeeder extends Seeder
 
             [
                 'id'                       => 6,
-                'default_account_id'       => null,
+                'default_account_id'       => 46,
                 'suspense_account_id'      => null,
                 'sort'                     => null,
                 'currency_id'              => $currency?->id,

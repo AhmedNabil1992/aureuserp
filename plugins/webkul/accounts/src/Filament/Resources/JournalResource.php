@@ -3,52 +3,26 @@
 namespace Webkul\Account\Filament\Resources;
 
 use BackedEnum;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
-use Filament\Forms\Components\ColorPicker;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
-use Filament\Infolists\Components\ColorEntry;
-use Filament\Infolists\Components\IconEntry;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
-use Filament\Schemas\Components\Fieldset;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Group;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\QueryException;
-use Illuminate\Support\Facades\Auth;
-use Webkul\Account\Enums\AccountType;
-use Webkul\Account\Enums\CommunicationStandard;
-use Webkul\Account\Enums\CommunicationType;
-use Webkul\Account\Enums\JournalType;
-use Webkul\Account\Enums\PaymentType;
 use Webkul\Account\Filament\Resources\JournalResource\Pages\CreateJournal;
 use Webkul\Account\Filament\Resources\JournalResource\Pages\EditJournal;
 use Webkul\Account\Filament\Resources\JournalResource\Pages\ListJournals;
 use Webkul\Account\Filament\Resources\JournalResource\Pages\ViewJournal;
+use Webkul\Account\Filament\Resources\JournalResource\Schemas\JournalForm;
+use Webkul\Account\Filament\Resources\JournalResource\Schemas\JournalInfolist;
+use Webkul\Account\Filament\Resources\JournalResource\Tables\JournalsTable;
 use Webkul\Account\Models\Journal;
+<<<<<<< HEAD
 use Webkul\Security\Models\User;
 use Webkul\Support\Filament\Forms\Components\Repeater;
 use Webkul\Support\Filament\Forms\Components\Repeater\TableColumn;
 use Webkul\Support\Filament\Infolists\Components\RepeatableEntry;
 use Webkul\Support\Filament\Infolists\Components\Repeater\TableColumn as InfolistTableColumn;
 use Webkul\Support\Models\Company;
+=======
+>>>>>>> upstream/master
 
 class JournalResource extends Resource
 {
@@ -64,6 +38,7 @@ class JournalResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
+<<<<<<< HEAD
         return $schema
             ->components([
                 Group::make()
@@ -391,275 +366,19 @@ class JournalResource extends Resource
                     ->columns(3),
             ])
             ->columns(1);
+=======
+        return JournalForm::configure($schema);
+>>>>>>> upstream/master
     }
 
     public static function table(Table $table): Table
     {
-        return $table
-            ->columns([
-                TextColumn::make('name')
-                    ->searchable()
-                    ->sortable()
-                    ->label(__('accounts::filament/resources/journal.table.columns.name')),
-                TextColumn::make('type')
-                    ->searchable()
-                    ->sortable()
-                    ->label(__('accounts::filament/resources/journal.table.columns.type')),
-                TextColumn::make('code')
-                    ->searchable()
-                    ->sortable()
-                    ->label(__('accounts::filament/resources/journal.table.columns.code')),
-                TextColumn::make('currency.name')
-                    ->searchable()
-                    ->sortable()
-                    ->label(__('accounts::filament/resources/journal.table.columns.currency')),
-                TextColumn::make('creator.name')
-                    ->searchable()
-                    ->sortable()
-                    ->label(__('accounts::filament/resources/journal.table.columns.created-by')),
-            ])
-            ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-                DeleteAction::make()
-                    ->action(function (Journal $record, DeleteAction $action) {
-                        try {
-                            $record->delete();
-
-                            $action->success();
-                        } catch (QueryException $e) {
-                            $action->failure();
-                        }
-                    })
-                    ->failureNotification(
-                        Notification::make()
-                            ->danger()
-                            ->title(__('accounts::filament/resources/journal.table.actions.delete.notification.error.title'))
-                            ->body(__('accounts::filament/resources/journal.table.actions.delete.notification.error.body'))
-                    )
-                    ->successNotification(
-                        Notification::make()
-                            ->success()
-                            ->title(__('accounts::filament/resources/journal.table.actions.delete.notification.success.title'))
-                            ->body(__('accounts::filament/resources/journal.table.actions.delete.notification.success.body'))
-                    ),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->action(function (Collection $records, DeleteBulkAction $action) {
-                            try {
-                                $records->each(fn (Model $record) => $record->delete());
-
-                                $action->success();
-                            } catch (QueryException $e) {
-                                $action->failure();
-                            }
-                        })
-                        ->failureNotification(
-                            Notification::make()
-                                ->danger()
-                                ->title(__('accounts::filament/resources/journal.table.bulk-actions.delete.notification.error.title'))
-                                ->body(__('accounts::filament/resources/journal.table.bulk-actions.delete.notification.error.body'))
-                        )
-                        ->successNotification(
-                            Notification::make()
-                                ->success()
-                                ->title(__('accounts::filament/resources/journal.table.bulk-actions.delete.notification.success.title'))
-                                ->body(__('accounts::filament/resources/journal.table.bulk-actions.delete.notification.success.body'))
-                        ),
-                ]),
-            ]);
+        return JournalsTable::configure($table);
     }
 
     public static function infolist(Schema $schema): Schema
     {
-        return $schema
-            ->components([
-                Grid::make(['default' => 3])
-                    ->schema([
-                        Group::make()
-                            ->schema([
-                                Tabs::make('Journal Information')
-                                    ->tabs([
-                                        Tab::make(__('accounts::filament/resources/journal.infolist.tabs.journal-entries.title'))
-                                            ->schema([
-                                                Fieldset::make(__('accounts::filament/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.title'))
-                                                    ->schema([
-                                                        IconEntry::make('refund_order')
-                                                            ->boolean()
-                                                            ->visible(fn ($record) => in_array($record->type, [JournalType::SALE, JournalType::PURCHASE]))
-                                                            ->placeholder('-')
-                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.entries.dedicated-credit-note-sequence')),
-                                                        IconEntry::make('payment_order')
-                                                            ->boolean()
-                                                            ->placeholder('-')
-                                                            ->visible(fn ($record) => in_array($record->type, [JournalType::BANK, JournalType::CASH, JournalType::CREDIT_CARD]))
-                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.entries.dedicated-payment-sequence')),
-                                                        TextEntry::make('code')
-                                                            ->placeholder('-')
-                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.entries.sort-code')),
-                                                        TextEntry::make('currency.name')
-                                                            ->placeholder('-')
-                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.entries.currency')),
-                                                        ColorEntry::make('color')
-                                                            ->placeholder('-')
-                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.entries.color')),
-                                                        // Inside accounting-information Fieldset in infolist
-                                                        TextEntry::make('defaultAccount.name')
-                                                            ->placeholder('-')
-                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.entries.default-account')),
-
-                                                        TextEntry::make('profitAccount.name')
-                                                            ->placeholder('-')
-                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.entries.profit-account'))
-                                                            ->visible(fn (Get $get) => in_array($get('type'), [
-                                                                JournalType::CASH,
-                                                                JournalType::SALE,
-                                                                JournalType::BANK,
-                                                            ])),
-
-                                                        TextEntry::make('lossAccount.name')
-                                                            ->placeholder('-')
-                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.entries.loss-account'))
-                                                            ->visible(fn (Get $get) => in_array($get('type'), [
-                                                                JournalType::CASH,
-                                                                JournalType::BANK,
-                                                                JournalType::PURCHASE,
-                                                            ])),
-
-                                                        TextEntry::make('suspenseAccount.name')
-                                                            ->placeholder('-')
-                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.journal-entries.field-set.accounting-information.entries.suspense-account'))
-                                                            ->visible(fn ($record) => in_array($record->type, [
-                                                                JournalType::BANK,
-                                                                JournalType::CASH,
-                                                                JournalType::CREDIT_CARD,
-                                                            ])),
-
-                                                    ])->columnSpanFull(),
-                                                Section::make(__('accounts::filament/resources/journal.infolist.tabs.journal-entries.field-set.bank-account-number.title'))
-                                                    ->visible(fn ($record) => $record->type === JournalType::BANK)
-                                                    ->schema([
-                                                        TextEntry::make('bankAccount.account_number')
-                                                            ->placeholder('-')
-                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.journal-entries.field-set.bank-account-number.entries.account-number')),
-                                                    ]),
-                                            ]),
-
-                                        Tab::make(__('accounts::filament/resources/journal.form.tabs.incoming-payments.title'))
-                                            ->visible(fn (Get $get) => in_array($get('type'), [
-                                                JournalType::BANK,
-                                                JournalType::CASH,
-                                                JournalType::CREDIT_CARD,
-                                            ]))
-                                            ->schema([
-                                                RepeatableEntry::make('inboundPaymentMethodLines')
-                                                    ->hiddenLabel()
-                                                    ->table([
-                                                        InfolistTableColumn::make('paymentMethod.name')
-                                                            ->alignCenter()
-                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.incoming-payments.entries.payment-method')),
-
-                                                        InfolistTableColumn::make('name')
-                                                            ->alignCenter()
-                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.incoming-payments.entries.display-name')),
-                                                        InfolistTableColumn::make('paymentAccount.name')
-                                                            ->alignCenter()
-                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.incoming-payments.entries.account-number')),
-                                                    ])
-                                                    ->schema([
-                                                        TextEntry::make('paymentMethod.name')
-                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.incoming-payments.entries.payment-method')),
-                                                        TextEntry::make('name')
-                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.incoming-payments.entries.display-name'))
-                                                            ->placeholder('-'),
-
-                                                        TextEntry::make('paymentAccount.name')
-                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.incoming-payments.entries.account-number')),
-                                                    ]),
-                                            ]),
-
-                                        Tab::make(__('accounts::filament/resources/journal.form.tabs.outgoing-payments.title'))
-                                            ->visible(fn (Get $get) => in_array($get('type'), [
-                                                JournalType::BANK,
-                                                JournalType::CASH,
-                                                JournalType::CREDIT_CARD,
-                                            ]))
-                                            ->schema([
-                                                RepeatableEntry::make('inboundPaymentMethodLines')
-                                                    ->hiddenLabel()
-                                                    ->table([
-                                                        InfolistTableColumn::make('paymentMethod.name')
-                                                            ->alignCenter()
-                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.outgoing-payments.entries.payment-method')),
-
-                                                        InfolistTableColumn::make('name')
-                                                            ->alignCenter()
-                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.outgoing-payments.entries.display-name')),
-                                                        InfolistTableColumn::make('paymentAccount.name')
-                                                            ->alignCenter()
-                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.outgoing-payments.entries.account-number')),
-                                                    ])
-                                                    ->schema([
-                                                        TextEntry::make('paymentMethod.name')
-                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.outgoing-payments.entries.payment-method')),
-                                                        TextEntry::make('name')
-                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.outgoing-payments.entries.display-name'))
-                                                            ->placeholder('-'),
-
-                                                        TextEntry::make('paymentAccount.name')
-                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.outgoing-payments.entries.account-number')),
-                                                    ]),
-                                            ]),
-
-                                        Tab::make(__('accounts::filament/resources/journal.infolist.tabs.advanced-settings.title'))
-                                            ->schema([
-                                                Fieldset::make(__('accounts::filament/resources/journal.infolist.tabs.advanced-settings.title'))
-                                                    ->schema([
-                                                        TextEntry::make('allowedAccounts.name')
-                                                            ->placeholder('-')
-                                                            ->listWithLineBreaks()
-                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.advanced-settings.allowed-accounts.entries.allowed-accounts')),
-                                                        IconEntry::make('auto_check_on_post')
-                                                            ->boolean()
-                                                            ->placeholder('-')
-                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.advanced-settings.allowed-accounts.entries.auto-check-on-post')),
-                                                    ]),
-
-                                                Fieldset::make(__('accounts::filament/resources/journal.infolist.tabs.advanced-settings.payment-communication.title'))
-                                                    ->visible(fn ($record) => $record->type === JournalType::SALE)
-                                                    ->schema([
-                                                        TextEntry::make('invoice_reference_type')
-                                                            ->placeholder('-')
-                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.advanced-settings.payment-communication.entries.communication-type')),
-                                                        TextEntry::make('invoice_reference_model')
-                                                            ->placeholder('-')
-                                                            ->label(__('accounts::filament/resources/journal.infolist.tabs.advanced-settings.payment-communication.entries.communication-standard')),
-                                                    ]),
-                                            ]),
-                                    ]),
-                            ])->columnSpan(2),
-                        Group::make()
-                            ->schema([
-                                Section::make(__('accounts::filament/resources/journal.infolist.general.title'))
-                                    ->schema([
-                                        TextEntry::make('name')
-                                            ->placeholder('-')
-                                            ->label(__('accounts::filament/resources/journal.infolist.general.entries.name'))
-                                            ->icon('heroicon-o-document-text'),
-                                        TextEntry::make('type')
-                                            ->placeholder('-')
-                                            ->label(__('accounts::filament/resources/journal.infolist.general.entries.type'))
-                                            ->icon('heroicon-o-tag'),
-                                        TextEntry::make('company.name')
-                                            ->placeholder('-')
-                                            ->label(__('accounts::filament/resources/journal.infolist.general.entries.company'))
-                                            ->icon('heroicon-o-building-office'),
-                                    ]),
-                            ])->columnSpan(1),
-                    ])->columnSpanFull(),
-            ]);
+        return JournalInfolist::configure($schema);
     }
 
     public static function getRelations(): array

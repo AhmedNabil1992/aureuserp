@@ -36,6 +36,7 @@ class Partner extends BasePartner
         $this->mergeCasts([
             'email_verified_at' => 'datetime',
             'password'          => 'hashed',
+            'last_login_at'     => 'datetime',
         ]);
 
         parent::__construct($attributes);

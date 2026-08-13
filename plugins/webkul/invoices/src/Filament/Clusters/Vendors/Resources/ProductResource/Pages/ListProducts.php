@@ -2,11 +2,11 @@
 
 namespace Webkul\Invoice\Filament\Clusters\Vendors\Resources\ProductResource\Pages;
 
-use Illuminate\Database\Eloquent\Builder;
 use Webkul\Account\Filament\Resources\ProductResource\Pages\ListProducts as BaseListProducts;
 use Webkul\Invoice\Filament\Clusters\Vendors\Resources\ProductResource;
-use Webkul\Product\Enums\ProductType;
 use Webkul\TableViews\Filament\Components\PresetView;
+use Illuminate\Database\Eloquent\Builder;
+use Webkul\Product\Enums\ProductType;
 
 class ListProducts extends BaseListProducts
 {

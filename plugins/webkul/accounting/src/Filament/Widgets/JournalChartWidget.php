@@ -27,8 +27,7 @@ class JournalChartWidget extends Component
     {
         $type = $this->journal->type;
         $baseQuery = Move::query()
-            ->where('journal_id', $this->journal->id)
-            ->applyPermissionScope();
+            ->where('journal_id', $this->journal->id);
 
         $data = [
             'stats'   => [],
@@ -382,7 +381,6 @@ class JournalChartWidget extends Component
             ->where('state', MoveState::POSTED)
             ->whereIn('payment_state', [PaymentState::NOT_PAID, PaymentState::PARTIAL])
             ->where('amount_residual', '>', 0)
-            ->applyPermissionScope()
             ->get();
 
         foreach ($moves as $move) {

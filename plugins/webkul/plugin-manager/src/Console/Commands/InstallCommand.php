@@ -344,6 +344,8 @@ class InstallCommand extends Command
             ]);
         }
 
+        Package::syncPostgresSequences();
+
         $this->info("✅ Seeders <comment>{$this->package->shortName()}</comment> completed successfully.");
 
         $this->newLine();
