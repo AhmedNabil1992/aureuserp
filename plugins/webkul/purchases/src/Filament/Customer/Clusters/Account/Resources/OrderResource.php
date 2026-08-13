@@ -6,10 +6,10 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Webkul\Account\Filament\Customer\Clusters\Account;
 use Webkul\Purchase\Filament\Customer\Clusters\Account\Resources\OrderResource\Schemas\OrderInfolist;
 use Webkul\Purchase\Filament\Customer\Clusters\Account\Resources\OrderResource\Tables\OrdersTable;
 use Webkul\Purchase\Models\Order;
-use Webkul\Website\Filament\Customer\Clusters\Account;
 
 class OrderResource extends Resource
 {

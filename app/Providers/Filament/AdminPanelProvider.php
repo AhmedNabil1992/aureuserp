@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Http\Middleware\ApplyBrandSettings;
 use App\Http\Middleware\SetLocale;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use Emuniq\FilamentBrowserNotifications\BrowserNotificationsPlugin;
 use Filament\Actions\Action;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
@@ -23,12 +24,12 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Webkul\Support\Enums\NavigationGroup;
 use WallaceMartinss\FilamentEvolution\FilamentEvolutionPlugin;
+use Webkul\Support\Enums\NavigationGroup;
 use Webkul\Support\Filament\Pages\Profile;
 use Webkul\Support\GlobalSearchProvider;
-use Emuniq\FilamentBrowserNotifications\BrowserNotificationsPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -60,10 +61,10 @@ class AdminPanelProvider extends PanelProvider
                     ->label(fn () => Auth::user()?->name)
                     ->url(fn (): string => Profile::getUrl()),
                 'quick-navigation' => Action::make('quick-navigation')
-                ->label(__('welcome.user_menu.quick')) // ترجمة النص
-                ->icon('heroicon-o-magnifying-glass') // أيقونة البحث
+                    ->label(__('welcome.user_menu.quick')) // ترجمة النص
+                    ->icon('heroicon-o-magnifying-glass') // أيقونة البحث
                 // هنبعت الـ Event للويندو عشان يفتح المودال
-                ->url('javascript:window.dispatchEvent(new CustomEvent("open-quick-navigation"))'),
+                    ->url('javascript:window.dispatchEvent(new CustomEvent("open-quick-navigation"))'),
             ])
             ->navigationGroups(
                 collect(NavigationGroup::cases())->mapWithKeys(
@@ -75,7 +76,7 @@ class AdminPanelProvider extends PanelProvider
                 )->all()
             )
             ->plugins([
-                ManufacturingPlugin::make(),
+                // ManufacturingPlugin::make(),
                 FilamentEvolutionPlugin::make(),
                 FilamentShieldPlugin::make()
                     ->gridColumns([
@@ -123,7 +124,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->renderHook(
                 PanelsRenderHook::HEAD_START,
-                fn (): string => \Illuminate\Support\Facades\Vite::useBuildDirectory('build')->withEntryPoints(['resources/js/app.js'])->toHtml()
+                fn (): string => Vite::useBuildDirectory('build')->withEntryPoints(['resources/js/app.js'])->toHtml()
             )
             ->renderHook(
                 PanelsRenderHook::USER_MENU_BEFORE,
