@@ -106,7 +106,7 @@ return [
         'ar' => [
             'label'  => 'Arabic',
             'native' => 'العربية',
-            'flag'   => 'sa',
+            'flag'   => 'eg',
             'rtl'    => true,
         ],
         'es' => [

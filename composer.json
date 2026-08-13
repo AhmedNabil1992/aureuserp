@@ -10,6 +10,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
+        "aureuserp/mcp": "dev-main",
         "aureuserp/nativephp-remote": "^0.1.0",
         "barryvdh/laravel-debugbar": "^4.0",
         "barryvdh/laravel-dompdf": "^3.1",
@@ -110,5 +111,11 @@
         "forum": "https://forums.aureuserp.com",
         "source": "https://github.com/aureuserp/aureuserp",
         "docs": "https://devdocs.aureuserp.com"
+    },
+    "repositories": [
+    {
+        "type": "vcs",
+        "url": "https://github.com/AhmedNabil1992/mcp.git"
     }
+]
 }

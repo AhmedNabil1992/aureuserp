@@ -104,7 +104,7 @@ return [
     */
 
     'permissions' => [
-        'separator' => '_',
+        'separator' => ':',
         'case'      => 'lower_snake',
         'generate'  => true,
     ],
