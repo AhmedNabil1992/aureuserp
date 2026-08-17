@@ -253,7 +253,7 @@ class JournalChartWidget extends Component
             ->where('journal_id', $this->journal->id)
             ->where('state', MoveState::POSTED)
             ->with('originPayment:id,payment_type,date')
-            ->applyPermissionScope()
+            // ->applyPermissionScope()
             ->where(function ($query) use ($start, $end): void {
                 $query->whereBetween('date', [$start->toDateString(), $end->toDateString()])
                     ->orWhereHas('originPayment', function ($paymentQuery) use ($start, $end): void {
@@ -306,7 +306,7 @@ class JournalChartWidget extends Component
             ->where('journal_id', $this->journal->id)
             ->where('state', MoveState::POSTED)
             ->with('originPayment:id,payment_type')
-            ->applyPermissionScope()
+            // ->applyPermissionScope()
             ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
             ->get();
 
