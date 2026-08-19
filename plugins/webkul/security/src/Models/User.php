@@ -16,8 +16,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use NotificationChannels\WebPush\HasPushSubscriptions;
 use Spatie\Permission\Traits\HasRoles;
 use Webkul\Employee\Models\Department;
 use Webkul\Employee\Models\Employee;
@@ -31,10 +33,12 @@ use Webkul\Support\Models\Scopes\CompanyScope;
 class User extends BaseUser implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasEmailAuthentication
 {
     use HasOwnershipScope,
+        HasPushSubscriptions,
         HasRoles,
         InteractsWithAppAuthentication,
         InteractsWithAppAuthenticationRecovery,
         InteractsWithEmailAuthentication,
+        Notifiable,
         SoftDeletes;
 
     public function __construct(array $attributes = [])

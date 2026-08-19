@@ -20,7 +20,6 @@ use Illuminate\Support\Facades\Auth;
 use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Enums\MoveType;
 use Webkul\Account\Enums\PaymentState;
-use Webkul\Account\Filament\Customer\Clusters\Account;
 use Webkul\Account\Filament\Customer\Clusters\Account\Resources\InvoiceResource\Pages\ListInvoices;
 use Webkul\Account\Filament\Customer\Clusters\Account\Resources\InvoiceResource\Pages\ViewInvoice;
 use Webkul\Account\Models\Invoice;

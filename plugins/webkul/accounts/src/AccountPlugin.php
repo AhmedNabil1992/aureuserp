@@ -46,10 +46,6 @@ class AccountPlugin implements Plugin
             })
             ->when($panel->getId() == 'customer', function (Panel $panel): void {
                 $panel
-                    ->discoverClusters(
-                        in: __DIR__.'/Filament/Customer/Clusters',
-                        for: 'Webkul\\Account\\Filament\\Customer\\Clusters'
-                    )
                     ->discoverResources(
                         in: __DIR__.'/Filament/Customer/Clusters',
                         for: 'Webkul\\Account\\Filament\\Customer\\Clusters'

@@ -17,6 +17,7 @@ use Webkul\Account\Models\PaymentTerm;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
+use Webkul\Inventory\Enums\OperationType as OperationTypeEnum;
 use Webkul\Inventory\Models\Operation;
 use Webkul\Inventory\Models\ProcurementGroup;
 use Webkul\Inventory\Models\Warehouse;
@@ -243,6 +244,12 @@ class Order extends Model
     public function operations(): HasMany
     {
         return $this->hasMany(Operation::class, 'sale_order_id');
+    }
+
+    public function deliveries(): HasMany
+    {
+        return $this->operations()
+            ->whereHas('operationType', fn ($query) => $query->where('type', OperationTypeEnum::OUTGOING));
     }
 
     public function updateName()

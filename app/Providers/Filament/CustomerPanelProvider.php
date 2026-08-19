@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Http\Middleware\ApplyBrandSettings;
 use App\Http\Middleware\SetLocale;
+use Emuniq\FilamentBrowserNotifications\BrowserNotificationsPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -19,8 +20,8 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Emuniq\FilamentBrowserNotifications\BrowserNotificationsPlugin;
 
 class CustomerPanelProvider extends PanelProvider
 {
@@ -58,12 +59,12 @@ class CustomerPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label(fn (): string => __('admin.navigation.website'))
                     ->icon('icon-website'),
-                // NavigationGroup::make()
-                //     ->label(fn (): string => __('admin.navigation.purchase'))
-                //     ->icon('icon-purchases'),
                 NavigationGroup::make()
                     ->label(fn (): string => __('psmonitor::filament/customer/navigation.group'))
                     ->icon('heroicon-o-computer-desktop'),
+                NavigationGroup::make()
+                    ->label(fn (): string => __('admin.navigation.articles'))
+                    ->icon('heroicon-o-book-open'),
             ])
             ->plugins([
                 BrowserNotificationsPlugin::make()
@@ -74,7 +75,7 @@ class CustomerPanelProvider extends PanelProvider
             ->maxContentWidth(Width::Full)
             ->renderHook(
                 PanelsRenderHook::HEAD_START,
-                fn (): string => \Illuminate\Support\Facades\Vite::useBuildDirectory('build')->withEntryPoints(['resources/js/app.js'])->toHtml()
+                fn (): string => Vite::useBuildDirectory('build')->withEntryPoints(['resources/js/app.js'])->toHtml()
             )
             ->renderHook(
                 PanelsRenderHook::USER_MENU_BEFORE,

@@ -36,6 +36,11 @@ class ArticleResource extends Resource
         return __('articles::filament/customer/resources/article.navigation.title');
     }
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('articles::filament/customer/resources/article.navigation.group');
+    }
+
     public static function getModelLabel(): string
     {
         return __('articles::filament/customer/resources/article.model-label');

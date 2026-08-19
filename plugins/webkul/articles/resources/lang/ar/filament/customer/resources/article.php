@@ -3,6 +3,7 @@
 return [
     'navigation' => [
         'title' => 'مقالات المساعدة',
+        'group' => 'المقالات',
     ],
 
     'model-label'        => 'مقال',
