@@ -135,7 +135,7 @@ class RequestPasswordReset extends Page
                 'rtl'   => FilamentIcon::resolve('panels::pages.password-reset.request-password-reset.actions.login.rtl') ?? 'heroicon-m-arrow-right',
                 default => FilamentIcon::resolve('panels::pages.password-reset.request-password-reset.actions.login') ?? 'heroicon-m-arrow-left',
             })
-            ->url(filament()->getLoginUrl());
+            ->url(filament()->getPanel('customer')->getLoginUrl());
     }
 
     public function getTitle(): string|Htmlable

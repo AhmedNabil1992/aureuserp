@@ -32,6 +32,7 @@ class CustomerPanelProvider extends PanelProvider
             ->path('portal')
             ->homeUrl(url('/portal/dashboard'))
             ->login()
+            // ->register()
             ->emailVerification()
             ->authPasswordBroker('customers')
             ->profile(isSimple: false)

@@ -313,7 +313,7 @@ class Register extends Page
         return Action::make('login')
             ->link()
             ->label(__('website::filament/customer/pages/auth/register.actions.login.label'))
-            ->url(filament()->getLoginUrl());
+            ->url(filament()->getPanel('customer')->getLoginUrl());
     }
 
     protected function getUserModel(): string
