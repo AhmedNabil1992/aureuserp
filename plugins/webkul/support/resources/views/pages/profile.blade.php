@@ -3,17 +3,8 @@
         $hasMultiFactorAuth = \Filament\Facades\Filament::hasMultiFactorAuthentication();
     @endphp
 
-    <div
-        @class([
-            'grid grid-cols-1 gap-6',
-            'lg:grid-cols-3!' => $hasMultiFactorAuth,
-        ])
-    >
-        <div
-            @class([
-                'lg:col-span-2' => $hasMultiFactorAuth,
-            ])
-        >
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div class="lg:col-span-2">
             <form
                 wire:submit="updateProfile"
                 wire:key="profile-form"
@@ -34,10 +25,14 @@
             </form>
         </div>
 
-        @if ($hasMultiFactorAuth)
-            <div class="lg:col-span-1">
+        <div class="lg:col-span-1 flex flex-col gap-6">
+            @if ($hasMultiFactorAuth)
                 {{ $this->multiFactorAuthenticationSchema }}
-            </div>
-        @endif
+            @endif
+
+            @if (view()->exists('filament-browser-notifications::profile-section'))
+                @include('filament-browser-notifications::profile-section')
+            @endif
+        </div>
     </div>
 </x-filament-panels::page>

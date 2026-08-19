@@ -98,8 +98,7 @@ class AdminPanelProvider extends PanelProvider
                     ]),
                 BrowserNotificationsPlugin::make()
                     ->promptDelay(5)           // seconds before showing prompt (default: 2)
-                    ->dismissCooldownDays(14)  // days before re-prompting (default: 7)
-                    ->profileSection(false),   // disable auto-injected profile section
+                    ->dismissCooldownDays(14), // days before re-prompting (default: 7)
             ])
             ->globalSearch(provider: GlobalSearchProvider::class)
             ->middleware([
