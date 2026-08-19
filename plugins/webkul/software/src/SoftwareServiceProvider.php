@@ -62,6 +62,7 @@ class SoftwareServiceProvider extends PackageServiceProvider
                 '2026_05_02_000032_create_software_customer_notifications_table',
                 '2026_07_07_000033_create_software_program_edition_features_table',
                 '2026_07_31_112438_altra_software_license_devices_add_soft_delete',
+                '2026_07_31_120000_add_device_reset_fee_to_software_tables',
             ])
             ->runsMigrations()
             ->hasInstallCommand(function (InstallCommand $command): void {

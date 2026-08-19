@@ -77,6 +77,10 @@ return [
             'driver' => 'eloquent',
             'model'  => env('AUTH_MODEL', User::class),
         ],
+        'mcp_users' => [
+            'driver' => 'eloquent',
+            'model'  => env('MCP_AUTH_MODEL', Webkul\Mcp\Models\McpOAuthUser::class),
+        ],
 
         'customers' => [
             'driver' => 'eloquent',
