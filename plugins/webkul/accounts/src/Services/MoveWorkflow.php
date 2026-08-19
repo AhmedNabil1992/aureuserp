@@ -22,6 +22,7 @@ use Webkul\Account\Models\Move as AccountMove;
 use Webkul\Account\Models\MoveLine;
 use Webkul\Account\Models\PartialReconcile;
 use Webkul\Account\Models\Partner;
+use Webkul\Account\Models\Payment;
 use Webkul\Support\Services\EmailService;
 
 class MoveWorkflow
@@ -66,6 +67,8 @@ class MoveWorkflow
         }
 
         $this->bumpPartnerRanks($move);
+
+        $this->autoReconcileOutstandingPayments($move);
 
         MoveConfirmed::dispatch($move);
 
@@ -335,6 +338,82 @@ class MoveWorkflow
             }
 
             $reconciler->reconcile($lines);
+        }
+    }
+
+    protected function autoReconcileOutstandingPayments(AccountMove $move): void
+    {
+        if (! $move->isInvoice(true)) {
+            return;
+        }
+
+        $move->refresh();
+
+        if (! in_array($move->payment_state, [PaymentState::NOT_PAID, PaymentState::PARTIAL, PaymentState::IN_PAYMENT], true)) {
+            return;
+        }
+
+        $paymentTermLines = $move->paymentTermLines
+            ->filter(fn ($line) => ! $line->reconciled)
+            ->values();
+
+        if ($paymentTermLines->isEmpty()) {
+            return;
+        }
+
+        $outstandingLines = MoveLine::query()
+            ->whereIn('account_id', $paymentTermLines->pluck('account_id')->unique())
+            ->where('parent_state', MoveState::POSTED)
+            ->where('partner_id', $move->commercial_partner_id)
+            ->where('reconciled', false)
+            ->where('move_id', '!=', $move->id)
+            ->where(function ($query) {
+                $query->where('amount_residual', '!=', 0.0)
+                    ->orWhere('amount_residual_currency', '!=', 0.0);
+            })
+            ->when($move->isInbound(), function ($query) {
+                return $query->where('balance', '<', 0);
+            }, function ($query) {
+                return $query->where('balance', '>', 0);
+            })
+            ->orderBy('date')
+            ->orderBy('id')
+            ->get();
+
+        if ($outstandingLines->isEmpty()) {
+            return;
+        }
+
+        $reconciler = app(Reconciler::class);
+
+        foreach ($outstandingLines->pluck('account_id')->unique() as $accountId) {
+            $linesToReconcile = $paymentTermLines
+                ->where('account_id', $accountId)
+                ->merge($outstandingLines->where('account_id', $accountId))
+                ->values();
+
+            $paymentIds = $outstandingLines
+                ->where('account_id', $accountId)
+                ->map(fn (MoveLine $line) => $line->move->origin_payment_id ?: $line->payment_id)
+                ->filter()
+                ->unique()
+                ->values();
+
+            if ($linesToReconcile->count() < 2) {
+                continue;
+            }
+
+            $reconciler->reconcile($linesToReconcile);
+
+            if ($paymentIds->isNotEmpty()) {
+                $move->matchedPayments()->syncWithoutDetaching($paymentIds->all());
+
+                Payment::whereIn('id', $paymentIds->all())
+                    ->get()
+                    ->each(function (Payment $payment): void {
+                        $payment->save();
+                    });
+            }
         }
     }
 

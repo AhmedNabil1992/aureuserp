@@ -115,14 +115,16 @@ class WebsitePlugin implements Plugin
 
     protected function getTopNavigationItems(): Collection
     {
+        $customerPanel = filament()->getPanel('customer');
+
         return new Collection([
             NavigationItem::make('Login')
                 ->label(fn () => __('website::filament/app.navigation.top.login'))
-                ->url(filament()->getLoginUrl())
+                ->url(fn (): string => $customerPanel->getLoginUrl())
                 ->visible(! Filament::auth()->check()),
             NavigationItem::make('Register')
                 ->label(fn () => __('website::filament/app.navigation.top.register'))
-                ->url(filament()->getRegistrationUrl())
+                ->url(fn (): string => filament()->getRegistrationUrl())
                 ->visible(! Filament::auth()->check()),
         ]);
     }
