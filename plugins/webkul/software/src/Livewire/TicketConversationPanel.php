@@ -17,6 +17,7 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use Webkul\Software\Models\Ticket;
 use Webkul\Software\Services\TicketService;
+use Filament\Forms\Components\ViewField;
 
 class TicketConversationPanel extends Component implements HasActions, HasForms
 {
@@ -63,6 +64,11 @@ class TicketConversationPanel extends Component implements HasActions, HasForms
                     ->required()
                     ->columnSpanFull()
                     ->autofocus(),
+                // السطر ده هو اللي هيظهر مسجل الصوت في البوب-أب
+                ViewField::make('voice_note')
+                    ->label('رسالة صوتية (اختياري)')
+                    ->view('software::components.voice-recorder')
+                    ->columnSpanFull(),
                 FileUpload::make('attachments')
                     ->label('Attachments')
                     ->multiple()
@@ -74,6 +80,24 @@ class TicketConversationPanel extends Component implements HasActions, HasForms
             ->action(function (array $data): void {
                 /** @var TicketService $service */
                 $service = app(TicketService::class);
+
+                $attachments = $data['attachments'] ?? [];
+
+                // معالجة الرسالة الصوتية لو موجودة
+                if (!empty($data['voice_note'])) {
+                    // استخراج كود الـ Base64 النقي بدون الهيدر (data:audio/webm;base64,...)
+                    $audioData = substr($data['voice_note'], strpos($data['voice_note'], ',') + 1);
+                    $audioDecoded = base64_decode($audioData);
+
+                    // إنشاء اسم عشوائي للملف
+                    $fileName = 'software/tickets/voice_' . time() . '_' . uniqid() . '.webm';
+                    
+                    // حفظ الملف في السيرفر
+                    \Illuminate\Support\Facades\Storage::disk('public')->put($fileName, $audioDecoded);
+                    
+                    // إضافته لقائمة المرفقات عشان يتربط بالتيكت
+                    $attachments[] = $fileName;
+                }
 
                 $eventData = [
                     'content'    => $data['content'],
@@ -90,7 +114,7 @@ class TicketConversationPanel extends Component implements HasActions, HasForms
                 $service->replyToTicket(
                     $this->ticket,
                     $eventData,
-                    $data['attachments'] ?? []
+                    $attachments // نمرر المرفقات بعد إضافة الفويس ليها
                 );
 
                 Notification::make()

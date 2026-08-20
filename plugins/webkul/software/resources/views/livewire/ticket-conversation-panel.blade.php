@@ -1,7 +1,8 @@
 <div
-    class="ticket-conversation-panel"
+    class="ticket-conversation-panel relative"
     x-data="ticketConversation({{ $ticket->id }})"
     x-init="init()"
+    @keydown.window.escape="closeImage()"
 >
 
     {{-- Reply Action Button --}}
@@ -11,7 +12,7 @@
         </div>
     @endif
 
-    {{-- Conversation Thread (newest first) — forced LTR so admin=right, customer=left --}}
+    {{-- Conversation Thread (newest first) --}}
     <div class="ticket-chat-ltr space-y-6">
     @forelse ($events as $event)
         @php
@@ -22,18 +23,24 @@
             $senderName     = $sender?->name ?? 'System';
             $initials       = strtoupper(substr($senderName, 0, 2));
             $badgeLabel     = $isAdminMessage ? 'Staff' : 'Customer';
-            // Use Filament CSS variables so colors always resolve regardless of Tailwind compilation
+            
+            // Avatar Background
             $avatarBg       = $isAdminMessage
                 ? 'background-color: var(--color-primary-600, #4f46e5);'
                 : 'background-color: var(--color-success-600, #16a34a);';
+
+            // Bubble Styling
             $bubbleStyle    = $isMyMessage
                 ? ($isAdminMessage
                     ? 'background-color: var(--color-primary-600, #4f46e5); color: #fff; border-bottom-right-radius: 4px;'
                     : 'background-color: var(--color-success-600, #16a34a); color: #fff; border-bottom-right-radius: 4px;')
                 : 'background-color: #fff; border: 1px solid #e5e7eb; border-bottom-left-radius: 4px;';
+
+            // Badge Styling
             $badgeStyle     = $isAdminMessage
                 ? 'background-color: #e0e7ff; color: #4338ca; font-size: 10px; padding: 1px 6px; border-radius: 9999px; font-weight: 500;'
                 : 'background-color: #dcfce7; color: #15803d; font-size: 10px; padding: 1px 6px; border-radius: 9999px; font-weight: 500;';
+
             $attachBorderStyle = $isMyMessage ? 'border-top: 1px solid rgba(255,255,255,0.25);' : 'border-top: 1px solid #e5e7eb;';
             $attachLinkStyle   = $isMyMessage
                 ? 'background: rgba(255,255,255,0.2); color: #fff;'
@@ -52,7 +59,7 @@
             {{-- Bubble wrapper --}}
             <div style="max-width: 75%;">
 
-                {{-- Sender name + badge (always visible, aligned to bubble side) --}}
+                {{-- Sender name + badge --}}
                 <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px; padding: 0 4px; {{ $isMyMessage ? 'flex-direction: row-reverse;' : '' }}">
                     <span style="font-size:12px; font-weight:500; color:#4b5563;">{{ $senderName }}</span>
                     <span style="{{ $badgeStyle }}">{{ $badgeLabel }}</span>
@@ -62,33 +69,58 @@
                 <div style="border-radius:16px; padding:14px 18px; box-shadow:0 1px 2px rgba(0,0,0,.06); {{ $bubbleStyle }}">
 
                     {{-- Content --}}
-                    <div
-                        class="prose prose-base max-w-none"
-                        style="{{ $isMyMessage ? 'color:#fff;' : 'color:#1f2937;' }}"
-                    >
-                        {!! $event->content !!}
-                    </div>
+                    @if (!empty(trim(strip_tags($event->content))))
+                        <div class="prose prose-base max-w-none" style="{{ $isMyMessage ? 'color:#fff;' : 'color:#1f2937;' }}">
+                            {!! $event->content !!}
+                        </div>
+                    @endif
 
-                    {{-- Attachments --}}
+                    {{-- Attachments Section --}}
                     @if ($event->attachments->isNotEmpty())
-                        <div style="margin-top:10px; padding-top:10px; display:flex; flex-wrap:wrap; gap:6px; {{ $attachBorderStyle }}">
+                        <div style="margin-top:10px; padding-top:10px; display:flex; flex-direction:column; gap:8px; {{ $attachBorderStyle }}">
                             @foreach ($event->attachments as $att)
-                                <a
-                                    href="{{ $att->url }}"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    style="display:inline-flex; align-items:center; gap:4px; border-radius:8px; padding:4px 8px; font-size:11px; font-weight:500; text-decoration:none; transition:opacity .15s; {{ $attachLinkStyle }}"
-                                >
-                                    @if ($att->isImage())
-                                        <x-heroicon-o-photo class="w-3.5 h-3.5 shrink-0" />
-                                    @else
-                                        <x-heroicon-o-paper-clip class="w-3.5 h-3.5 shrink-0" />
-                                    @endif
-                                    <span style="max-width:130px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ $att->original_name }}</span>
-                                </a>
+                                @php
+                                    $ext = strtolower(pathinfo($att->original_name ?? $att->url, PATHINFO_EXTENSION));
+                                    $isAudio = in_array($ext, ['webm', 'mp3', 'wav', 'ogg', 'm4a', 'aac']);
+                                @endphp
+
+                                @if ($att->isImage())
+                                    {{-- Image Preview (Opens in Popup) --}}
+                                    <div class="mt-1">
+                                        <button 
+                                            type="button" 
+                                            @click.prevent="openImage('{{ $att->url }}')" 
+                                            class="inline-block transition-transform hover:scale-105 focus:outline-none"
+                                        >
+                                            <img
+                                                src="{{ $att->url }}"
+                                                alt="{{ $att->original_name }}"
+                                                style="max-width:240px; max-height:240px; border-radius:10px; object-fit:cover; border: 1px solid {{ $isMyMessage ? 'rgba(255,255,255,0.3)' : '#e5e7eb' }}; box-shadow:0 2px 4px rgba(0,0,0,.08);"
+                                                loading="lazy"
+                                            />
+                                        </button>
+                                    </div>
+                                @elseif ($isAudio)
+                                    {{-- Audio Player --}}
+                                    <div class="mt-1" style="width: 100%; max-width: 280px;">
+                                        <audio controls src="{{ $att->url }}" style="width: 100%; height: 38px; border-radius: 8px; outline: none;"></audio>
+                                    </div>
+                                @else
+                                    {{-- Standard File Attachment --}}
+                                    <a
+                                        href="{{ $att->url }}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style="display:inline-flex; align-items:center; gap:6px; border-radius:8px; padding:6px 10px; font-size:11px; font-weight:500; text-decoration:none; align-self:flex-start; {{ $attachLinkStyle }}"
+                                    >
+                                        <x-heroicon-o-paper-clip class="w-4 h-4 shrink-0" />
+                                        <span style="max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ $att->original_name }}</span>
+                                    </a>
+                                @endif
                             @endforeach
                         </div>
                     @endif
+
                 </div>
 
                 {{-- Timestamp --}}
@@ -125,7 +157,7 @@
                     {{ $creatorInit }}
                 </div>
             </div>
-            <div style="flex:1;">
+            <div style="flex:1; max-width: 75%;">
                 <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px; padding:0 4px;">
                     <span style="font-size:12px; font-weight:500; color:#4b5563;">{{ $creatorName }}</span>
                     <span style="background-color:#dcfce7; color:#15803d; font-size:10px; padding:1px 6px; border-radius:9999px; font-weight:500;">Customer</span>
@@ -136,21 +168,43 @@
                     </div>
 
                     @if ($ticket->attachments->isNotEmpty())
-                        <div style="margin-top:10px; padding-top:10px; border-top:1px solid #e5e7eb; display:flex; flex-wrap:wrap; gap:6px;">
+                        <div style="margin-top:10px; padding-top:10px; border-top:1px solid #e5e7eb; display:flex; flex-direction:column; gap:8px;">
                             @foreach ($ticket->attachments as $att)
-                                <a
-                                    href="{{ $att->url }}"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    style="display:inline-flex; align-items:center; gap:4px; border-radius:8px; background:#f3f4f6; padding:4px 8px; font-size:11px; font-weight:500; color:#374151; text-decoration:none;"
-                                >
-                                    @if ($att->isImage())
-                                        <x-heroicon-o-photo class="w-3.5 h-3.5 shrink-0" style="color:var(--color-primary-500,#6366f1)" />
-                                    @else
-                                        <x-heroicon-o-paper-clip class="w-3.5 h-3.5 shrink-0" />
-                                    @endif
-                                    <span style="max-width:130px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ $att->original_name }}</span>
-                                </a>
+                                @php
+                                    $ext = strtolower(pathinfo($att->original_name ?? $att->url, PATHINFO_EXTENSION));
+                                    $isAudio = in_array($ext, ['webm', 'mp3', 'wav', 'ogg', 'm4a', 'aac']);
+                                @endphp
+
+                                @if ($att->isImage())
+                                    <div class="mt-1">
+                                        <button 
+                                            type="button" 
+                                            @click.prevent="openImage('{{ $att->url }}')" 
+                                            class="inline-block transition-transform hover:scale-105 focus:outline-none"
+                                        >
+                                            <img
+                                                src="{{ $att->url }}"
+                                                alt="{{ $att->original_name }}"
+                                                style="max-width:240px; max-height:240px; border-radius:10px; object-fit:cover; border:1px solid #e5e7eb; box-shadow:0 2px 4px rgba(0,0,0,.08);"
+                                                loading="lazy"
+                                            />
+                                        </button>
+                                    </div>
+                                @elseif ($isAudio)
+                                    <div class="mt-1" style="width: 100%; max-width: 280px;">
+                                        <audio controls src="{{ $att->url }}" style="width: 100%; height: 38px; border-radius: 8px; outline: none;"></audio>
+                                    </div>
+                                @else
+                                    <a
+                                        href="{{ $att->url }}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style="display:inline-flex; align-items:center; gap:6px; border-radius:8px; background:#f3f4f6; padding:6px 10px; font-size:11px; font-weight:500; color:#374151; text-decoration:none; align-self:flex-start;"
+                                    >
+                                        <x-heroicon-o-paper-clip class="w-4 h-4 shrink-0" />
+                                        <span style="max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ $att->original_name }}</span>
+                                    </a>
+                                @endif
                             @endforeach
                         </div>
                     @endif
@@ -162,19 +216,63 @@
         </div>
     </div>
 
+    {{-- Fullscreen Image Modal (Popup) --}}
+    <div 
+        x-show="isImageOpen" 
+        style="display: none;"
+        @click="closeImage()" 
+        class="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-8 bg-gray-900/90 backdrop-blur-sm cursor-zoom-out"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 scale-90"
+        x-transition:enter-end="opacity-100 scale-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 scale-100"
+        x-transition:leave-end="opacity-0 scale-90"
+    >
+        {{-- Close Button --}}
+        <button 
+            type="button"
+            @click.stop="closeImage()" 
+            class="absolute top-4 right-4 md:top-6 md:right-6 text-white hover:text-gray-300 focus:outline-none transition-colors"
+        >
+            <x-heroicon-o-x-mark class="w-8 h-8 md:w-10 md:h-10" />
+        </button>
+
+        {{-- The Image --}}
+        <img 
+            :src="currentImageUrl" 
+            @click.stop
+            class="max-w-[95vw] max-h-[90vh] rounded-lg shadow-2xl object-contain cursor-default"
+        />
+    </div>
+
     <x-filament-actions::modals />
 </div>
 
 @once
 @push('scripts')
 <script>
-    /**
-     * Reverb & Firebase Realtime Database listener for ticket conversations.
-     * When a message is broadcasted, Livewire refreshes instantly.
-     */
     function ticketConversation(ticketId) {
         return {
             _unsubscribe: null,
+            // المتغيرات الخاصة بالبوب-أب
+            isImageOpen: false,
+            currentImageUrl: '',
+            
+            // دالة فتح الصورة
+            openImage(url) {
+                this.currentImageUrl = url;
+                this.isImageOpen = true;
+                document.body.style.overflow = 'hidden'; // منع السكرول في الصفحة الخلفية
+            },
+            
+            // دالة غلق الصورة
+            closeImage() {
+                this.isImageOpen = false;
+                setTimeout(() => { this.currentImageUrl = ''; }, 300); // تفريغ الرابط بعد انتهاء الأنيميشن
+                document.body.style.overflow = ''; // إرجاع السكرول
+            },
+
             init() {
                 // Listen to Reverb broadcast channel
                 if (window.Echo) {
@@ -203,7 +301,7 @@
             },
             destroy() {
                 if (this._unsubscribe) { this._unsubscribe(); }
-            },
+            }
         };
     }
 
