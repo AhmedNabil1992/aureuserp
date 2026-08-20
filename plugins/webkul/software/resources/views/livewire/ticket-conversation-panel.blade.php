@@ -102,8 +102,8 @@
                                     </div>
                                 @elseif ($isAudio)
                                     {{-- Audio Player --}}
-                                    <div class="mt-1" style="width: 100%; max-width: 280px;">
-                                        <audio controls src="{{ $att->url }}" style="width: 100%; height: 38px; border-radius: 8px; outline: none;"></audio>
+                                    <div class="mt-2" style="width: 100%; min-width: 260px; max-width: 100%;">
+                                        <audio controls src="{{ $att->url }}" style="width: 100%; height: 48px; border-radius: 8px; outline: none;"></audio>
                                     </div>
                                 @else
                                     {{-- Standard File Attachment --}}
@@ -191,8 +191,8 @@
                                         </button>
                                     </div>
                                 @elseif ($isAudio)
-                                    <div class="mt-1" style="width: 100%; max-width: 280px;">
-                                        <audio controls src="{{ $att->url }}" style="width: 100%; height: 38px; border-radius: 8px; outline: none;"></audio>
+                                    <div class="mt-2" style="width: 100%; min-width: 260px; max-width: 100%;">
+                                        <audio controls src="{{ $att->url }}" style="width: 100%; height: 48px; border-radius: 8px; outline: none;"></audio>
                                     </div>
                                 @else
                                     <a
