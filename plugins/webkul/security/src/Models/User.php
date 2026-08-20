@@ -29,6 +29,7 @@ use Webkul\Security\Support\OwnerSource;
 use Webkul\Security\Traits\HasOwnershipScope;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Scopes\CompanyScope;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends BaseUser implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasEmailAuthentication
 {
@@ -39,6 +40,7 @@ class User extends BaseUser implements FilamentUser, HasAppAuthentication, HasAp
         InteractsWithAppAuthenticationRecovery,
         InteractsWithEmailAuthentication,
         Notifiable,
+        HasApiTokens,
         SoftDeletes;
 
     public function __construct(array $attributes = [])
