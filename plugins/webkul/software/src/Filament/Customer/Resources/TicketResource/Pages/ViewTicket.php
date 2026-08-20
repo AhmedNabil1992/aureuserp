@@ -71,7 +71,8 @@ class ViewTicket extends ViewRecord
                                 ->label('Opened')
                                 ->dateTime(),
                         ])
-                        ->columns(3),
+                        ->columns(3)
+                        ->collapsible(),
 
                     Section::make('Conversation')
                         ->schema([
@@ -81,7 +82,7 @@ class ViewTicket extends ViewRecord
                                 'canReply'   => true,
                             ]),
                         ])
-                        ->collapsible(false),
+                        ->collapsible(),
                 ])
                 ->columnSpanFull(),
         ]);
