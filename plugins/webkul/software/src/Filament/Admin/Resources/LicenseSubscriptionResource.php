@@ -29,18 +29,28 @@ class LicenseSubscriptionResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
+    public static function getNavigationLabel(): string
+    {
+        return __('software::filament/admin/resources/license-subscription.navigation.label');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('software::filament/admin/resources/license-subscription.navigation.label');
+    }
+
     protected static ?string $cluster = Licensing::class;
 
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Select::make('license_id')->relationship('license', 'serial_number')->searchable()->preload()->required(),
-            Select::make('service_type')
+            Select::make('license_id')->label(__('software::filament/admin/resources/license-subscription.form.fields.license'))->relationship('license', 'serial_number')->searchable()->preload()->required(),
+            Select::make('service_type')->label(__('software::filament/admin/resources/license-subscription.form.fields.service_type'))
                 ->options(collect(ServiceType::cases())->mapWithKeys(fn (ServiceType $case): array => [$case->value => ucfirst(str_replace('_', ' ', $case->value))])->all())
                 ->required(),
-            DatePicker::make('start_date')->native(false),
-            DatePicker::make('end_date')->native(false),
-            Toggle::make('is_active')->default(true),
+            DatePicker::make('start_date')->label(__('software::filament/admin/resources/license-subscription.form.fields.start_date'))->native(false),
+            DatePicker::make('end_date')->label(__('software::filament/admin/resources/license-subscription.form.fields.end_date'))->native(false),
+            Toggle::make('is_active')->label(__('software::filament/admin/resources/license-subscription.form.fields.is_active'))->default(true),
         ])->columns(2);
     }
 
@@ -48,10 +58,10 @@ class LicenseSubscriptionResource extends Resource
     {
         return $table->columns([
             TextColumn::make('license.serial_number')->label(__('software::filament/admin/resources/license-subscription.table.columns.license'))->searchable(),
-            TextColumn::make('service_type')->badge(),
-            TextColumn::make('start_date')->date(),
-            TextColumn::make('end_date')->date(),
-            IconColumn::make('is_active')->boolean(),
+            TextColumn::make('service_type')->label(__('software::filament/admin/resources/license-subscription.table.columns.service_type'))->badge(),
+            TextColumn::make('start_date')->label(__('software::filament/admin/resources/license-subscription.table.columns.start_date'))->date(),
+            TextColumn::make('end_date')->label(__('software::filament/admin/resources/license-subscription.table.columns.end_date'))->date(),
+            IconColumn::make('is_active')->label(__('software::filament/admin/resources/license-subscription.table.columns.is_active'))->boolean(),
         ])->recordActions([
             // EditAction::make(),
             DeleteAction::make(),

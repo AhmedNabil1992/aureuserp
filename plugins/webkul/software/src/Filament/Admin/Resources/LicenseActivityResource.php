@@ -28,6 +28,16 @@ class LicenseActivityResource extends Resource
 
     protected static ?string $cluster = Licensing::class;
 
+    public static function getNavigationLabel(): string
+    {
+        return __('software::filament/admin/resources/license-activity.navigation.label');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('software::filament/admin/resources/license-activity.navigation.label');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
@@ -41,8 +51,8 @@ class LicenseActivityResource extends Resource
     {
         return $table->columns([
             TextColumn::make('license.serial_number')->label(__('software::filament/admin/resources/license-activity.table.columns.license'))->searchable(),
-            TextColumn::make('current_version')->searchable(),
-            TextColumn::make('last_online_at')->dateTime()->sortable(),
+            TextColumn::make('current_version')->label(__('software::filament/admin/resources/license-activity.table.columns.current_version'))->searchable(),
+            TextColumn::make('last_online_at')->label(__('software::filament/admin/resources/license-activity.table.columns.last_online_at'))->dateTime()->sortable(),
         ])->recordActions([
             DeleteAction::make(),
         ])->toolbarActions([

@@ -13,7 +13,7 @@ class ManageLicenseSubscriptions extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make()->label('New Subscription')->icon('heroicon-o-plus-circle'),
+            CreateAction::make()->label(__('software::filament/admin/resources/license-subscription.titles.create'))->icon('heroicon-o-plus-circle'),
         ];
     }
 }

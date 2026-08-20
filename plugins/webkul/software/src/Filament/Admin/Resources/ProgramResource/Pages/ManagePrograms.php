@@ -14,7 +14,7 @@ class ManagePrograms extends ManageRecords
     {
         return [
             CreateAction::make()
-                ->label('New Program')
+                ->label(__('software::filament/admin/resources/program.title.create'))
                 ->icon('heroicon-o-plus-circle'),
         ];
     }

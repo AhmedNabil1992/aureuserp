@@ -41,6 +41,16 @@ class ProgramEditionResource extends Resource
         return __('admin.navigation.software');
     }
 
+    public static function getModelLabel(): string
+    {
+        return __('software::filament/admin/resources/program-edition.navigation.label');
+    }
+
+    public static function getModelPluralLabel(): string
+    {
+        return __('software::filament/admin/resources/program-edition.navigation.label');
+    }
+
     public static function getNavigationLabel(): string
     {
         return __('software::filament/admin/resources/program-edition.navigation.label');
@@ -85,7 +95,7 @@ class ProgramEditionResource extends Resource
             TextInput::make('max_devices')->numeric()->minValue(1),
             TextInput::make('license_cost')->numeric(),
             TextInput::make('license_price')->numeric(),
-            TextInput::make('device_reset_fee')->numeric()->default(0.00),
+            TextInput::make('device_reset_fee')->numeric()->default(0.00)->label(__('software::filament/admin/resources/program-edition.form.fields.device_reset_fee')),
             TextInput::make('monthly_renewal')->numeric(),
             TextInput::make('annual_renewal')->numeric(),
             Section::make(__('software::filament/admin/resources/program-edition.form.feature_rules.title'))
@@ -157,7 +167,7 @@ class ProgramEditionResource extends Resource
             TextColumn::make('variantProduct.name')->label(__('software::filament/admin/resources/program-edition.table.columns.variant'))->searchable(),
             TextColumn::make('max_devices')->label(__('software::filament/admin/resources/program-edition.table.columns.max_devices'))->numeric(),
             TextColumn::make('license_price')->label(__('software::filament/admin/resources/program-edition.table.columns.license_price'))->money('EGP'),
-            TextColumn::make('device_reset_fee')->label('Device Reset Fee')->money('EGP')->toggleable(),
+            TextColumn::make('device_reset_fee')->label(__('software::filament/admin/resources/program-edition.table.columns.device_reset_fee'))->money('EGP')->toggleable(),
             TextColumn::make('license_cost')->label(__('software::filament/admin/resources/program-edition.table.columns.license_cost'))->money('EGP'),
             TextColumn::make('monthly_renewal')->label(__('software::filament/admin/resources/program-edition.table.columns.monthly_renewal'))->money('EGP'),
             TextColumn::make('annual_renewal')->label(__('software::filament/admin/resources/program-edition.table.columns.annual_renewal'))->money('EGP'),

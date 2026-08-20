@@ -5,6 +5,12 @@ return [
         'label' => 'Programs',
     ],
 
+    'title' => [
+        'index' => 'Programs',
+        'create' => 'Add Program',
+        'edit' => 'Edit Program',
+    ],
+
     'form' => [
         'fields' => [
             'name' => 'Name',

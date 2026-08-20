@@ -12,7 +12,7 @@ class Catalog extends Cluster
 
     public static function getNavigationLabel(): string
     {
-        return 'Catalog';
+        return __('software::filament/admin/clusters/navigation.navigation.catalog');
     }
 
     public static function getNavigationGroup(): string

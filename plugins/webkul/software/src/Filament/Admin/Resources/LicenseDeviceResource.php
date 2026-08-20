@@ -30,19 +30,29 @@ class LicenseDeviceResource extends Resource
 
     protected static ?string $cluster = Licensing::class;
 
+    public static function getNavigationLabel(): string
+    {
+        return __('software::filament/admin/resources/license-device.navigation.label');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('software::filament/admin/resources/license-device.navigation.label');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Select::make('license_id')->relationship('license', 'serial_number')->searchable()->preload()->required(),
-            TextInput::make('computer_id')->required()->maxLength(255),
-            TextInput::make('license_key')->maxLength(255),
-            TextInput::make('device_name')->maxLength(255),
-            TextInput::make('bios_id')->maxLength(255),
-            TextInput::make('disk_id')->maxLength(255),
-            TextInput::make('base_id')->maxLength(255),
-            TextInput::make('video_id')->maxLength(255),
-            TextInput::make('mac_id')->maxLength(255),
-            Toggle::make('is_primary')->default(false),
+            Select::make('license_id')->label(__('software::filament/admin/resources/license-device.form.fields.license'))->relationship('license', 'serial_number')->searchable()->preload()->required(),
+            TextInput::make('computer_id')->label(__('software::filament/admin/resources/license-device.form.fields.computer_id'))->required()->maxLength(255),
+            TextInput::make('license_key')->label(__('software::filament/admin/resources/license-device.form.fields.license_key'))->maxLength(255),
+            TextInput::make('device_name')->label(__('software::filament/admin/resources/license-device.form.fields.device_name'))->maxLength(255),
+            TextInput::make('bios_id')->label(__('software::filament/admin/resources/license-device.form.fields.bios_id'))->maxLength(255),
+            TextInput::make('disk_id')->label(__('software::filament/admin/resources/license-device.form.fields.disk_id'))->maxLength(255),
+            TextInput::make('base_id')->label(__('software::filament/admin/resources/license-device.form.fields.base_id'))->maxLength(255),
+            TextInput::make('video_id')->label(__('software::filament/admin/resources/license-device.form.fields.video_id'))->maxLength(255),
+            TextInput::make('mac_id')->label(__('software::filament/admin/resources/license-device.form.fields.mac_id'))->maxLength(255),
+            Toggle::make('is_primary')->label(__('software::filament/admin/resources/license-device.form.fields.is_primary'))->default(false),
         ])->columns(2);
     }
 
@@ -50,17 +60,17 @@ class LicenseDeviceResource extends Resource
     {
         return $table->columns([
             TextColumn::make('license.serial_number')->label(__('software::filament/admin/resources/license-device.table.columns.license'))->searchable(),
-            TextColumn::make('computer_id')->searchable(),
-            TextColumn::make('license_key')->searchable(),
-            TextColumn::make('bios_id')->searchable(),
-            TextColumn::make('disk_id')->searchable(),
-            TextColumn::make('base_id')->searchable(),
-            TextColumn::make('video_id')->searchable(),
-            TextColumn::make('mac_id')->searchable(),
-            TextColumn::make('device_name')->searchable(),
-            IconColumn::make('is_primary')->boolean(),
-            TextColumn::make('created_at')->dateTime()->sortable(),
-            TextColumn::make('updated_at')->dateTime()->sortable(),
+            TextColumn::make('computer_id')->label(__('software::filament/admin/resources/license-device.table.columns.computer_id'))->searchable(),
+            TextColumn::make('license_key')->label(__('software::filament/admin/resources/license-device.table.columns.license_key'))->searchable(),
+            TextColumn::make('bios_id')->label(__('software::filament/admin/resources/license-device.table.columns.bios_id'))->searchable(),
+            TextColumn::make('disk_id')->label(__('software::filament/admin/resources/license-device.table.columns.disk_id'))->searchable(),
+            TextColumn::make('base_id')->label(__('software::filament/admin/resources/license-device.table.columns.base_id'))->searchable(),
+            TextColumn::make('video_id')->label(__('software::filament/admin/resources/license-device.table.columns.video_id'))->searchable(),
+            TextColumn::make('mac_id')->label(__('software::filament/admin/resources/license-device.table.columns.mac_id'))->searchable(),
+            TextColumn::make('device_name')->label(__('software::filament/admin/resources/license-device.table.columns.device_name'))->searchable(),
+            IconColumn::make('is_primary')->label(__('software::filament/admin/resources/license-device.table.columns.is_primary'))->boolean(),
+            TextColumn::make('created_at')->label(__('software::filament/admin/resources/license-device.table.columns.created_at'))->dateTime()->sortable(),
+            TextColumn::make('updated_at')->label(__('software::filament/admin/resources/license-device.table.columns.updated_at'))->dateTime()->sortable(),
         ])->recordActions([
             EditAction::make(),
             DeleteAction::make(),

@@ -5,6 +5,12 @@ return [
         'label' => 'Program Editions',
     ],
 
+    'title' => [
+        'index' => 'Program Editions',
+        'create' => 'Add Program Edition',
+        'edit' => 'Edit Program Edition',
+    ],
+    
     'form' => [
         'fields' => [
             'linked_variant' => 'Linked Variant (Required for billing)',
@@ -37,6 +43,7 @@ return [
             'variant'         => 'Variant',
             'max_devices'     => 'Max Devices',
             'license_price'   => 'License Price',
+            'device_reset_fee'   => 'Device Reset Fee',
             'license_cost'    => 'License Cost',
             'monthly_renewal' => 'Monthly Renewal',
             'annual_renewal'  => 'Annual Renewal',

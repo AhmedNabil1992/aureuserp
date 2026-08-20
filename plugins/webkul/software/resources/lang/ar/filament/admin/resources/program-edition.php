@@ -5,6 +5,12 @@ return [
         'label' => 'إصدارات البرامج',
     ],
 
+    'title' => [
+        'index' => 'إصدارات البرامج',
+        'create' => 'إضافة إصدار برنامج',
+        'edit' => 'تحرير إصدار البرنامج',
+    ],
+    
     'form' => [
         'fields' => [
             'linked_variant' => 'المتغير المرتبط (مطلوب للفوترة)',
@@ -37,6 +43,7 @@ return [
             'variant'         => 'المتغير',
             'max_devices'     => 'أقصى عدد للأجهزة',
             'license_price'   => 'سعر الترخيص',
+            'device_reset_fee'   => 'رسوم إعادة تعيين الجهاز',
             'license_cost'    => 'تكلفة الترخيص',
             'monthly_renewal' => 'التجديد الشهري',
             'annual_renewal'  => 'التجديد السنوي',

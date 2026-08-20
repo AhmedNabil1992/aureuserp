@@ -5,6 +5,12 @@ return [
         'label' => 'Program Features',
     ],
 
+    'title' => [
+        'index' => 'Program Features',
+        'create' => 'Add Program Feature',
+        'edit' => 'Edit Program Feature',
+    ],
+
     'form' => [
         'fields' => [
             'subscription_type' => 'Subscription Type',

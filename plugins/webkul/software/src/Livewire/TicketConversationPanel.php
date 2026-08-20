@@ -7,6 +7,7 @@ use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
@@ -51,18 +52,17 @@ class TicketConversationPanel extends Component implements HasActions, HasForms
             ->modalHeading('Reply to Ticket #'.$this->ticket->ticket_number)
             ->modalWidth('4xl')
             ->form([
-                RichEditor::make('content')
+                // RichEditor::make('content')
+                //     ->label('Message')
+                //     ->required()
+                //     ->extraAttributes(['style' => 'min-height: 280px;'])
+                //     ->columnSpanFull()
+                //     ->autofocus(),
+                TextInput::make('content')
                     ->label('Message')
                     ->required()
-                    ->extraAttributes(['style' => 'min-height: 280px;'])
-                    ->toolbarButtons([
-                        'bold', 'italic', 'underline', 'strike',
-                        'link', 'orderedList', 'bulletList',
-                        'blockquote', 'codeBlock',
-                        'h2', 'h3',
-                        'redo', 'undo',
-                    ])
-                    ->columnSpanFull(),
+                    ->columnSpanFull()
+                    ->autofocus(),
                 FileUpload::make('attachments')
                     ->label('Attachments')
                     ->multiple()

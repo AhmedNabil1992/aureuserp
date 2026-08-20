@@ -12,7 +12,7 @@ class Support extends Cluster
 
     public static function getNavigationLabel(): string
     {
-        return 'Support';
+        return __('software::filament/admin/clusters/navigation.navigation.support');
     }
 
     public static function getNavigationGroup(): string

@@ -12,7 +12,7 @@ class Licensing extends Cluster
 
     public static function getNavigationLabel(): string
     {
-        return 'Licensing';
+        return __('software::filament/admin/clusters/navigation.navigation.licensing');
     }
 
     public static function getNavigationGroup(): string

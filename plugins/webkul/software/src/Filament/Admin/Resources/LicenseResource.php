@@ -54,6 +54,11 @@ class LicenseResource extends Resource
         return __('software::filament/admin/resources/license.navigation.label');
     }
 
+    public static function getModelLabel(): string
+    {
+        return __('software::filament/admin/resources/license.navigation.label');
+    }
+    
     public static function form(Schema $schema): Schema
     {
         return $schema

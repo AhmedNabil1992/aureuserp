@@ -29,6 +29,16 @@ class RemoteProfileResource extends Resource
 
     protected static ?string $cluster = Licensing::class;
 
+    public static function getNavigationLabel(): string
+    {
+        return __('software::filament/admin/resources/remote-profile.navigation.label');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('software::filament/admin/resources/remote-profile.navigation.label');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
@@ -47,7 +57,9 @@ class RemoteProfileResource extends Resource
             TextColumn::make('anydesk'),
             TextColumn::make('teamviewer'),
             TextColumn::make('rustdesk'),
-            TextColumn::make('updated_at')->dateTime()->sortable(),
+            TextColumn::make('remark')->label(__('software::filament/admin/resources/remote-profile.table.columns.remark'))->limit(50),
+            TextColumn::make('created_at')->label(__('software::filament/admin/resources/remote-profile.table.columns.created_at'))->dateTime()->sortable(),
+            TextColumn::make('updated_at')->label(__('software::filament/admin/resources/remote-profile.table.columns.updated_at'))->dateTime()->sortable(),
         ])->recordActions([
             EditAction::make(),
             DeleteAction::make(),

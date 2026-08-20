@@ -13,7 +13,7 @@ class ManageProgramReleases extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make()->label('New Release')->icon('heroicon-o-plus-circle'),
+            CreateAction::make()->label(__('software::filament/admin/resources/program-release.title.create'))->icon('heroicon-o-plus-circle'),
         ];
     }
 }

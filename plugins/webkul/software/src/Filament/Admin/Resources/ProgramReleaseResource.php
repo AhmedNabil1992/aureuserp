@@ -45,16 +45,16 @@ class ProgramReleaseResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Select::make('program_id')->relationship('program', 'name')->searchable()->preload()->required(),
-            TextInput::make('version_number')->required()->maxLength(50),
-            TextInput::make('update_link')->url()->maxLength(500),
-            TextInput::make('file_name')->maxLength(255),
-            DatePicker::make('release_date')->native(false),
-            Toggle::make('is_db_update')->default(false),
-            TextInput::make('db_link')->maxLength(500),
-            Toggle::make('is_active')->default(true),
-            Textarea::make('app_terminate')->rows(2)->columnSpanFull(),
-            Textarea::make('remark')->rows(2)->columnSpanFull(),
+            Select::make('program_id')->label(__('software::filament/admin/resources/program-release.form.fields.program'))->relationship('program', 'name')->searchable()->preload()->required(),
+            TextInput::make('version_number')->label(__('software::filament/admin/resources/program-release.form.fields.version_number'))->required()->maxLength(50),
+            TextInput::make('update_link')->label(__('software::filament/admin/resources/program-release.form.fields.update_link'))->url()->maxLength(500),
+            TextInput::make('file_name')->label(__('software::filament/admin/resources/program-release.form.fields.file_name'))->maxLength(255),
+            DatePicker::make('release_date')->label(__('software::filament/admin/resources/program-release.form.fields.release_date'))->native(false),
+            Toggle::make('is_db_update')->label(__('software::filament/admin/resources/program-release.form.fields.is_db_update'))->default(false),
+            TextInput::make('db_link')->label(__('software::filament/admin/resources/program-release.form.fields.db_link'))->maxLength(500),
+            Toggle::make('is_active')->label(__('software::filament/admin/resources/program-release.form.fields.is_active'))->default(true),
+            Textarea::make('app_terminate')->label(__('software::filament/admin/resources/program-release.form.fields.app_terminate'))->rows(2)->columnSpanFull(),
+            Textarea::make('remark')->label(__('software::filament/admin/resources/program-release.form.fields.remark'))->rows(2)->columnSpanFull(),
         ])->columns(2);
     }
 
@@ -62,11 +62,11 @@ class ProgramReleaseResource extends Resource
     {
         return $table->columns([
             TextColumn::make('program.name')->label(__('software::filament/admin/resources/program-release.table.columns.program'))->searchable(),
-            TextColumn::make('version_number')->searchable()->sortable(),
-            TextColumn::make('release_date')->date()->sortable(),
-            IconColumn::make('is_active')->boolean(),
-            IconColumn::make('is_db_update')->boolean(),
-            TextColumn::make('download_times')->numeric(),
+            TextColumn::make('version_number')->label(__('software::filament/admin/resources/program-release.table.columns.version_number'))->searchable()->sortable(),
+            TextColumn::make('release_date')->label(__('software::filament/admin/resources/program-release.table.columns.release_date'))->date()->sortable(),
+            IconColumn::make('is_active')->label(__('software::filament/admin/resources/program-release.table.columns.is_active'))->boolean(),
+            IconColumn::make('is_db_update')->label(__('software::filament/admin/resources/program-release.table.columns.is_db_update'))->boolean(),
+            TextColumn::make('download_times')->label(__('software::filament/admin/resources/program-release.table.columns.download_times'))->numeric(),
         ])->recordActions([
             EditAction::make(),
             DeleteAction::make(),

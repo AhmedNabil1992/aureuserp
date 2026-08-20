@@ -41,6 +41,16 @@ class ProgramFeatureResource extends Resource
         return __('software::filament/admin/resources/program-feature.navigation.label');
     }
 
+    public static function getModelLabel(): string
+    {
+        return __('software::filament/admin/resources/program-feature.navigation.label');
+    }
+
+    public static function getModelPluralLabel(): string
+    {
+        return __('software::filament/admin/resources/program-feature.navigation.label');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema->components([

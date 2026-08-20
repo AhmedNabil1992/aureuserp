@@ -16,6 +16,7 @@ use Filament\Notifications\Notification;
 use Filament\Support\Colors\Color;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
@@ -101,6 +102,12 @@ class PartnersTable
                                 ->color(fn ($state) => Color::generateV3Palette($state['color']))
                                 ->weight(FontWeight::Bold)
                                 ->wrap(),
+                            IconColumn::make('is_dealer')
+                                ->label(__('partners::filament/resources/partner.table.columns.is-dealer'))
+                                ->trueIcon('heroicon-o-check-circle')
+                                ->falseIcon('heroicon-o-x-circle')
+                                ->sortable()
+                                ->alignCenter(),
                         ])
                             ->visible(fn ($record): bool => (bool) $record->tags?->count()),
                     ])->space(1),
