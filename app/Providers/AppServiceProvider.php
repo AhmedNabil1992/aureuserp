@@ -8,7 +8,7 @@ use Illuminate\Support\ServiceProvider;
 use Livewire\Component;
 use Livewire\Livewire;
 use Webkul\Security\Models\User;
-
+use App\Console\Commands\SyncPartnerTags;
 use function Livewire\on;
 use function Livewire\store;
 
@@ -24,7 +24,11 @@ class AppServiceProvider extends ServiceProvider
         if (app()->environment('production')) {
             URL::forceScheme('https');
         }
-
+        if ($this->app->runningInConsole()) {
+                $this->commands([
+                    SyncPartnerTags::class,
+                ]);
+            }
         on('dehydrate', function (Component $component): void {
             if (! Livewire::isLivewireRequest()) {
                 return;
