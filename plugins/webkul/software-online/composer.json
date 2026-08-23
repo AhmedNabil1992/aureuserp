@@ -1,0 +1,30 @@
+{
+    "name": "webkul/software-online",
+    "description": "Multi-system SaaS and online platform management with custom API provisioning and customer balance billing.",
+    "authors": [
+        {
+            "name": "etech",
+            "email": "admin@etech-valley.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webkul\\SoftwareOnline\\SoftwareOnlineServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Webkul\\SoftwareOnline\\": "src/",
+            "Webkul\\SoftwareOnline\\Database\\Factories\\": "database/factories/",
+            "Webkul\\SoftwareOnline\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Webkul\\SoftwareOnline\\Tests\\": "tests/"
+        }
+    }
+}

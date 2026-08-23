@@ -39,7 +39,14 @@ class TicketResource extends Resource
 
     protected static ?string $cluster = Support::class;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static ?string $recordTitleAttribute = 'title';
+
+    public static function canAccess(): bool
+    {
+        return false;
+    }
 
     public static function getNavigationLabel(): string
     {

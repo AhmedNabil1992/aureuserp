@@ -26,6 +26,8 @@ return [
         'setting'       => 'الإعدادات',
         'psmonitor'     => 'متابعه PS',
         'help'          => 'المساعدة',
-        'barcode'       => 'الباركود',
+        'barcode'           => 'الباركود',
+        'technical-support' => 'الدعم الفني',
+        'software-online'   => 'الأنظمة الأونلاين',
     ],
 ];

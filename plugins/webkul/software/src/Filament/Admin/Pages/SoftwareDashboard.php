@@ -78,7 +78,6 @@ class SoftwareDashboard extends BaseDashboard
         return [
             SoftwareStatsOverviewWidget::class,
             SoftwareLicenseStatusChartWidget::class,
-            SoftwareTicketStatusChartWidget::class,
             SoftwareSubscriptionStatusChartWidget::class,
             SoftwareSubscriptionTypesChartWidget::class,
             SoftwareSubscriptionsAlertsOverviewWidget::class,

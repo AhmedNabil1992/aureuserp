@@ -1,0 +1,30 @@
+{
+    "name": "webkul/technical-support",
+    "description": "Technical support and multi-service ticketing system across Software, Wi-Fi, and Online Services.",
+    "authors": [
+        {
+            "name": "etech",
+            "email": "admin@etech-valley.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webkul\\TechnicalSupport\\TechnicalSupportServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Webkul\\TechnicalSupport\\": "src/",
+            "Webkul\\TechnicalSupport\\Database\\Factories\\": "database/factories/",
+            "Webkul\\TechnicalSupport\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Webkul\\TechnicalSupport\\Tests\\": "tests/"
+        }
+    }
+}

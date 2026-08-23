@@ -35,7 +35,7 @@ class TicketResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
-    protected static bool $shouldRegisterNavigation = true;
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static ?string $recordTitleAttribute = 'title';
 
@@ -56,17 +56,7 @@ class TicketResource extends Resource
 
     public static function canAccess(): bool
     {
-        $user = Filament::auth()->user();
-
-        if (! $user) {
-            return false;
-        }
-
-        if (! IlluminateSchema::hasTable('software_licenses')) {
-            return false;
-        }
-
-        return License::where('partner_id', $user->id)->exists();
+        return false;
     }
 
     public static function form(Schema $schema): Schema

@@ -31,6 +31,13 @@ class TicketEventResource extends Resource
 
     protected static ?string $cluster = Support::class;
 
+    protected static bool $shouldRegisterNavigation = false;
+
+    public static function canAccess(): bool
+    {
+        return false;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema->components([

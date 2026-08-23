@@ -57,6 +57,10 @@ enum NavigationGroup: string implements HasIcon, HasLabel
 
     case WhattsApp = 'whatts-app';
 
+    case TechnicalSupport = 'technical-support';
+
+    case SoftwareOnline = 'software-online';
+
     public function getLabel(): string
     {
         return __('admin.navigation.'.$this->value);
@@ -65,31 +69,33 @@ enum NavigationGroup: string implements HasIcon, HasLabel
     public function getIcon(): string
     {
         return match ($this) {
-            self::Dashboard     => 'icon-dashboard',
-            self::Contact       => 'icon-contacts',
-            self::Sale          => 'icon-sales',
-            self::Purchase      => 'icon-purchases',
-            self::Maintenance   => 'icon-maintenance',
-            self::Manufacturing => 'icon-manufacturing',
-            self::Inventory     => 'icon-inventories',
-            self::Invoice       => 'icon-invoices',
-            self::Accounting    => 'icon-accounting',
-            self::Project       => 'icon-projects',
-            self::Employee      => 'icon-employees',
-            self::TimeOff       => 'icon-time-offs',
-            self::Recruitment   => 'icon-recruitments',
-            self::Website       => 'icon-website',
-            self::Barcode       => 'icon-barcode',
-            self::Plugin        => 'icon-plugin',
-            self::Setting       => 'icon-settings',
-            self::Help          => 'icon-help',
-            self::Software      => 'heroicon-o-cpu-chip',
-            self::Wifi          => 'heroicon-o-wifi',
-            self::Marketing     => 'heroicon-o-megaphone',
-            self::Leads         => 'heroicon-o-user-group',
-            self::Product       => 'icon-products',
-            self::Articles      => 'heroicon-o-book-open',
-            self::WhattsApp     => 'heroicon-o-chat-bubble-left-right',
+            self::Dashboard        => 'icon-dashboard',
+            self::Contact          => 'icon-contacts',
+            self::Sale             => 'icon-sales',
+            self::Purchase         => 'icon-purchases',
+            self::Maintenance      => 'icon-maintenance',
+            self::Manufacturing    => 'icon-manufacturing',
+            self::Inventory        => 'icon-inventories',
+            self::Invoice          => 'icon-invoices',
+            self::Accounting       => 'icon-accounting',
+            self::Project          => 'icon-projects',
+            self::Employee         => 'icon-employees',
+            self::TimeOff          => 'icon-time-offs',
+            self::Recruitment      => 'icon-recruitments',
+            self::Website          => 'icon-website',
+            self::Barcode          => 'icon-barcode',
+            self::Plugin           => 'icon-plugin',
+            self::Setting          => 'icon-settings',
+            self::Help             => 'icon-help',
+            self::Software         => 'heroicon-o-cpu-chip',
+            self::Wifi             => 'heroicon-o-wifi',
+            self::Marketing        => 'heroicon-o-megaphone',
+            self::Leads            => 'heroicon-o-user-group',
+            self::Product          => 'icon-products',
+            self::Articles         => 'heroicon-o-book-open',
+            self::WhattsApp        => 'heroicon-o-chat-bubble-left-right',
+            self::TechnicalSupport => 'heroicon-o-lifebuoy',
+            self::SoftwareOnline   => 'heroicon-o-globe-alt',
         };
     }
 }

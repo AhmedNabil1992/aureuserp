@@ -38,6 +38,7 @@ use Webkul\Wifi\WifiServiceProvider;
 use Webkul\Psmonitor\PsmonitorServiceProvider;
 use Webkul\Article\ArticleServiceProvider;
 use Webkul\Lead\LeadServiceProvider;
+use Webkul\TechnicalSupport\TechnicalSupportServiceProvider;
 
 // use App\Providers\AppServiceProvider;
 // use App\Providers\Filament\AdminPanelProvider;
@@ -108,4 +109,6 @@ return [
     PsmonitorServiceProvider::class,
     ArticleServiceProvider::class,
     LeadServiceProvider::class,
+    TechnicalSupportServiceProvider::class,
+    \Webkul\SoftwareOnline\SoftwareOnlineServiceProvider::class,
 ];

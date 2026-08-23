@@ -26,6 +26,8 @@ return [
         'setting'       => 'Settings',
         'psmonitor'     => 'PS Monitor',
         'help'          => 'Help',
-        'barcode'       => 'Barcode',
+        'barcode'           => 'Barcode',
+        'technical-support' => 'Technical Support',
+        'software-online'   => 'Online Systems',
     ],
 ];

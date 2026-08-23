@@ -66,6 +66,12 @@ class CustomerPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label(fn (): string => __('admin.navigation.articles'))
                     ->icon('heroicon-o-book-open'),
+                NavigationGroup::make()
+                    ->label(fn (): string => __('admin.navigation.software-online'))
+                    ->icon('heroicon-o-globe-alt'),
+                NavigationGroup::make()
+                    ->label(fn (): string => __('admin.navigation.technical-support'))
+                    ->icon('heroicon-o-lifebuoy'),
             ])
             ->plugins([
                 BrowserNotificationsPlugin::make()
