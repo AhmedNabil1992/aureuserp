@@ -270,8 +270,6 @@ class TicketService
      */
     protected function sanitizeHtml(string $html): string
     {
-        return clean($html, [
-            'HTML.Allowed' => 'p,b,strong,i,em,u,a[href|title|target],ul,ol,li,br,span[class],code,pre,blockquote',
-        ]);
+        return strip_tags($html, '<p><b><strong><i><em><u><a><ul><ol><li><br><span><code><pre><blockquote>');
     }
 }

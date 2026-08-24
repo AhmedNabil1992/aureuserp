@@ -243,13 +243,18 @@
                             </span>
                         </div>
 
+                        @php
+                            $hasAudio = $event->attachments->contains(fn ($a) => $a->isAudio());
+                            $isOnlyVoice = $hasAudio && in_array(trim(strip_tags($event->content)), ['🎤 رسالة صوتية', 'رسالة صوتية', 'Voice message', 'voice_message']);
+                        @endphp
+
                         {{-- Bubble Card --}}
                         <div
-                            class="relative px-4 sm:px-5 py-3 sm:py-3.5 shadow-md {{ $isMyMessage ? 'rounded-2xl rounded-tr-xs' : 'rounded-2xl rounded-tl-xs' }}"
-                            style="min-width: 140px; {{ $isMyMessage ? 'background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important; color: #ffffff !important;' : ($isBotMessage ? 'background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%) !important; color: #ffffff !important;' : 'background: linear-gradient(135deg, #059669 0%, #047857 100%) !important; color: #ffffff !important;') }}"
+                            class="relative px-4 sm:px-5 py-3 sm:py-3.5 shadow-md {{ $isMyMessage ? 'rounded-2xl rounded-tr-xs' : 'rounded-2xl rounded-tl-xs' }} {{ $hasAudio ? 'w-full min-w-[290px] sm:min-w-[360px] max-w-[440px]' : '' }}"
+                            style="min-width: {{ $hasAudio ? '290px' : '140px' }}; {{ $isMyMessage ? 'background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important; color: #ffffff !important;' : ($isBotMessage ? 'background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%) !important; color: #ffffff !important;' : 'background: linear-gradient(135deg, #059669 0%, #047857 100%) !important; color: #ffffff !important;') }}"
                         >
                             {{-- Text Content --}}
-                            @if (!empty(trim(strip_tags($event->content))))
+                            @if (!empty(trim(strip_tags($event->content))) && ! $isOnlyVoice)
                                 @php
                                     $escapedContent = e($event->content);
                                     $formattedContent = preg_replace(
@@ -259,7 +264,7 @@
                                     );
                                 @endphp
                                 <div
-                                    class="text-sm sm:text-base font-medium leading-relaxed whitespace-pre-wrap select-text text-right"
+                                    class="text-sm sm:text-base font-medium leading-relaxed whitespace-pre-wrap select-text text-right mb-1"
                                     style="color: #ffffff !important;"
                                 >
                                     {!! nl2br($formattedContent) !!}
@@ -268,7 +273,7 @@
 
                             {{-- Attachments Section --}}
                             @if ($event->attachments->isNotEmpty())
-                                <div class="mt-2.5 pt-2 flex flex-col gap-2 border-t border-white/30">
+                                <div class="{{ (!empty(trim(strip_tags($event->content))) && ! $isOnlyVoice) ? 'mt-2.5 pt-2 border-t border-white/30' : '' }} flex flex-col gap-2">
                                     @foreach ($event->attachments as $att)
                                         @if ($att->isImage())
                                             <div class="mt-1">
@@ -290,16 +295,16 @@
                                                 </button>
                                             </div>
                                         @elseif ($att->isAudio())
-                                            {{-- Spacious, Easy-to-use Audio Player --}}
-                                            <div class="p-3 rounded-2xl w-full min-w-[250px] sm:min-w-[290px] bg-white/20 text-white">
-                                                <div class="flex items-center justify-between gap-2 mb-1.5 text-xs font-bold">
+                                            {{-- Spacious, Wide, Easy-to-use Audio Player --}}
+                                            <div class="p-3.5 rounded-2xl w-full min-w-[270px] sm:min-w-[340px] bg-white/20 dark:bg-black/25 backdrop-blur-sm text-white border border-white/25 shadow-inner">
+                                                <div class="flex items-center justify-between gap-2 mb-2 text-xs font-bold">
                                                     <div class="flex items-center gap-1.5">
                                                         <x-heroicon-s-microphone class="w-4 h-4 shrink-0 text-white" />
                                                         <span>{{ __("{$langPrefix}.voice_message") }}</span>
                                                     </div>
-                                                    <span class="text-[10px] opacity-80 font-mono">{{ $att->readable_size }}</span>
+                                                    <span class="text-[10px] opacity-85 font-mono">{{ $att->readable_size }}</span>
                                                 </div>
-                                                <audio controls class="ticket-audio-player w-full h-9 rounded-xl focus:outline-none shadow-2xs">
+                                                <audio controls class="ticket-audio-player w-full h-10 rounded-xl focus:outline-none shadow-sm" style="min-width: 250px; width: 100%; display: block;">
                                                     <source src="{{ $att->url }}" type="{{ $att->mime_type ?? 'audio/webm' }}">
                                                     {{ __("{$langPrefix}.browser_no_audio") }}
                                                 </audio>

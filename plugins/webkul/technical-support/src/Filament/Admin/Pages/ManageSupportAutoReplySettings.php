@@ -10,6 +10,7 @@ use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Pages\SettingsPage;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Webkul\Support\Enums\NavigationGroup;
 use Webkul\TechnicalSupport\Settings\SupportAutoReplySettings;
@@ -56,7 +57,7 @@ class ManageSupportAutoReplySettings extends SettingsPage
                     Textarea::make('emergency_message')
                         ->label(__('technical-support::filament/admin/pages/settings.fields.emergency_message'))
                         ->rows(3)
-                        ->required(fn ($get) => (bool) $get('is_emergency_mode'))
+                        ->required(fn (Get $get): bool => (bool) $get('is_emergency_mode'))
                         ->columnSpanFull(),
                 ])
                 ->columns(2),

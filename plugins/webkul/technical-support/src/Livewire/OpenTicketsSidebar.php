@@ -9,9 +9,9 @@ use Webkul\TechnicalSupport\Models\Ticket;
 
 class OpenTicketsSidebar extends Component
 {
-    public int $currentTicketId;
+    public ?int $currentTicketId = null;
 
-    public function mount(int $currentTicketId): void
+    public function mount(?int $currentTicketId = null): void
     {
         $this->currentTicketId = $currentTicketId;
     }
