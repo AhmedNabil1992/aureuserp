@@ -91,6 +91,8 @@ class TicketConversationPanel extends Component implements HasActions, HasForms
         $eventData = [
             'content'    => $this->message ?: ($this->voiceNoteData ? '🎤 رسالة صوتية' : 'ملفات مرفقة'),
             'type'       => $this->isPrivateNote && $this->senderType === 'admin' ? 'note' : 'message',
+            
+            // حماية إضافية: تأكيد أن العميل لا يمكنه أبداً إرسال رسالة خاصة حتى لو تلاعب بالـ Request
             'is_private' => $this->isPrivateNote && $this->senderType === 'admin',
         ];
 
@@ -210,10 +212,19 @@ class TicketConversationPanel extends Component implements HasActions, HasForms
 
     public function render(): View
     {
-        $events = $this->ticket->events()
+        // بناء الاستعلام الأساسي
+        $query = $this->ticket->events()
             ->with(['user', 'partner', 'attachments'])
-            ->oldest()
-            ->get();
+            ->oldest();
+
+        // التعديل الأمني الأهم: 
+        // لو اللي فاتح هو "العميل"، استبعد أي رسالة خاصة من قاعدة البيانات نهائياً
+        // كده مستحيل توصل للمتصفح بتاعه لا في الـ HTML ولا في الـ JSON Response
+        if ($this->senderType === 'customer') {
+            $query->where('is_private', false);
+        }
+
+        $events = $query->get();
 
         return view('technical-support::livewire.ticket-conversation-panel', [
             'ticket' => $this->ticket->load(['partner', 'program', 'license', 'attachments']),

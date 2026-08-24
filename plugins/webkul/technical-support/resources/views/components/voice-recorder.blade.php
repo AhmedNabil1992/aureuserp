@@ -64,33 +64,55 @@
             this.recordingTime = 0;
             clearInterval(this.timerInterval);
         }
-    }" class="flex flex-col gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 w-full">
+    }" class="flex flex-col gap-3 p-4 bg-white dark:bg-gray-900 rounded-xl border border-gray-300 dark:border-gray-700 w-full shadow-sm">
 
+        {{-- حالة قبل التسجيل (زرار البدء) --}}
         <div x-show="!isRecording && !audioUrl" class="w-full">
-            <button @click.prevent="start" type="button" class="w-full inline-flex items-center justify-center gap-2 py-2 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors shadow-sm">
-                <x-heroicon-m-microphone class="w-5 h-5" />
-                <span>بدء تسجيل رسالة صوتية</span>
-            </button>
+            <x-filament::button
+                color="primary"
+                icon="heroicon-m-microphone"
+                class="w-full justify-center"
+                x-on:click.prevent="start"
+            >
+                بدء تسجيل رسالة صوتية
+            </x-filament::button>
         </div>
 
-        <div x-show="isRecording" style="display: none;" class="w-full flex items-center gap-3">
-            <button @click.prevent="stop" type="button" class="flex-grow inline-flex items-center justify-center gap-2 py-2 px-4 rounded-lg bg-danger-600 hover:bg-danger-700 text-white text-sm font-medium transition-colors shadow-sm">
-                <x-heroicon-m-stop-circle class="w-5 h-5" />
-                <span>إيقاف التسجيل</span>
-            </button>
+        {{-- حالة أثناء التسجيل (زرار الإيقاف + العداد) --}}
+        <div x-show="isRecording" style="display: none;" class="w-full flex items-center gap-4">
+            <div class="flex-grow">
+                <x-filament::button
+                    color="danger"
+                    icon="heroicon-m-stop-circle"
+                    class="w-full justify-center"
+                    x-on:click.prevent="stop"
+                >
+                    إيقاف التسجيل
+                </x-filament::button>
+            </div>
             
-            <div class="flex items-center gap-2 text-danger-600 font-bold text-base min-w-[70px] justify-center">
-                <div class="w-2.5 h-2.5 rounded-full bg-danger-600 animate-pulse"></div>
-                <span x-text="formattedTime"></span>
+            {{-- العداد وتأثير النبض --}}
+            <div class="flex items-center gap-2 text-danger-600 dark:text-danger-500 font-bold text-lg min-w-[70px] justify-center" dir="ltr">
+                <div class="w-3 h-3 rounded-full bg-danger-600 dark:bg-danger-500 animate-pulse"></div>
+                <span x-text="formattedTime" class="tabular-nums"></span>
             </div>
         </div>
 
-        <div x-show="audioUrl" style="display: none;" class="w-full flex items-center gap-2">
-            <audio :src="audioUrl" controls class="flex-grow h-11 rounded-lg"></audio>
+        {{-- حالة بعد الانتهاء (مشغل الصوت + زر الحذف) --}}
+        <div x-show="audioUrl" style="display: none;" class="w-full flex items-center gap-3">
+            {{-- مشغل الصوت --}}
+            <audio :src="audioUrl" controls class="flex-grow h-11 rounded-lg outline-none"></audio>
             
-            <button @click.prevent="clear" type="button" class="p-2.5 rounded-lg bg-danger-50 text-danger-600 hover:bg-danger-100 dark:bg-danger-950 dark:text-danger-400 transition-colors" title="حذف وإعادة التسجيل">
-                <x-heroicon-m-trash class="w-5 h-5" />
-            </button>
+            {{-- زرار الحذف --}}
+            <div class="flex-shrink-0">
+                <x-filament::icon-button
+                    icon="heroicon-m-trash"
+                    color="danger"
+                    size="lg"
+                    tooltip="حذف وإعادة التسجيل"
+                    x-on:click.prevent="clear"
+                />
+            </div>
         </div>
     </div>
 </x-dynamic-component>
