@@ -23,7 +23,8 @@ class TicketMessageSent implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('tickets.' . $this->ticket->id),
+            new PrivateChannel('tickets.' . $this->ticket->id), // بتشغل الشات نفسه
+            new PrivateChannel('tickets.admin-sidebar'),        // بتشغل السايد بار برا
         ];
     }
 

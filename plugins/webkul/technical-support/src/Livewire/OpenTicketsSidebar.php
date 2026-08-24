@@ -19,7 +19,11 @@ class OpenTicketsSidebar extends Component
     protected function getListeners(): array
     {
         return [
-            'echo:tickets.admin-sidebar,.TicketMessageSent' => '$refresh',
+            // غيرناها لـ echo-private عشان الحماية
+            'echo-private:tickets.admin-sidebar,.TicketMessageSent' => '$refresh',
+            
+            // لو عندك Event لإنشاء التيكت ضيفه هنا كمان بالشكل ده:
+            // 'echo-private:tickets.admin-sidebar,.TicketCreated' => '$refresh',
         ];
     }
 

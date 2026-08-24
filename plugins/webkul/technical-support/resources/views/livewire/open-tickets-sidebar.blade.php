@@ -73,7 +73,7 @@
         return {
             init() {
                 if (window.Echo) {
-                    window.Echo.channel('tickets.admin-sidebar')
+                    window.Echo.private('tickets.admin-sidebar')
                         .listen('.TicketMessageSent', () => {
                             this.$wire.$refresh();
                         });
