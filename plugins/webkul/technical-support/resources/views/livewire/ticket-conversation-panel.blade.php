@@ -549,7 +549,7 @@
                 }
 
                 if (window.Echo && config.ticketId) {
-                    const channel = window.Echo.channel('tickets.' + config.ticketId);
+                    const channel = window.Echo.private('tickets.' + config.ticketId);
 
                     channel.listen('.TicketMessageSent', () => {
                         this.otherPartyTyping = false;
@@ -578,7 +578,7 @@
                 if (now - this.lastTypingEmit > 1500) {
                     this.lastTypingEmit = now;
                     if (window.Echo && config.ticketId) {
-                        window.Echo.channel('tickets.' + config.ticketId)
+                        window.Echo.private('tickets.' + config.ticketId)
                             .whisper('typing', {
                                 senderType: config.senderType,
                                 senderName: config.senderName

@@ -9,6 +9,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Webkul\TechnicalSupport\Models\Ticket;
 use Webkul\TechnicalSupport\Models\TicketEvent;
+use Illuminate\Broadcasting\PrivateChannel;
 
 class TicketMessageSent implements ShouldBroadcastNow
 {
@@ -22,7 +23,7 @@ class TicketMessageSent implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new Channel('tickets.' . $this->ticket->id),
+            new PrivateChannel('tickets.' . $this->ticket->id),
         ];
     }
 
