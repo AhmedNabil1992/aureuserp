@@ -11,3 +11,8 @@ Broadcast::channel('tickets.{id}', function ($user, $id) {
     // طبعاً تقدر بعدين تضيف شرط يتأكد إن التيكت دي تخص العميل ده فعلاً
     return true; 
 }, ['guards' => ['web', 'customer']]); // ضفنا الـ guards عشان يقبل الأدمن والعميل
+
+Broadcast::channel('tickets.admin-sidebar', function ($user) {
+    // يمكنك تعديل الشرط للتأكد من أن المستخدم هو أدمن أو موظف دعم فني
+    return true; 
+}, ['guards' => ['web']]); // الـ guard الخاص بلوحة تحكم الأدمن
