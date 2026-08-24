@@ -122,7 +122,7 @@ class TicketService
             ]);
 
             // Notify customer about admin reply
-            $this->notificationService->notifyCustomerTicketReply($ticket, $event);
+            $this->notificationService->notifyCustomerNewReply($ticket, $event);
         } elseif (! empty($data['partner_id'])) {
             $ticket->update([
                 'is_unread_admin' => true,
@@ -130,7 +130,7 @@ class TicketService
             ]);
 
             // Notify staff about customer reply
-            $this->notificationService->notifyStaffTicketReply($ticket, $event);
+            $this->notificationService->notifyStaffNewReply($ticket, $event);
         }
 
         // Real-time broadcast

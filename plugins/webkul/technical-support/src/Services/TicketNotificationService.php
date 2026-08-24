@@ -125,4 +125,14 @@ class TicketNotificationService
                 ->broadcast($ticket->partner);
         } catch (\Throwable) {}
     }
+
+    public function notifyCustomerTicketReply(Ticket $ticket, TicketEvent $event): void
+    {
+        $this->notifyCustomerNewReply($ticket, $event);
+    }
+
+    public function notifyStaffTicketReply(Ticket $ticket, TicketEvent $event): void
+    {
+        $this->notifyStaffNewReply($ticket, $event);
+    }
 }
