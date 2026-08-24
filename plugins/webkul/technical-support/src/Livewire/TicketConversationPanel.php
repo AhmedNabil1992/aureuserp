@@ -12,10 +12,14 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Webkul\TechnicalSupport\Enums\TicketStatus;
+use Webkul\TechnicalSupport\Models\CannedReply;
+use Webkul\TechnicalSupport\Models\QuickDownload;
 use Webkul\TechnicalSupport\Models\Ticket;
 use Webkul\TechnicalSupport\Services\TicketService;
 
@@ -53,13 +57,63 @@ class TicketConversationPanel extends Component implements HasActions, HasForms
         ];
     }
 
+    public function getCannedRepliesProperty(): EloquentCollection
+    {
+        return CannedReply::where('is_active', true)
+            ->where(function ($q) {
+                $q->whereNull('service_type')
+                  ->orWhere('service_type', $this->ticket->service_type->value);
+            })
+            ->latest()
+            ->get();
+    }
+
+    public function getQuickDownloadsProperty(): EloquentCollection
+    {
+        return QuickDownload::where('is_active', true)
+            ->orderBy('sort_order')
+            ->latest()
+            ->get();
+    }
+
+    public function applyCannedReply(int $id): void
+    {
+        $reply = CannedReply::find($id);
+        if ($reply) {
+            $this->message = $reply->content;
+            $this->dispatch('canned-reply-applied');
+        }
+    }
+
+    public function insertQuickDownload(int $id): void
+    {
+        $download = QuickDownload::find($id);
+        if ($download) {
+            $url = $download->download_url;
+            $text = "📦 **{$download->title}**";
+            if ($download->version) {
+                $text .= " ({$download->version})";
+            }
+            if ($download->file_size) {
+                $text .= " - الحجم: {$download->file_size}";
+            }
+            $text .= "\n🔗 رابط التحميل المباشر:\n{$url}";
+            if ($download->description) {
+                $text .= "\n{$download->description}";
+            }
+
+            $this->message = trim($this->message ? $this->message . "\n\n" . $text : $text);
+            $this->dispatch('canned-reply-applied');
+        }
+    }
+
     public function sendInlineMessage(): void
     {
         if (empty(trim($this->message)) && empty($this->files) && empty($this->voiceNoteData)) {
             return;
         }
 
-        if (! $this->canReply || $this->ticket->status->value === 'closed') {
+        if (! $this->canReply || $this->ticket->status === TicketStatus::Closed) {
             return;
         }
 
@@ -91,8 +145,6 @@ class TicketConversationPanel extends Component implements HasActions, HasForms
         $eventData = [
             'content'    => $this->message ?: ($this->voiceNoteData ? '🎤 رسالة صوتية' : 'ملفات مرفقة'),
             'type'       => $this->isPrivateNote && $this->senderType === 'admin' ? 'note' : 'message',
-            
-            // حماية إضافية: تأكيد أن العميل لا يمكنه أبداً إرسال رسالة خاصة حتى لو تلاعب بالـ Request
             'is_private' => $this->isPrivateNote && $this->senderType === 'admin',
         ];
 
@@ -119,6 +171,46 @@ class TicketConversationPanel extends Component implements HasActions, HasForms
         $this->dispatch('message-sent');
     }
 
+    public function closeTicket(): void
+    {
+        /** @var TicketService $service */
+        $service = app(TicketService::class);
+
+        $userId = $this->senderType === 'admin' ? Auth::id() : null;
+        $partnerId = $this->senderType === 'customer' ? Auth::guard('customer')->id() : null;
+
+        $service->closeTicket($this->ticket, $userId, $partnerId);
+
+        $this->ticket->refresh();
+
+        Notification::make()
+            ->title('تم إغلاق التذكرة بنجاح')
+            ->success()
+            ->send();
+
+        $this->dispatch('message-sent');
+    }
+
+    public function reopenTicket(): void
+    {
+        /** @var TicketService $service */
+        $service = app(TicketService::class);
+
+        $userId = $this->senderType === 'admin' ? Auth::id() : null;
+        $partnerId = $this->senderType === 'customer' ? Auth::guard('customer')->id() : null;
+
+        $service->reopenTicket($this->ticket, $userId, $partnerId);
+
+        $this->ticket->refresh();
+
+        Notification::make()
+            ->title('تمت إعادة فتح التذكرة بنجاح')
+            ->success()
+            ->send();
+
+        $this->dispatch('message-sent');
+    }
+
     public function removeUploadedFile(int $index): void
     {
         unset($this->files[$index]);
@@ -130,105 +222,25 @@ class TicketConversationPanel extends Component implements HasActions, HasForms
         $this->voiceNoteData = null;
     }
 
-    public function replyAction(): Action
-    {
-        return Action::make('reply')
-            ->label(__('technical-support::filament/resources/ticket.actions.reply'))
-            ->icon('heroicon-o-chat-bubble-left-ellipsis')
-            ->color('primary')
-            ->modalHeading(__('technical-support::filament/resources/ticket.actions.reply_heading', ['number' => $this->ticket->ticket_number]))
-            ->modalWidth('3xl')
-            ->form([
-                TextInput::make('content')
-                    ->label(__('technical-support::filament/resources/ticket.form.fields.message'))
-                    ->nullable()
-                    ->columnSpanFull()
-                    ->autofocus(),
-                ViewField::make('voice_note')
-                    ->label(__('technical-support::filament/resources/ticket.form.fields.voice_note'))
-                    ->view('technical-support::components.voice-recorder')
-                    ->columnSpanFull(),
-                FileUpload::make('attachments')
-                    ->label(__('technical-support::filament/resources/ticket.form.fields.attachments'))
-                    ->multiple()
-                    ->disk('public')
-                    ->directory('technical-support/tickets')
-                    ->maxSize(10240)
-                    ->columnSpanFull(),
-            ])
-            ->action(function (array $data): void {
-                $attachments = $data['attachments'] ?? [];
-                $hasVoice = ! empty($data['voice_note']);
-                $content = trim($data['content'] ?? '');
-
-                if (empty($content) && empty($attachments) && ! $hasVoice) {
-                    Notification::make()
-                        ->title('يرجى كتابة رسالة أو تسجيل صوت أو إرفاق ملف للرد')
-                        ->warning()
-                        ->send();
-
-                    return;
-                }
-
-                /** @var TicketService $service */
-                $service = app(TicketService::class);
-
-                if ($hasVoice) {
-                    $audioData = substr($data['voice_note'], strpos($data['voice_note'], ',') + 1);
-                    $audioDecoded = base64_decode($audioData);
-
-                    $fileName = 'technical-support/tickets/voice_' . time() . '_' . uniqid() . '.webm';
-                    Storage::disk('public')->put($fileName, $audioDecoded);
-                    $attachments[] = $fileName;
-                }
-
-                $eventData = [
-                    'content'    => $content ?: ($hasVoice ? '🎤 رسالة صوتية' : '📎 ملفات مرفقة'),
-                    'type'       => 'message',
-                    'is_private' => false,
-                ];
-
-                if ($this->senderType === 'admin') {
-                    $eventData['user_id'] = Auth::id();
-                } else {
-                    $eventData['partner_id'] = Auth::guard('customer')->id();
-                }
-
-                $service->replyToTicket(
-                    $this->ticket,
-                    $eventData,
-                    $attachments
-                );
-
-                Notification::make()
-                    ->title(__('technical-support::filament/resources/ticket.notifications.reply_sent'))
-                    ->success()
-                    ->send();
-
-                $this->ticket->refresh();
-            })
-            ->visible(fn (): bool => $this->canReply && $this->ticket->status->value !== 'closed');
-    }
-
     public function render(): View
     {
-        // بناء الاستعلام الأساسي
-        $query = $this->ticket->events()
-            ->with(['user', 'partner', 'attachments'])
-            ->oldest();
-
-        // التعديل الأمني الأهم: 
-        // لو اللي فاتح هو "العميل"، استبعد أي رسالة خاصة من قاعدة البيانات نهائياً
-        // كده مستحيل توصل للمتصفح بتاعه لا في الـ HTML ولا في الـ JSON Response
-        if ($this->senderType === 'customer') {
-            $query->where('is_private', false);
+        // Mark unread flags as read on view
+        if ($this->senderType === 'admin' && $this->ticket->is_unread_admin) {
+            $this->ticket->update(['is_unread_admin' => false]);
+        } elseif ($this->senderType === 'customer' && $this->ticket->is_unread_client) {
+            $this->ticket->update(['is_unread_client' => false]);
         }
 
-        $events = $query->get();
+        $events = $this->ticket->events()
+            ->with(['attachments', 'user', 'partner'])
+            ->when($this->senderType === 'customer', fn ($q) => $q->where('is_private', false))
+            ->oldest()
+            ->get();
 
         return view('technical-support::livewire.ticket-conversation-panel', [
-            'ticket' => $this->ticket->load(['partner', 'program', 'license', 'attachments']),
-            'events' => $events,
+            'events'         => $events,
+            'cannedReplies'  => $this->cannedReplies,
+            'quickDownloads' => $this->quickDownloads,
         ]);
     }
 }

@@ -2,12 +2,15 @@
 
 namespace Webkul\TechnicalSupport\Services;
 
+use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Webkul\TechnicalSupport\Enums\TicketStatus;
 use Webkul\TechnicalSupport\Events\TicketMessageSent;
 use Webkul\TechnicalSupport\Models\Ticket;
 use Webkul\TechnicalSupport\Models\TicketAttachment;
 use Webkul\TechnicalSupport\Models\TicketEvent;
+use Webkul\TechnicalSupport\Settings\SupportAutoReplySettings;
 
 class TicketService
 {
@@ -37,12 +40,37 @@ class TicketService
             $data['content'] = $this->sanitizeHtml($data['content']);
         }
 
+        $creatorUserId = $data['creator_id'] ?? null;
+        $partnerId     = $data['partner_id'] ?? null;
+
         $ticket = Ticket::create($data);
 
-        $this->saveAttachments($ticket, $filePaths);
+        // 1. Create Initial Conversation Event (Problem Details)
+        $initialContent = $data['content'] ?? $data['description'] ?? $ticket->title;
+        if (empty(trim(strip_tags($initialContent)))) {
+            $initialContent = !empty($filePaths) ? 'ملفات مرفقة / تسجيل صوتي' : ($ticket->title ?? 'تفاصيل المشكلة');
+        }
+
+        $initialEvent = $ticket->events()->create([
+            'user_id'    => $creatorUserId,
+            'partner_id' => $creatorUserId ? null : $partnerId,
+            'type'       => 'message',
+            'content'    => $initialContent,
+            'is_private' => false,
+        ]);
+
+        if (! empty($filePaths)) {
+            $this->saveAttachments($initialEvent, $filePaths);
+        }
+
+        // 2. Handle Auto-Reply System (Welcome / Off-Hours / Emergency Mode)
+        // Only trigger auto-reply if created by a customer
+        if (empty($creatorUserId) && ! empty($partnerId)) {
+            $this->handleAutoReply($ticket);
+        }
 
         // Broadcast real-time Reverb event
-        TicketMessageSent::dispatch($ticket);
+        TicketMessageSent::dispatch($ticket, $initialEvent);
 
         // Send notifications to assigned staff
         $this->notificationService->notifyStaffNewTicket($ticket);
@@ -62,24 +90,153 @@ class TicketService
             $data['content'] = $this->sanitizeHtml($data['content']);
         }
 
+        // Auto-assign unassigned ticket to replying admin
+        if (empty($ticket->user_id) && ! empty($data['user_id'])) {
+            $ticket->update([
+                'user_id' => $data['user_id'],
+            ]);
+        }
+
+        // Auto status updates
+        if (! empty($data['user_id'])) {
+            // Admin replied -> move to Pending if Open
+            if ($ticket->status === TicketStatus::Open) {
+                $ticket->update(['status' => TicketStatus::Pending]);
+            }
+        } elseif (! empty($data['partner_id'])) {
+            // Customer replied -> move back to Open if Pending
+            if ($ticket->status === TicketStatus::Pending) {
+                $ticket->update(['status' => TicketStatus::Open]);
+            }
+        }
+
         $event = $ticket->events()->create($data);
 
         $this->saveAttachments($event, $filePaths);
 
-        $isAdminReply = ! empty($data['user_id']);
+        // Update ticket unread indicators & timestamps
+        if (! empty($data['user_id']) && empty($data['is_private'])) {
+            $ticket->update([
+                'is_unread_client' => true,
+                'last_replied_at'  => now(),
+            ]);
 
-        if ($isAdminReply) {
-            $ticket->update(['is_unread_client' => true]);
-            $this->notificationService->notifyCustomerNewReply($ticket, $event);
-        } else {
-            $ticket->update(['is_unread_admin' => true]);
-            $this->notificationService->notifyStaffNewReply($ticket, $event);
+            // Notify customer about admin reply
+            $this->notificationService->notifyCustomerTicketReply($ticket, $event);
+        } elseif (! empty($data['partner_id'])) {
+            $ticket->update([
+                'is_unread_admin' => true,
+                'last_replied_at' => now(),
+            ]);
+
+            // Notify staff about customer reply
+            $this->notificationService->notifyStaffTicketReply($ticket, $event);
         }
 
-        // Broadcast real-time event
+        // Real-time broadcast
         TicketMessageSent::dispatch($ticket, $event);
 
         return $event;
+    }
+
+    /**
+     * Handle Automatic Replies (Welcome / Emergency / Business Hours).
+     */
+    protected function handleAutoReply(Ticket $ticket): void
+    {
+        try {
+            /** @var SupportAutoReplySettings $settings */
+            $settings = app(SupportAutoReplySettings::class);
+
+            $autoMessage = null;
+
+            // A. Emergency Mode Check (Highest Priority)
+            if ($settings->is_emergency_mode) {
+                $autoMessage = $settings->emergency_message ?: "نعتذر عن عدم توفر فريق الدعم حالياً لوجود ظرف طارئ، وسيتم مراجعة طلبك فور استئناف الخدمة.";
+            } else {
+                // B. Business Hours Check
+                if ($settings->is_business_hours_enabled) {
+                    $tz = $settings->timezone ?: 'Africa/Cairo';
+                    $now = Carbon::now($tz);
+                    $dayOfWeek = $now->dayOfWeek; // 0 (Sun) - 6 (Sat)
+                    $currentTime = $now->format('H:i');
+
+                    $workDays = $settings->work_days ?? [0, 1, 2, 3, 4];
+                    $isWorkDay = in_array($dayOfWeek, $workDays);
+
+                    $startTime = $settings->work_start_time ?: '09:00';
+                    $endTime = $settings->work_end_time ?: '18:00';
+
+                    $isWorkTime = ($currentTime >= $startTime && $currentTime <= $endTime);
+
+                    if (! $isWorkDay || ! $isWorkTime) {
+                        $autoMessage = $settings->out_of_hours_message ?: "نشكر تواصلك معنا. التذكرة مسجلة ولكنك تتواصل معنا خارج أوقات العمل الرسمية. سيتم الرد على استفسارك فور بدء موعد العمل القادم.";
+                    } elseif ($settings->is_auto_reply_enabled && ! empty($settings->welcome_message)) {
+                        $autoMessage = $settings->welcome_message;
+                    }
+                } elseif ($settings->is_auto_reply_enabled && ! empty($settings->welcome_message)) {
+                    $autoMessage = $settings->welcome_message;
+                }
+            }
+
+            if (! empty($autoMessage)) {
+                $ticket->events()->create([
+                    'user_id'    => null,
+                    'partner_id' => null,
+                    'type'       => 'message',
+                    'content'    => "🤖 " . $autoMessage,
+                    'is_private' => false,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+
+    /**
+     * Close a ticket with system audit event.
+     */
+    public function closeTicket(Ticket $ticket, ?int $userId = null, ?int $partnerId = null): void
+    {
+        $ticket->update([
+            'status' => TicketStatus::Closed,
+        ]);
+
+        $closedBy = $userId ? 'فريق الدعم الفني' : 'العميل';
+
+        $event = $ticket->events()->create([
+            'user_id'    => $userId,
+            'partner_id' => $partnerId,
+            'type'       => 'event',
+            'content'    => "تم إغلاق التذكرة بواسطة {$closedBy}",
+            'is_private' => false,
+        ]);
+
+        // Real-time broadcast
+        TicketMessageSent::dispatch($ticket, $event);
+    }
+
+    /**
+     * Reopen a closed ticket.
+     */
+    public function reopenTicket(Ticket $ticket, ?int $userId = null, ?int $partnerId = null): void
+    {
+        $ticket->update([
+            'status' => TicketStatus::Open,
+        ]);
+
+        $reopenedBy = $userId ? 'فريق الدعم الفني' : 'العميل';
+
+        $event = $ticket->events()->create([
+            'user_id'    => $userId,
+            'partner_id' => $partnerId,
+            'type'       => 'event',
+            'content'    => "تمت إعادة فتح التذكرة بواسطة {$reopenedBy}",
+            'is_private' => false,
+        ]);
+
+        // Real-time broadcast
+        TicketMessageSent::dispatch($ticket, $event);
     }
 
     /**
@@ -100,6 +257,7 @@ class TicketService
 
             $attachable->attachments()->create([
                 'file_path'     => $path,
+                'file_name'     => $name,
                 'original_name' => $name,
                 'mime_type'     => $mime,
                 'file_size'     => $size,
@@ -108,30 +266,12 @@ class TicketService
     }
 
     /**
-     * Store an uploaded file.
+     * Sanitize HTML content to prevent XSS.
      */
-    public function storeUploadedFile(UploadedFile $file): string
+    protected function sanitizeHtml(string $html): string
     {
-        return $file->store('technical-support/tickets', 'public');
-    }
-
-    /**
-     * Sanitize HTML content.
-     */
-    private function sanitizeHtml(string $content): string
-    {
-        $allowedTags = '<p><br><b><i><strong><em><u><s><ul><ol><li><a>'
-            .'<h1><h2><h3><h4><h5><h6><blockquote><pre><code><span><div>'
-            .'<table><thead><tbody><tr><th><td><img><audio>';
-
-        $content = strip_tags($content, $allowedTags);
-
-        // Remove on* event-handler attributes
-        $content = preg_replace('/\s+on[a-z]+\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s>]*)/i', '', $content) ?? $content;
-
-        // Remove javascript: protocol in href/src/action attributes
-        $content = preg_replace('/\s+(href|src|action)\s*=\s*["\']?\s*javascript:[^"\'>\s]*/i', '', $content) ?? $content;
-
-        return $content;
+        return clean($html, [
+            'HTML.Allowed' => 'p,b,strong,i,em,u,a[href|title|target],ul,ol,li,br,span[class],code,pre,blockquote',
+        ]);
     }
 }

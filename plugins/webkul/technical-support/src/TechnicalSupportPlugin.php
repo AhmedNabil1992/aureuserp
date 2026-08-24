@@ -45,6 +45,10 @@ class TechnicalSupportPlugin implements Plugin
                     ->discoverResources(
                         in: __DIR__.'/Filament/Customer/Resources',
                         for: 'Webkul\\TechnicalSupport\\Filament\\Customer\\Resources'
+                    )
+                    ->discoverWidgets(
+                        in: __DIR__.'/Filament/Customer/Widgets',
+                        for: 'Webkul\\TechnicalSupport\\Filament\\Customer\\Widgets'
                     );
             });
     }

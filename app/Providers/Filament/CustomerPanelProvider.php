@@ -44,6 +44,8 @@ class CustomerPanelProvider extends PanelProvider
                 'primary' => Color::Blue,
             ])
             ->topNavigation()
+            ->databaseNotifications()
+            ->databaseNotificationsPolling('30s')
             ->navigationGroups([
                 NavigationGroup::make()
                     ->label(fn (): string => __('admin.navigation.dashboard'))
