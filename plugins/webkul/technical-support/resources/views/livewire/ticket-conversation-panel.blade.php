@@ -256,18 +256,30 @@
                             {{-- Text Content --}}
                             @if (!empty(trim(strip_tags($event->content))) && ! $isOnlyVoice)
                                 @php
-                                    $escapedContent = e($event->content);
-                                    $formattedContent = preg_replace(
-                                        '/(https?:\/\/[^\s<]+)/i',
-                                        '<a href="$1" target="_blank" rel="noopener noreferrer" class="underline font-bold hover:opacity-90 break-all text-white bg-black/25 hover:bg-black/40 px-2 py-0.5 rounded-lg inline-flex items-center gap-1 my-0.5 shadow-2xs transition"><svg class="w-3.5 h-3.5 inline shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg> $1</a>',
-                                        $escapedContent
-                                    );
+                                    $rawText = $event->content ?? '';
+                                    $hasHtml = ($rawText !== strip_tags($rawText));
+                                    if ($hasHtml) {
+                                        $clean = strip_tags($rawText, '<b><strong><i><em><u><a><ul><ol><li><br><code><pre><blockquote>');
+                                        $formattedContent = preg_replace(
+                                            '/(https?:\/\/[^\s<]+)/i',
+                                            '<a href="$1" target="_blank" rel="noopener noreferrer" class="underline font-bold hover:opacity-90 break-all text-white bg-black/25 hover:bg-black/40 px-2 py-0.5 rounded-lg inline-flex items-center gap-1 my-0.5 shadow-2xs transition"><svg class="w-3.5 h-3.5 inline shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg> $1</a>',
+                                            $clean
+                                        );
+                                    } else {
+                                        $escaped = e($rawText);
+                                        $withLinks = preg_replace(
+                                            '/(https?:\/\/[^\s<]+)/i',
+                                            '<a href="$1" target="_blank" rel="noopener noreferrer" class="underline font-bold hover:opacity-90 break-all text-white bg-black/25 hover:bg-black/40 px-2 py-0.5 rounded-lg inline-flex items-center gap-1 my-0.5 shadow-2xs transition"><svg class="w-3.5 h-3.5 inline shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg> $1</a>',
+                                            $escaped
+                                        );
+                                        $formattedContent = nl2br($withLinks);
+                                    }
                                 @endphp
                                 <div
                                     class="text-sm sm:text-base font-medium leading-relaxed whitespace-pre-wrap select-text text-right mb-1"
                                     style="color: #ffffff !important;"
                                 >
-                                    {!! nl2br($formattedContent) !!}
+                                    {!! $formattedContent !!}
                                 </div>
                             @endif
 
@@ -722,7 +734,7 @@
                 }
 
                 if (window.Echo && config.ticketId) {
-                    const channel = window.Echo.channel('tickets.' + config.ticketId);
+                    const channel = window.Echo.private('tickets.' + config.ticketId);
 
                     channel.listen('.TicketMessageSent', () => {
                         this.otherPartyTyping = false;
@@ -757,7 +769,7 @@
                 if (now - this.lastTypingEmit > 1500) {
                     this.lastTypingEmit = now;
                     if (window.Echo && config.ticketId) {
-                        window.Echo.channel('tickets.' + config.ticketId)
+                        window.Echo.private('tickets.' + config.ticketId)
                             .whisper('typing', {
                                 senderType: config.senderType,
                                 senderName: config.senderName
