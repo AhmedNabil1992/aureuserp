@@ -738,6 +738,15 @@
 
                     channel.listen('.TicketMessageSent', () => {
                         this.otherPartyTyping = false;
+                        this.playNotificationSound();
+
+                        if (document.hidden) {
+                            this.showDesktopNotification(
+                                "💬 رسالة جديدة في التذكرة #" + (config.ticketNumber || config.ticketId),
+                                "تم استلام رد جديد في المحادثة"
+                            );
+                        }
+
                         this.$wire.$refresh().then(() => {
                             this.scrollToBottom(true);
                         });
@@ -756,6 +765,45 @@
                             }, 3000);
                         }
                     });
+                }
+
+                // Request desktop browser notification permission on user interaction
+                if ('Notification' in window && Notification.permission === 'default') {
+                    const reqPerm = () => {
+                        Notification.requestPermission();
+                        document.removeEventListener('click', reqPerm);
+                    };
+                    document.addEventListener('click', reqPerm, { once: true });
+                }
+            },
+
+            playNotificationSound() {
+                try {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioContext) return;
+                    const ctx = new AudioContext();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.12);
+                    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.25);
+                } catch (e) {}
+            },
+
+            showDesktopNotification(title, body) {
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    try {
+                        new Notification(title, {
+                            body: body,
+                            icon: '/images/favicon.ico'
+                        });
+                    } catch (e) {}
                 }
             },
 

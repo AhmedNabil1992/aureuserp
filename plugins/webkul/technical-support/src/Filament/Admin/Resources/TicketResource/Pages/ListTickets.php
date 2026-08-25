@@ -26,4 +26,11 @@ class ListTickets extends ListRecords
             SupportTicketStatusChartWidget::class,
         ];
     }
+
+    protected function getListeners(): array
+    {
+        return [
+            'echo-private:tickets.admin-sidebar,.TicketMessageSent' => '$refresh',
+        ];
+    }
 }
