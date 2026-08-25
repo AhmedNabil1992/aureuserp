@@ -5,9 +5,12 @@ namespace Webkul\TechnicalSupport\Services;
 use Filament\Notifications\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Webkul\Partner\Models\Partner;
 use Webkul\Security\Models\User;
+use Webkul\TechnicalSupport\Mail\TicketCreatedMail;
+use Webkul\TechnicalSupport\Mail\TicketReplyMail;
 use Webkul\TechnicalSupport\Models\ServiceStaffAssignment;
 use Webkul\TechnicalSupport\Models\Ticket;
 use Webkul\TechnicalSupport\Models\TicketEvent;
@@ -63,6 +66,7 @@ class TicketNotificationService
         $url = route('filament.admin.resources.tickets.view', ['record' => $ticket->id]);
         $serviceName = $ticket->service_label;
 
+        // 1. Send Database Notifications Synchronously (Instant in Filament Bell)
         try {
             $notification = Notification::make()
                 ->title("تذكرة جديدة #{$ticket->ticket_number} - {$serviceName}")
@@ -74,16 +78,28 @@ class TicketNotificationService
                         ->url($url),
                 ]);
 
-            // 1. Send Database Notification (Reliable, persistent in Filament bell)
-            $notification->sendToDatabase($staff);
-
-            // 2. Broadcast via WebSockets (non-blocking)
-            try {
-                $notification->broadcast($staff);
-            } catch (\Throwable) {}
+            foreach ($staff as $user) {
+                try {
+                    $user->notifyNow($notification->toDatabase());
+                } catch (\Throwable) {}
+            }
         } catch (\Throwable $e) {
             report($e);
         }
+
+        // 2. Send Emails to Assigned Staff
+        foreach ($staff as $user) {
+            if (! empty($user->email)) {
+                try {
+                    Mail::to($user->email)->send(new TicketCreatedMail($ticket));
+                } catch (\Throwable) {}
+            }
+        }
+
+        // 3. Broadcast WebSockets Event
+        try {
+            $notification->broadcast($staff);
+        } catch (\Throwable) {}
     }
 
     /**
@@ -103,6 +119,7 @@ class TicketNotificationService
 
         $url = route('filament.admin.resources.tickets.view', ['record' => $ticket->id]);
 
+        // 1. Send Database Notifications Synchronously
         try {
             $notification = Notification::make()
                 ->title("رد جديد على التذكرة #{$ticket->ticket_number}")
@@ -114,16 +131,28 @@ class TicketNotificationService
                         ->url($url),
                 ]);
 
-            // 1. Send Database Notification
-            $notification->sendToDatabase($staff);
-
-            // 2. Broadcast via WebSockets
-            try {
-                $notification->broadcast($staff);
-            } catch (\Throwable) {}
+            foreach ($staff as $user) {
+                try {
+                    $user->notifyNow($notification->toDatabase());
+                } catch (\Throwable) {}
+            }
         } catch (\Throwable $e) {
             report($e);
         }
+
+        // 2. Send Emails to Staff
+        foreach ($staff as $user) {
+            if (! empty($user->email)) {
+                try {
+                    Mail::to($user->email)->send(new TicketReplyMail($ticket, $event, 'staff'));
+                } catch (\Throwable) {}
+            }
+        }
+
+        // 3. Broadcast WebSockets Event
+        try {
+            $notification->broadcast($staff);
+        } catch (\Throwable) {}
     }
 
     /**
@@ -137,6 +166,7 @@ class TicketNotificationService
 
         $url = route('filament.customer.resources.support-tickets.view', ['record' => $ticket->id]);
 
+        // 1. Send Database Notification Synchronously to Partner
         try {
             $notification = Notification::make()
                 ->title("رد جديد على التذكرة #{$ticket->ticket_number}")
@@ -148,16 +178,22 @@ class TicketNotificationService
                         ->url($url),
                 ]);
 
-            // 1. Send Database Notification
-            $notification->sendToDatabase($ticket->partner);
-
-            // 2. Broadcast via WebSockets
-            try {
-                $notification->broadcast($ticket->partner);
-            } catch (\Throwable) {}
+            $ticket->partner->notifyNow($notification->toDatabase());
         } catch (\Throwable $e) {
             report($e);
         }
+
+        // 2. Send Email to Customer
+        if (! empty($ticket->partner->email)) {
+            try {
+                Mail::to($ticket->partner->email)->send(new TicketReplyMail($ticket, $event, 'customer'));
+            } catch (\Throwable) {}
+        }
+
+        // 3. Broadcast WebSockets Event
+        try {
+            $notification->broadcast($ticket->partner);
+        } catch (\Throwable) {}
     }
 
     public function notifyCustomerTicketReply(Ticket $ticket, TicketEvent $event): void
