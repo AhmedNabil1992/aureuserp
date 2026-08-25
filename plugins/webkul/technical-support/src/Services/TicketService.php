@@ -69,11 +69,19 @@ class TicketService
             $this->handleAutoReply($ticket);
         }
 
-        // Broadcast real-time Reverb event
-        TicketMessageSent::dispatch($ticket, $initialEvent);
+        // 3. Send notifications to assigned staff (Database + Email)
+        try {
+            $this->notificationService->notifyStaffNewTicket($ticket);
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
-        // Send notifications to assigned staff
-        $this->notificationService->notifyStaffNewTicket($ticket);
+        // 4. Broadcast real-time Reverb event (non-blocking)
+        try {
+            TicketMessageSent::dispatch($ticket, $initialEvent);
+        } catch (\Throwable $e) {
+            // Ignored if WebSocket server is unreachable
+        }
 
         return $ticket;
     }
@@ -121,20 +129,32 @@ class TicketService
                 'last_replied_at'  => now(),
             ]);
 
-            // Notify customer about admin reply
-            $this->notificationService->notifyCustomerNewReply($ticket, $event);
+            // Notify customer about admin reply (Database + Email)
+            try {
+                $this->notificationService->notifyCustomerNewReply($ticket, $event);
+            } catch (\Throwable $e) {
+                report($e);
+            }
         } elseif (! empty($data['partner_id'])) {
             $ticket->update([
                 'is_unread_admin' => true,
                 'last_replied_at' => now(),
             ]);
 
-            // Notify staff about customer reply
-            $this->notificationService->notifyStaffNewReply($ticket, $event);
+            // Notify staff about customer reply (Database + Email)
+            try {
+                $this->notificationService->notifyStaffNewReply($ticket, $event);
+            } catch (\Throwable $e) {
+                report($e);
+            }
         }
 
-        // Real-time broadcast
-        TicketMessageSent::dispatch($ticket, $event);
+        // Real-time broadcast (non-blocking)
+        try {
+            TicketMessageSent::dispatch($ticket, $event);
+        } catch (\Throwable $e) {
+            // Ignored if WebSocket server is unreachable
+        }
 
         return $event;
     }
