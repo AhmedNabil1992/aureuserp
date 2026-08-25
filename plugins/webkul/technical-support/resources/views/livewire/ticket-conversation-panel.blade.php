@@ -736,15 +736,22 @@
                 if (window.Echo && config.ticketId) {
                     const channel = window.Echo.private('tickets.' + config.ticketId);
 
-                    channel.listen('.TicketMessageSent', () => {
+                    channel.listen('.TicketMessageSent', (e) => {
                         this.otherPartyTyping = false;
-                        this.playNotificationSound();
 
-                        if (document.hidden) {
-                            this.showDesktopNotification(
-                                "💬 رسالة جديدة في التذكرة #" + (config.ticketNumber || config.ticketId),
-                                "تم استلام رد جديد في المحادثة"
-                            );
+                        // Only play sound & show notification if message was sent by the other party
+                        const isFromMe = e && ((config.senderType === 'admin' && e.sender_type === 'admin') ||
+                                              (config.senderType === 'customer' && e.sender_type === 'customer'));
+
+                        if (!isFromMe) {
+                            this.playNotificationSound();
+
+                            if (document.hidden) {
+                                this.showDesktopNotification(
+                                    "💬 رسالة جديدة في التذكرة #" + (config.ticketNumber || config.ticketId),
+                                    "تم استلام رد جديد في المحادثة"
+                                );
+                            }
                         }
 
                         this.$wire.$refresh().then(() => {

@@ -36,8 +36,11 @@ class TicketMessageSent implements ShouldBroadcastNow
     public function broadcastWith(): array
     {
         return [
-            'ticket_id' => $this->ticket->id,
-            'event_id'  => $this->event?->id,
+            'ticket_id'   => $this->ticket->id,
+            'event_id'    => $this->event?->id,
+            'sender_type' => $this->event?->user_id ? 'admin' : ($this->event?->partner_id ? 'customer' : 'bot'),
+            'user_id'     => $this->event?->user_id,
+            'partner_id'  => $this->event?->partner_id,
         ];
     }
 }

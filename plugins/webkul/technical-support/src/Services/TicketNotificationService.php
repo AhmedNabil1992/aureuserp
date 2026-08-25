@@ -5,12 +5,9 @@ namespace Webkul\TechnicalSupport\Services;
 use Filament\Notifications\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Webkul\Partner\Models\Partner;
 use Webkul\Security\Models\User;
-use Webkul\TechnicalSupport\Mail\TicketCreatedMail;
-use Webkul\TechnicalSupport\Mail\TicketReplyMail;
 use Webkul\TechnicalSupport\Models\ServiceStaffAssignment;
 use Webkul\TechnicalSupport\Models\Ticket;
 use Webkul\TechnicalSupport\Models\TicketEvent;
@@ -87,16 +84,7 @@ class TicketNotificationService
             report($e);
         }
 
-        // 2. Send Emails to Assigned Staff
-        foreach ($staff as $user) {
-            if (! empty($user->email)) {
-                try {
-                    Mail::to($user->email)->send(new TicketCreatedMail($ticket));
-                } catch (\Throwable) {}
-            }
-        }
-
-        // 3. Broadcast WebSockets Event
+        // 2. Broadcast WebSockets Event
         try {
             $notification->broadcast($staff);
         } catch (\Throwable) {}
@@ -140,16 +128,7 @@ class TicketNotificationService
             report($e);
         }
 
-        // 2. Send Emails to Staff
-        foreach ($staff as $user) {
-            if (! empty($user->email)) {
-                try {
-                    Mail::to($user->email)->send(new TicketReplyMail($ticket, $event, 'staff'));
-                } catch (\Throwable) {}
-            }
-        }
-
-        // 3. Broadcast WebSockets Event
+        // 2. Broadcast WebSockets Event
         try {
             $notification->broadcast($staff);
         } catch (\Throwable) {}
@@ -179,18 +158,14 @@ class TicketNotificationService
                 ]);
 
             $ticket->partner->notifyNow($notification->toDatabase());
-        } catch (\Throwable $e) {
-            report($e);
-        }
-
-        // 2. Send Email to Customer
-        if (! empty($ticket->partner->email)) {
+        } catch (\Throwable) {
+            // Fallback try on partner user instance if separate
             try {
-                Mail::to($ticket->partner->email)->send(new TicketReplyMail($ticket, $event, 'customer'));
+                $notification->sendToDatabase($ticket->partner);
             } catch (\Throwable) {}
         }
 
-        // 3. Broadcast WebSockets Event
+        // 2. Broadcast WebSockets Event
         try {
             $notification->broadcast($ticket->partner);
         } catch (\Throwable) {}
