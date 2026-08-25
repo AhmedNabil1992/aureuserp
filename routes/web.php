@@ -27,3 +27,44 @@ Route::get('/portal/account', function () {
 
     return redirect()->route('filament.customer.auth.login');
 })->name('filament.customer.account');
+
+Route::middleware(['web'])->group(function () {
+    Route::post('/webpush/subscribe', function (Request $request) {
+        $user = Auth::guard('web')->user() ?? Auth::guard('customer')->user() ?? $request->user();
+
+        if (! $user) {
+            return response()->json(['error' => 'Unauthenticated'], 401);
+        }
+
+        if (! method_exists($user, 'updatePushSubscription')) {
+            return response()->json(['error' => 'HasPushSubscriptions trait not added to model'], 500);
+        }
+
+        $user->updatePushSubscription(
+            endpoint: $request->input('endpoint'),
+            key: $request->input('keys.p256dh'),
+            token: $request->input('keys.auth'),
+            contentEncoding: $request->input('contentEncoding', 'aesgcm'),
+        );
+
+        return response()->json(['success' => true]);
+    })->name('webpush.subscribe');
+
+    Route::delete('/webpush/unsubscribe', function (Request $request) {
+        $user = Auth::guard('web')->user() ?? Auth::guard('customer')->user() ?? $request->user();
+
+        if (! $user) {
+            return response()->json(['error' => 'Unauthenticated'], 401);
+        }
+
+        if (! method_exists($user, 'deletePushSubscription')) {
+            return response()->json(['error' => 'HasPushSubscriptions trait not added to model'], 500);
+        }
+
+        $user->deletePushSubscription(
+            $request->input('endpoint'),
+        );
+
+        return response()->json(['success' => true]);
+    })->name('webpush.unsubscribe');
+});
