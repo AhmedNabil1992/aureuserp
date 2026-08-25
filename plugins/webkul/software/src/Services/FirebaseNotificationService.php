@@ -5,12 +5,39 @@ namespace Webkul\Software\Services;
 use Kreait\Firebase\Contract\Messaging;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification as FcmNotification;
+use Illuminate\Support\Facades\Log;
 use Webkul\Software\Models\FcmToken;
 use Webkul\Software\Models\Ticket;
 
 class FirebaseNotificationService
 {
-    public function __construct(protected Messaging $messaging) {}
+    protected ?Messaging $messaging = null;
+
+    protected ?bool $unavailable = null;
+
+    /**
+     * Firebase is optional: when credentials are missing, this service
+     * degrades to a no-op instead of crashing queue jobs.
+     */
+    protected function messaging(): ?Messaging
+    {
+        if ($this->unavailable) {
+            return null;
+        }
+
+        if ($this->messaging !== null) {
+            return $this->messaging;
+        }
+
+        try {
+            return $this->messaging = app(Messaging::class);
+        } catch (\Throwable $e) {
+            $this->unavailable = true;
+            Log::warning('Firebase push skipped: '.$e->getMessage());
+
+            return null;
+        }
+    }
 
     /**
      * Notify all FCM tokens that belong to the ticket's customer (partner).
@@ -64,6 +91,14 @@ class FirebaseNotificationService
             return;
         }
 
+        $messaging = $this->messaging();
+
+        if ($messaging === null) {
+            Log::warning('Firebase push skipped: Firebase is not configured.');
+
+            return;
+        }
+
         $notification = FcmNotification::create($title, $body);
 
         foreach (array_chunk($tokens, 500) as $chunk) {
@@ -71,7 +106,7 @@ class FirebaseNotificationService
                 ->withNotification($notification)
                 ->withData($data);
 
-            $report = $this->messaging->sendMulticast($message, $chunk);
+            $report = $messaging->sendMulticast($message, $chunk);
 
             // Prune tokens that Firebase says are invalid / unregistered
             foreach ($report->invalidTokens() as $invalidToken) {
