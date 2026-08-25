@@ -2,7 +2,7 @@
 
 namespace Webkul\TechnicalSupport\Services;
 
-use Filament\Notifications\Actions\Action;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;

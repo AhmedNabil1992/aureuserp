@@ -56,6 +56,7 @@ class AdminPanelProvider extends PanelProvider
             ->maxContentWidth(Width::Full)
             ->databaseNotifications()
             ->databaseNotificationsPolling('15s')
+            ->lazyLoadedDatabaseNotifications(false)
             ->userMenuItems([
                 'profile' => Action::make('profile')
                     ->label(fn () => Auth::user()?->name)

@@ -46,6 +46,7 @@ class CustomerPanelProvider extends PanelProvider
             ->topNavigation()
             ->databaseNotifications()
             ->databaseNotificationsPolling('15s')
+            ->lazyLoadedDatabaseNotifications(false)
             ->navigationGroups([
                 NavigationGroup::make()
                     ->label(fn (): string => __('admin.navigation.dashboard'))

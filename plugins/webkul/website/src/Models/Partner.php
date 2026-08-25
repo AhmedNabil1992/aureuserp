@@ -46,4 +46,9 @@ class Partner extends BasePartner
     {
         return PartnerFactory::new();
     }
+
+    public function getMorphClass(): string
+    {
+        return BasePartner::class;
+    }
 }

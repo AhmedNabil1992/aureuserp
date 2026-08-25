@@ -11,6 +11,9 @@ use Webkul\PluginManager\PackageServiceProvider;
 use Webkul\TechnicalSupport\Livewire\OpenTicketsSidebar;
 use Webkul\TechnicalSupport\Livewire\TicketConversationPanel;
 
+use Filament\Support\Facades\FilamentView;
+use Filament\View\PanelsRenderHook;
+
 class TechnicalSupportServiceProvider extends PackageServiceProvider
 {
     public static string $name = 'technical-support';
@@ -45,6 +48,11 @@ class TechnicalSupportServiceProvider extends PackageServiceProvider
     {
         Livewire::component('technical-support-open-tickets-sidebar', OpenTicketsSidebar::class);
         Livewire::component('technical-support-ticket-conversation-panel', TicketConversationPanel::class);
+
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::BODY_END,
+            fn () => view('technical-support::components.browser-notifications'),
+        );
 
         if (class_exists(\Livewire\Finder\Finder::class)) {
             app(\Livewire\Finder\Finder::class)->addNamespace('technical-support', classNamespace: 'Webkul\\TechnicalSupport\\Livewire');
