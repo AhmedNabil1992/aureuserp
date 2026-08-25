@@ -59,7 +59,7 @@ class TicketConversationPanel extends Component implements HasActions, HasForms
         }
 
         return [
-            "echo:tickets.{$ticketId},.TicketMessageSent" => '$refresh',
+            "echo-private:tickets.{$ticketId},.TicketMessageSent" => '$refresh',
         ];
     }
 

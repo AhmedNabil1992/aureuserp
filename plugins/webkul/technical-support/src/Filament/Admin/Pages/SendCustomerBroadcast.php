@@ -92,7 +92,10 @@ class SendCustomerBroadcast extends Page implements HasForms
                             ->preload()
                             ->options(function (): array {
                                 return Partner::query()
-                                    ->where('account_type', '!=', AccountType::ADDRESS)
+                                    ->where(function ($q) {
+                                        $q->whereNull('account_type')
+                                          ->orWhere('account_type', '!=', AccountType::ADDRESS->value);
+                                    })
                                     ->orderBy('name')
                                     ->pluck('name', 'id')
                                     ->toArray();
@@ -171,7 +174,12 @@ class SendCustomerBroadcast extends Page implements HasForms
         $partners = match ($state['target_type'] ?? 'all') {
             'selected' => Partner::whereIn('id', $state['partner_ids'] ?? [])->get(),
             'tags'     => Partner::whereHas('tags', fn ($q) => $q->whereIn('partners_tags.id', $state['tag_ids'] ?? []))->get(),
-            default    => Partner::where('account_type', '!=', AccountType::ADDRESS)->get(),
+            default    => Partner::query()
+                ->where(function ($q) {
+                    $q->whereNull('account_type')
+                      ->orWhere('account_type', '!=', AccountType::ADDRESS->value);
+                })
+                ->get(),
         };
 
         if ($partners->isEmpty()) {
