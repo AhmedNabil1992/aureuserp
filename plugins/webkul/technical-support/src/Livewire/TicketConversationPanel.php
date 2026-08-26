@@ -82,6 +82,35 @@ class TicketConversationPanel extends Component implements HasActions, HasForms
             ->get();
     }
 
+    /**
+     * Resolve a "/shortcut" command to its canned reply content.
+     *
+     * @return string|null The resolved content, or null when the message starts
+     *                     with "/" but no matching shortcut exists.
+     */
+    protected function resolveSlashCommand(string $message): ?string
+    {
+        $trimmed = trim($message);
+
+        if ($trimmed === '' || ! str_starts_with($trimmed, '/')) {
+            return $trimmed;
+        }
+
+        // Extract the first token after "/", e.g. "/fixed" -> "fixed"
+        $firstToken = preg_split('/\s+/u', $trimmed)[0] ?? '';
+        $shortcut = strtolower(ltrim($firstToken, '/'));
+
+        $reply = CannedReply::where('is_active', true)
+            ->whereRaw('LOWER(shortcut) = ?', [$shortcut])
+            ->where(function ($q) {
+                $q->whereNull('service_type')
+                  ->orWhere('service_type', $this->ticket->service_type->value);
+            })
+            ->first();
+
+        return $reply?->content;
+    }
+
     public function applyCannedReply(int $id): void
     {
         $reply = CannedReply::find($id);
@@ -122,6 +151,24 @@ class TicketConversationPanel extends Component implements HasActions, HasForms
         if (! $this->canReply || $this->ticket->status === TicketStatus::Closed) {
             return;
         }
+
+        // Admin only: resolve "/shortcut" commands to canned reply content
+        if ($this->senderType === 'admin') {
+            $resolved = $this->resolveSlashCommand($this->message);
+
+            if (is_null($resolved)) {
+                Notification::make()
+                    ->title('لا يوجد رد سريع بهذا الاختصار')
+                    ->body("لم يتم العثور على اختصار مطابق في الردود السريعة.")
+                    ->warning()
+                    ->send();
+
+                return;
+            }
+
+            $this->message = $resolved;
+        }
+
 
         /** @var TicketService $service */
         $service = app(TicketService::class);
