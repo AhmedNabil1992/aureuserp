@@ -81,13 +81,20 @@
                     } }}">
                         {{ $ticket->status->getLabel() }}
                     </span>
+                    @if ($senderType === 'admin')
+                        <span>•</span>
+                        <span class="inline-flex items-center gap-1 text-slate-600 dark:text-gray-300">
+                            <x-heroicon-m-user class="w-3.5 h-3.5 text-blue-500" />
+                            {{ $ticket->assignedTo?->name ?? 'غير مسندة' }}
+                        </span>
+                    @endif
                 </div>
             </div>
         </div>
 
-        {{-- Top Right Actions: Ticket Metadata & Close/Reopen Ticket Button --}}
-        <div class="flex items-center gap-2.5">
-            <div class="hidden sm:flex items-center gap-2 text-xs font-semibold">
+        {{-- Top Right Actions: Ticket Metadata & Reassign / Close / Reopen Button --}}
+        <div class="flex items-center gap-2">
+            <div class="hidden md:flex items-center gap-2 text-xs font-semibold">
                 <span class="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
                     {{ $ticket->service_label }}
                 </span>
@@ -95,6 +102,13 @@
                     {{ $ticket->priority->getLabel() }}
                 </span>
             </div>
+
+            {{-- Reassign Action (for Admin) --}}
+            @if ($senderType === 'admin')
+                <div class="inline-flex items-center">
+                    {{ $this->reassignAction }}
+                </div>
+            @endif
 
             {{-- Close / Reopen Ticket Button --}}
             @if ($ticket->status->value !== 'closed')
@@ -695,6 +709,9 @@
             />
         </div>
     </div>
+
+    {{-- ── 5. FILAMENT ACTION MODALS (e.g. Reassign) ───────────────────── --}}
+    <x-filament-actions::modals />
 </div>
 
 @once

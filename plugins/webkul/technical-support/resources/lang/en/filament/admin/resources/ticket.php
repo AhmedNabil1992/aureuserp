@@ -79,6 +79,16 @@ return [
         'reply'         => 'Reply',
         'reply_heading' => 'Reply to Ticket #:number',
     ],
+    'tabs' => [
+        'my_tickets'  => 'Assigned to Me',
+        'open'        => 'Open Tickets',
+        'pending'     => 'Pending',
+        'unread'      => 'Unread by Staff',
+        'urgent'      => 'Urgent / High Priority',
+        'unassigned'  => 'Unassigned',
+        'closed'      => 'Closed Tickets',
+        'archived'    => 'Archived',
+    ],
     'notifications' => [
         'reply_sent' => 'Reply sent successfully',
     ],

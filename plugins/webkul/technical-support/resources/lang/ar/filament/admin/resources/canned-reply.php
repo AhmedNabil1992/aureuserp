@@ -17,4 +17,9 @@ return [
     'placeholders'  => [
         'all_services' => 'جميع الخدمات',
     ],
+    'tabs' => [
+        'active'   => 'الردود النشطة',
+        'inactive' => 'غير النشطة',
+        'archived' => 'المؤرشفة',
+    ],
 ];

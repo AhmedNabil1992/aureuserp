@@ -25,6 +25,8 @@ class ExploreSystemsPage extends Page
 
     public string $billingPeriod = 'monthly'; // 'monthly' or 'annual'
 
+    public string $modalBillingCycle = 'monthly'; // 'trial', 'monthly', or 'annual'
+
     public ?int $selectedSystemId = null;
 
     public ?int $selectedPlanId = null;
@@ -83,24 +85,41 @@ class ExploreSystemsPage extends Page
         return app(OnlineBillingService::class)->getAvailableBalance($partner);
     }
 
+    public function getHasUsedTrialProperty(): bool
+    {
+        $partner = Auth::guard('customer')->user();
+        if (! $partner) {
+            return true;
+        }
+
+        return app(OnlineBillingService::class)->hasUsedTrial($partner);
+    }
+
     public function selectPlan(int $planId): void
     {
         $this->selectedPlanId = $planId;
+        $this->modalBillingCycle = $this->billingPeriod;
         $this->dispatch('open-modal', id: 'create-instance-modal');
     }
 
     public function createWebsite(): void
     {
         $this->validate([
-            'selectedPlanId' => 'required|exists:online_system_plans,id',
-            'websiteName'    => 'required|string|min:3|max:100',
-            'subdomain'      => 'nullable|string|alpha_dash|max:50',
-            'adminEmail'     => 'required|email',
+            'selectedPlanId'    => 'required|exists:online_system_plans,id',
+            'websiteName'       => 'required|string|min:3|max:100',
+            'subdomain'         => 'nullable|string|alpha_dash|max:50',
+            'adminEmail'        => 'required|email',
+            'modalBillingCycle' => 'required|in:trial,monthly,annual',
         ]);
 
         $partner = Auth::guard('customer')->user();
         $plan = OnlineSystemPlan::findOrFail($this->selectedPlanId);
-        $cycle = $this->billingPeriod === 'annual' ? BillingCycle::Annual : BillingCycle::Monthly;
+
+        $cycle = match ($this->modalBillingCycle) {
+            'trial'  => BillingCycle::Trial,
+            'annual' => BillingCycle::Annual,
+            default  => BillingCycle::Monthly,
+        };
 
         try {
             $instance = app(OnlineBillingService::class)->subscribeNewInstance(

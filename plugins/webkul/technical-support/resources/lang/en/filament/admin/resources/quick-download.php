@@ -25,4 +25,9 @@ return [
     'actions'       => [
         'download' => 'Download File',
     ],
+    'tabs' => [
+        'active'   => 'Active Downloads',
+        'inactive' => 'Inactive',
+        'archived' => 'Archived',
+    ],
 ];

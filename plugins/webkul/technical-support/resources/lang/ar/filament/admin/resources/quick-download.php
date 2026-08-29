@@ -25,4 +25,9 @@ return [
     'actions'       => [
         'download' => 'تحميل الملف',
     ],
+    'tabs' => [
+        'active'   => 'التحميلات المتاحة',
+        'inactive' => 'غير المتاحة',
+        'archived' => 'المؤرشفة',
+    ],
 ];

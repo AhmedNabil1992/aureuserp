@@ -48,8 +48,20 @@ class InvoicesTable
                     ->badge()
                     ->toggleable(isToggledHiddenByDefault: false),
                 TextColumn::make('creator.name')
-                    ->placeholder('-')
                     ->label(__('accounts::filament/resources/invoice.table.columns.created-by'))
+                    ->state(function (Model $record) {
+                        if ($record->creator) {
+                            return $record->creator->name;
+                        }
+
+                        if ($record->partner) {
+                            return $record->partner->name . ' (العميل)';
+                        }
+
+                        return $record->invoice_partner_display_name ? ($record->invoice_partner_display_name . ' (العميل)') : '-';
+                    })
+                    ->badge(fn (Model $record) => ! $record->creator_id)
+                    ->color(fn (Model $record) => ! $record->creator_id ? 'info' : null)
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
                 TextColumn::make('invoice_partner_display_name')

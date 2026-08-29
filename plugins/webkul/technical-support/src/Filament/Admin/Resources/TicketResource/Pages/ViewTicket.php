@@ -2,8 +2,10 @@
 
 namespace Webkul\TechnicalSupport\Filament\Admin\Resources\TicketResource\Pages;
 
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Notifications\Notification;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Grid;
@@ -13,6 +15,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
+use Illuminate\Support\Facades\Auth;
 use Webkul\TechnicalSupport\Enums\ServiceType;
 use Webkul\TechnicalSupport\Enums\TicketPriority;
 use Webkul\TechnicalSupport\Enums\TicketStatus;
@@ -37,6 +40,46 @@ class ViewTicket extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('reassign')
+                ->label('إعادة تعيين المسؤول')
+                ->icon('heroicon-o-user-plus')
+                ->color('gray')
+                ->modalHeading('إعادة تعيين التذكرة إلى مسؤول آخر')
+                ->modalDescription('حدد الموظف أو الأدمن الذي تريد تحويل هذه التذكرة إليه.')
+                ->modalSubmitActionLabel('حفظ التعيين')
+                ->modalWidth('sm')
+                ->fillForm(fn (Ticket $record): array => [
+                    'assigned_to' => $record->assigned_to,
+                ])
+                ->form([
+                    \Filament\Forms\Components\Select::make('assigned_to')
+                        ->label('المسؤول')
+                        ->options(\Webkul\Security\Models\User::pluck('name', 'id'))
+                        ->searchable()
+                        ->preload()
+                        ->required(),
+                ])
+                ->action(function (Ticket $record, array $data): void {
+                    $oldAssignee = $record->assignedTo?->name ?? 'غير مسندة';
+                    $record->update([
+                        'assigned_to' => $data['assigned_to'],
+                    ]);
+
+                    $newAssignee = \Webkul\Security\Models\User::find($data['assigned_to']);
+
+                    $record->events()->create([
+                        'user_id'    => Auth::id(),
+                        'type'       => 'event',
+                        'content'    => "تمت إعادة تعيين التذكرة من [{$oldAssignee}] إلى [{$newAssignee?->name}]",
+                        'is_private' => true,
+                    ]);
+
+                    Notification::make()
+                        ->title('تمت إعادة تعيين التذكرة بنجاح')
+                        ->body("المسؤول الحالي: {$newAssignee?->name}")
+                        ->success()
+                        ->send();
+                }),
             EditAction::make(),
             DeleteAction::make(),
         ];

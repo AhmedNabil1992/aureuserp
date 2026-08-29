@@ -17,4 +17,9 @@ return [
     'placeholders'  => [
         'all_services' => 'All Services',
     ],
+    'tabs' => [
+        'active'   => 'Active Replies',
+        'inactive' => 'Inactive',
+        'archived' => 'Archived',
+    ],
 ];

@@ -101,8 +101,11 @@ class OnlineInstanceResource extends Resource
                     ->form([
                         Select::make('billing_cycle')
                             ->label(__('software-online::filament/customer/resources/my_instances.fields.billing_cycle'))
-                            ->options(BillingCycle::class)
-                            ->default(BillingCycle::Monthly)
+                            ->options([
+                                BillingCycle::Monthly->value => BillingCycle::Monthly->getLabel(),
+                                BillingCycle::Annual->value  => BillingCycle::Annual->getLabel(),
+                            ])
+                            ->default(fn (OnlineInstance $record) => $record->billing_cycle === BillingCycle::Annual ? BillingCycle::Annual->value : BillingCycle::Monthly->value)
                             ->required(),
                     ])
                     ->action(function (OnlineInstance $record, array $data) {

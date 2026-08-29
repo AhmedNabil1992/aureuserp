@@ -142,7 +142,61 @@
             {{ __('software-online::filament/customer/pages/explore.modal.description') }}
         </x-slot>
 
+        @php
+            $modalPlan = $activeSystem?->plans?->firstWhere('id', $selectedPlanId);
+        @endphp
+
         <form wire:submit.prevent="createWebsite" class="space-y-4">
+            <!-- Subscription Type Selector -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    {{ __('software-online::filament/customer/pages/explore.modal.subscription_type') }}
+                </label>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <!-- Trial Option (if not already used) -->
+                    @if(! $this->hasUsedTrial)
+                        <label class="relative flex flex-col p-3 rounded-xl border cursor-pointer transition-all {{ $modalBillingCycle === 'trial' ? 'border-primary-500 bg-primary-50/40 dark:bg-primary-500/10 ring-2 ring-primary-500' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300' }}">
+                            <input type="radio" wire:model.live="modalBillingCycle" value="trial" class="sr-only" />
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-xs font-bold text-gray-900 dark:text-white">{{ __('software-online::filament/customer/pages/explore.modal.trial_option') }}</span>
+                                <x-filament::badge color="warning" size="sm">مجاناً</x-filament::badge>
+                            </div>
+                            <span class="text-xs font-extrabold text-success-600 dark:text-success-400">0.00 EGP</span>
+                            <span class="text-[10px] text-gray-500 mt-0.5">{{ $modalPlan?->trial_days > 0 ? $modalPlan->trial_days : 14 }} يوم (مرة واحدة)</span>
+                        </label>
+                    @endif
+
+                    <!-- Monthly Option -->
+                    <label class="relative flex flex-col p-3 rounded-xl border cursor-pointer transition-all {{ $modalBillingCycle === 'monthly' ? 'border-primary-500 bg-primary-50/40 dark:bg-primary-500/10 ring-2 ring-primary-500' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300' }}">
+                        <input type="radio" wire:model.live="modalBillingCycle" value="monthly" class="sr-only" />
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-xs font-bold text-gray-900 dark:text-white">{{ __('software-online::filament/customer/pages/explore.modal.monthly_option') }}</span>
+                        </div>
+                        <span class="text-xs font-extrabold text-primary-600 dark:text-primary-400">{{ number_format($modalPlan?->monthly_price ?? 0, 2) }} EGP</span>
+                        <span class="text-[10px] text-gray-500 mt-0.5">شهرياً من الرصيد</span>
+                    </label>
+
+                    <!-- Annual Option -->
+                    <label class="relative flex flex-col p-3 rounded-xl border cursor-pointer transition-all {{ $modalBillingCycle === 'annual' ? 'border-primary-500 bg-primary-50/40 dark:bg-primary-500/10 ring-2 ring-primary-500' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300' }}">
+                        <input type="radio" wire:model.live="modalBillingCycle" value="annual" class="sr-only" />
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-xs font-bold text-gray-900 dark:text-white">{{ __('software-online::filament/customer/pages/explore.modal.annual_option') }}</span>
+                            <x-filament::badge color="success" size="sm">خصم</x-filament::badge>
+                        </div>
+                        <span class="text-xs font-extrabold text-primary-600 dark:text-primary-400">{{ number_format($modalPlan?->annual_price ?? 0, 2) }} EGP</span>
+                        <span class="text-[10px] text-gray-500 mt-0.5">سنوياً من الرصيد</span>
+                    </label>
+                </div>
+
+                @if($this->hasUsedTrial)
+                    <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1.5 flex items-center gap-1">
+                        <x-filament::icon icon="heroicon-o-information-circle" class="w-3.5 h-3.5 text-gray-400" />
+                        <span>{{ __('software-online::filament/customer/pages/explore.modal.trial_used_notice') }}</span>
+                    </p>
+                @endif
+            </div>
+
             <div>
                 <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
                     {{ __('software-online::filament/customer/pages/explore.modal.website_name') }}
@@ -190,10 +244,17 @@
                 />
             </div>
 
-            <div class="p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl text-xs text-amber-700 dark:text-amber-300 flex items-center gap-2">
-                <x-filament::icon icon="heroicon-o-information-circle" class="w-5 h-5 flex-shrink-0" />
-                <span>{{ __('software-online::filament/customer/pages/explore.modal.balance_notice') }}</span>
-            </div>
+            @if($modalBillingCycle === 'trial')
+                <div class="p-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl text-xs text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
+                    <x-filament::icon icon="heroicon-o-check-badge" class="w-5 h-5 flex-shrink-0" />
+                    <span>{{ __('software-online::filament/customer/pages/explore.modal.trial_balance_notice') }}</span>
+                </div>
+            @else
+                <div class="p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl text-xs text-amber-700 dark:text-amber-300 flex items-center gap-2">
+                    <x-filament::icon icon="heroicon-o-information-circle" class="w-5 h-5 flex-shrink-0" />
+                    <span>{{ __('software-online::filament/customer/pages/explore.modal.balance_notice') }}</span>
+                </div>
+            @endif
 
             <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <x-filament::button color="gray" type="button" x-on:click="$dispatch('close-modal', { id: 'create-instance-modal' })">

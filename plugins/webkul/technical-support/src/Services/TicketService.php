@@ -98,10 +98,10 @@ class TicketService
             $data['content'] = $this->sanitizeHtml($data['content']);
         }
 
-        // Auto-assign unassigned ticket to replying admin
-        if (empty($ticket->user_id) && ! empty($data['user_id'])) {
+        // Auto-assign ticket to replying admin
+        if (! empty($data['user_id'])) {
             $ticket->update([
-                'user_id' => $data['user_id'],
+                'assigned_to' => $data['user_id'],
             ]);
         }
 

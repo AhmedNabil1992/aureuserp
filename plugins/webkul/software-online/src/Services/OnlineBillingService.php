@@ -47,13 +47,31 @@ class OnlineBillingService
     /**
      * Check if partner has enough balance for amount
      */
+    /**
+     * Check if partner has already used their one-time free trial
+     */
+    public function hasUsedTrial(Partner $partner): bool
+    {
+        return OnlineInstance::query()
+            ->where('partner_id', $partner->id)
+            ->where('billing_cycle', BillingCycle::Trial->value)
+            ->exists()
+            || OnlineInstanceTransaction::query()
+                ->where('partner_id', $partner->id)
+                ->where('billing_cycle', BillingCycle::Trial->value)
+                ->exists();
+    }
+
+    /**
+     * Check if partner has enough balance for amount
+     */
     public function hasSufficientBalance(Partner $partner, float $amount): bool
     {
         return $this->getAvailableBalance($partner) >= $amount;
     }
 
     /**
-     * Process new website subscription from customer balance
+     * Process new website subscription from customer balance or free trial
      */
     public function subscribeNewInstance(
         Partner $partner,
@@ -64,7 +82,16 @@ class OnlineBillingService
         ?string $adminEmail = null,
         ?string $adminUsername = null
     ): OnlineInstance {
-        $price = $cycle === BillingCycle::Annual ? $plan->annual_price : $plan->monthly_price;
+        if ($cycle === BillingCycle::Trial) {
+            if ($this->hasUsedTrial($partner)) {
+                throw new Exception(__('software-online::filament/customer/pages/explore.trial_already_used'));
+            }
+            $price = 0.00;
+        } elseif ($cycle === BillingCycle::Annual) {
+            $price = (float) $plan->annual_price;
+        } else {
+            $price = (float) $plan->monthly_price;
+        }
 
         if ($price > 0 && ! $this->hasSufficientBalance($partner, (float) $price)) {
             throw new Exception(__('software-online::filament/customer/pages/explore.insufficient_balance'));
@@ -72,7 +99,14 @@ class OnlineBillingService
 
         return DB::transaction(function () use ($partner, $plan, $name, $subdomain, $cycle, $price, $adminEmail, $adminUsername) {
             $startsAt = now();
-            $expiresAt = $cycle === BillingCycle::Annual ? now()->addYear() : now()->addMonth();
+            if ($cycle === BillingCycle::Trial) {
+                $trialDays = $plan->trial_days > 0 ? $plan->trial_days : 14;
+                $expiresAt = now()->addDays($trialDays);
+            } elseif ($cycle === BillingCycle::Annual) {
+                $expiresAt = now()->addYear();
+            } else {
+                $expiresAt = now()->addMonth();
+            }
 
             $instance = OnlineInstance::create([
                 'partner_id'      => $partner->id,
@@ -91,8 +125,10 @@ class OnlineBillingService
                 'auto_renew'      => true,
             ]);
 
-            // Generate invoice move if accounts module is active
-            $moveData = $this->createSubscriptionInvoice($instance, $plan, $partner, $price, $cycle, 'new_subscription');
+            // Generate invoice move only if price > 0
+            $moveData = $price > 0
+                ? $this->createSubscriptionInvoice($instance, $plan, $partner, $price, $cycle, 'new_subscription')
+                : null;
 
             if ($moveData) {
                 $instance->update(['move_id' => $moveData['move']->id]);
@@ -126,9 +162,14 @@ class OnlineBillingService
     {
         $partner = $instance->partner;
         $plan = $instance->plan;
-        $cycle = $cycle ?? $instance->billing_cycle ?? BillingCycle::Monthly;
 
-        $price = $cycle === BillingCycle::Annual ? $plan->annual_price : $plan->monthly_price;
+        // Renewal is only allowed as Monthly or Annual (never Trial)
+        $cycle = $cycle ?? $instance->billing_cycle ?? BillingCycle::Monthly;
+        if ($cycle === BillingCycle::Trial) {
+            $cycle = BillingCycle::Monthly;
+        }
+
+        $price = $cycle === BillingCycle::Annual ? (float) $plan->annual_price : (float) $plan->monthly_price;
 
         if ($price > 0 && ! $this->hasSufficientBalance($partner, (float) $price)) {
             throw new Exception(__('software-online::filament/customer/pages/explore.insufficient_balance'));
@@ -148,6 +189,7 @@ class OnlineBillingService
 
             $instance->update([
                 'billing_cycle'   => $cycle,
+                'price'           => $price,
                 'expires_at'      => $newExpiry,
                 'last_renewed_at' => now(),
                 'status'          => InstanceStatus::Active,
@@ -204,19 +246,21 @@ class OnlineBillingService
                 return null;
             }
 
+            $userId = Auth::guard('web')->id();
+
             $accountMove = AccountMove::create([
                 'move_type'        => MoveType::OUT_INVOICE->value ?? 'out_invoice',
                 'state'            => MoveState::DRAFT->value ?? 'draft',
                 'journal_id'       => $journal->id,
-                'invoice_origin'   => 'SITE-#' . $instance->instance_number,
+                'invoice_origin'   => 'SITE-#' . ($instance->instance_number ?? $instance->id),
                 'date'             => now()->toDateString(),
                 'invoice_date'     => now()->toDateString(),
                 'invoice_date_due' => now()->toDateString(),
                 'company_id'       => $company->id,
                 'currency_id'      => $company->currency_id,
                 'partner_id'       => $partner->id,
-                'creator_id'       => Auth::id() ?? $partner->id,
-                'invoice_user_id'  => Auth::id() ?? $partner->id,
+                'creator_id'       => $userId,
+                'invoice_user_id'  => $userId,
             ]);
 
             $product = $plan->product;
@@ -232,7 +276,7 @@ class OnlineBillingService
                 'currency_id'  => $accountMove->currency_id,
                 'product_id'   => $product?->id,
                 'uom_id'       => $product?->uom_id,
-                'creator_id'   => Auth::id() ?? $partner->id,
+                'creator_id'   => $userId,
             ]);
 
             try {
@@ -294,6 +338,7 @@ class OnlineBillingService
             ->get();
 
         $remaining = (float) $invoiceLine->amount_residual;
+        $userId = Auth::guard('web')->id();
 
         foreach ($creditLines as $creditLine) {
             if ($remaining <= 0.001) {
@@ -316,7 +361,7 @@ class OnlineBillingService
                 'credit_currency_id'  => $creditLine->currency_id,
                 'debit_amount_currency'  => $partial,
                 'credit_amount_currency' => $partial,
-                'creator_id'          => Auth::id(),
+                'creator_id'          => $userId,
                 'max_date'            => now()->toDateString(),
                 'amount'              => $partial,
             ]);

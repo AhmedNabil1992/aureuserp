@@ -98,17 +98,31 @@ class TicketConversationPanel extends Component implements HasActions, HasForms
 
         // Extract the first token after "/", e.g. "/fixed" -> "fixed"
         $firstToken = preg_split('/\s+/u', $trimmed)[0] ?? '';
-        $shortcut = strtolower(ltrim($firstToken, '/'));
+        $shortcutClean = strtolower(ltrim($firstToken, '/'));
+        $shortcutWithSlash = '/' . $shortcutClean;
 
         $reply = CannedReply::where('is_active', true)
-            ->whereRaw('LOWER(shortcut) = ?', [$shortcut])
+            ->where(function ($q) use ($shortcutClean, $shortcutWithSlash) {
+                $q->whereRaw('LOWER(TRIM(shortcut)) = ?', [$shortcutClean])
+                  ->orWhereRaw('LOWER(TRIM(shortcut)) = ?', [$shortcutWithSlash])
+                  ->orWhereRaw("LOWER(TRIM(BOTH '/' FROM TRIM(shortcut))) = ?", [$shortcutClean]);
+            })
             ->where(function ($q) {
                 $q->whereNull('service_type')
-                  ->orWhere('service_type', $this->ticket->service_type->value);
+                  ->orWhere('service_type', $this->ticket->service_type?->value ?? $this->ticket->service_type);
             })
             ->first();
 
-        return $reply?->content;
+        if (! $reply) {
+            return null;
+        }
+
+        if ($trimmed === $firstToken) {
+            return $reply->content;
+        }
+
+        $remainingText = trim(mb_substr($trimmed, mb_strlen($firstToken)));
+        return $reply->content . ($remainingText !== '' ? "\n\n" . $remainingText : '');
     }
 
     public function applyCannedReply(int $id): void
@@ -262,6 +276,56 @@ class TicketConversationPanel extends Component implements HasActions, HasForms
             ->send();
 
         $this->dispatch('message-sent');
+    }
+
+    public function reassignAction(): Action
+    {
+        return Action::make('reassign')
+            ->label('إعادة تعيين')
+            ->icon('heroicon-o-user-plus')
+            ->color('gray')
+            ->button()
+            ->size('xs')
+            ->modalHeading('إعادة تعيين التذكرة إلى مسؤول آخر')
+            ->modalDescription('حدد الموظف أو الأدمن الذي تريد تحويل هذه التذكرة إليه.')
+            ->modalSubmitActionLabel('حفظ التعيين')
+            ->modalWidth('sm')
+            ->fillForm(fn (): array => [
+                'assigned_to' => $this->ticket->assigned_to,
+            ])
+            ->form([
+                \Filament\Forms\Components\Select::make('assigned_to')
+                    ->label('المسؤول')
+                    ->options(\Webkul\Security\Models\User::pluck('name', 'id'))
+                    ->searchable()
+                    ->preload()
+                    ->required(),
+            ])
+            ->action(function (array $data): void {
+                $oldAssignee = $this->ticket->assignedTo?->name ?? 'غير مسندة';
+                $this->ticket->update([
+                    'assigned_to' => $data['assigned_to'],
+                ]);
+
+                $newAssignee = \Webkul\Security\Models\User::find($data['assigned_to']);
+
+                $this->ticket->events()->create([
+                    'user_id'    => Auth::id(),
+                    'type'       => 'event',
+                    'content'    => "تمت إعادة تعيين التذكرة من [{$oldAssignee}] إلى [{$newAssignee?->name}]",
+                    'is_private' => true,
+                ]);
+
+                $this->ticket->refresh();
+
+                Notification::make()
+                    ->title('تمت إعادة تعيين التذكرة بنجاح')
+                    ->body("المسؤول الحالي: {$newAssignee?->name}")
+                    ->success()
+                    ->send();
+
+                $this->dispatch('message-sent');
+            });
     }
 
     public function removeUploadedFile(int $index): void
