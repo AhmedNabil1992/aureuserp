@@ -11,6 +11,8 @@ use Webkul\Security\Models\User;
 use App\Console\Commands\SyncPartnerTags;
 use function Livewire\on;
 use function Livewire\store;
+use JohnRivera7\FilamentAntivirus\Rules\AntivirusFileRule;
+use Filament\Forms\Components\FileUpload;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -45,6 +47,12 @@ class AppServiceProvider extends ServiceProvider
             }
 
             session()->put('filament.claimed_notifications', $notifications);
+        });
+
+        // تطبيق قاعدة فحص الفيروسات على أي حقل رفع ملفات في النظام تلقائياً
+        FileUpload::configureUsing(function (FileUpload $component) {
+            // بنستخدم دالة rule عشان نضيف القاعدة بدون ما نمسح أي قواعد تانية خاصة بالحقل
+            $component->rule(new AntivirusFileRule());
         });
     }
 }

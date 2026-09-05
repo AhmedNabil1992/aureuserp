@@ -30,6 +30,7 @@ use WallaceMartinss\FilamentEvolution\FilamentEvolutionPlugin;
 use Webkul\Support\Enums\NavigationGroup;
 use Webkul\Support\Filament\Pages\Profile;
 use Webkul\Support\GlobalSearchProvider;
+use JohnRivera7\FilamentAntivirus\FilamentAntivirusPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -100,6 +101,13 @@ class AdminPanelProvider extends PanelProvider
                 BrowserNotificationsPlugin::make()
                     ->promptDelay(5)           // seconds before showing prompt (default: 2)
                     ->dismissCooldownDays(14), // days before re-prompting (default: 7)
+                FilamentAntivirusPlugin::make()
+                    // ->navigationGroup(NavigationGroup::Setting->getLabel())
+                    // ->navigationLabel('Antivirus')
+                    // ->navigationSort(7)
+                    // ->permission(fn (): bool => auth()->user()?->hasAnyRole(['Admin', 'super_admin']) ?? false)
+                    ,
+
             ])
             ->globalSearch(provider: GlobalSearchProvider::class)
             ->middleware([
