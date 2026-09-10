@@ -483,7 +483,9 @@ class Move extends Model implements Sortable
             return;
         }
 
-        $this->creator_id ??= Auth::id();
+        if (Auth::user() instanceof User) {
+            $this->creator_id = Auth::id();
+        }
     }
 
     public function computeCompanyId()

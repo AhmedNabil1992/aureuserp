@@ -34,7 +34,9 @@ class FullReconcile extends Model
         parent::boot();
 
         static::creating(function ($fullReconcile) {
-            $fullReconcile->creator_id ??= Auth::id();
+            if (! $fullReconcile->creator_id && Auth::user() instanceof User) {
+                $fullReconcile->creator_id = Auth::id();
+            }
         });
     }
 }

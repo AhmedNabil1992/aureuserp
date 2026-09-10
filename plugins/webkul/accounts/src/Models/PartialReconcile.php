@@ -86,7 +86,9 @@ class PartialReconcile extends Model
         parent::boot();
 
         static::creating(function ($partialReconcile) {
-            $partialReconcile->creator_id ??= Auth::id();
+            if (! $partialReconcile->creator_id && Auth::user() instanceof User) {
+                $partialReconcile->creator_id = Auth::id();
+            }
         });
 
         static::saving(function ($partialReconcile) {

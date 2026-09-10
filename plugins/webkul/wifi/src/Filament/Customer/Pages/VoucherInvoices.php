@@ -157,6 +157,7 @@ class VoucherInvoices extends Page implements HasTable
                             'partner_id'            => $partner->id,
                             'commercial_partner_id' => $partner->id,
                             'invoice_user_id'       => Auth::guard('web')->id(),
+                            'creator_id'            => Auth::guard('web')->id(),
                             'state'                 => MoveState::DRAFT,
                             'move_type'             => MoveType::OUT_INVOICE,
                             'date'                  => now()->toDateString(),
