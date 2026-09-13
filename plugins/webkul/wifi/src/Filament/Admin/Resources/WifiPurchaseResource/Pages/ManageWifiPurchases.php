@@ -85,9 +85,8 @@ class ManageWifiPurchases extends ManageRecords
 
                     $currencyId = $package->currency_id;
 
-                    $cardsQuantity = max(1, (int) ($data['quantity'] ?? 1));
                     $packageCards = max(1, (int) ($package->quantity ?? 1));
-                    $invoiceLineQuantity = max(1, (int) round($cardsQuantity / $packageCards));
+                    $invoiceLineQuantity = 1;
 
                     $priceUnit = (float) ($partner->is_dealer && $package->dealer_amount !== null
                         ? $package->dealer_amount
@@ -125,6 +124,8 @@ class ManageWifiPurchases extends ManageRecords
                     });
 
                     $data['move_line_id'] = $invoiceLineId;
+                    $data['quantity'] = $packageCards;
+                    $data['remaining_quantity'] = $packageCards;
 
                     unset($data['partner_id']);
 
