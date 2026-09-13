@@ -265,7 +265,9 @@ class MoveLine extends Model implements Sortable
         parent::boot();
 
         static::creating(function ($moveLine) {
-            $moveLine->creator_id ??= Auth::id();
+            if (! $moveLine->creator_id && Auth::user() instanceof User) {
+                $moveLine->creator_id = Auth::id();
+            }
         });
 
         static::saving(function (MoveLine $line) {

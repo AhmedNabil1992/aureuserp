@@ -90,7 +90,9 @@ class WifiPurchase extends Model
     protected static function booted(): void
     {
         static::creating(function (self $purchase): void {
-            $purchase->creator_id ??= Auth::id();
+            if (! $purchase->creator_id && Auth::user() instanceof User) {
+                $purchase->creator_id = Auth::id();
+            }
         });
 
         static::saving(function (self $purchase): void {

@@ -117,15 +117,14 @@ class VoucherInvoices extends Page implements HasTable
                         ]);
                     }
 
-                    $cardsQuantity = max(1, (int) ($data['quantity'] ?? 1));
+                    $packagesCount = max(1, (int) ($data['quantity'] ?? 1));
                     $packageCards = max(1, (int) ($package->quantity ?? 1));
-                    $invoiceLineQuantity = max(1, (int) round($cardsQuantity / $packageCards));
 
                     $priceUnit = (float) ($partner->is_dealer && $package->dealer_amount !== null
                         ? $package->dealer_amount
                         : $package->amount);
 
-                    $totalCost = $invoiceLineQuantity * $priceUnit;
+                    $totalCost = $packagesCount * $priceUnit;
                     $availableCredit = $this->getPartnerAvailableCredit($partner->id);
 
                     if ($availableCredit < $totalCost) {
@@ -149,7 +148,7 @@ class VoucherInvoices extends Page implements HasTable
                         ]);
                     }
 
-                    $invoiceLineId = DB::transaction(function () use ($journal, $package, $partner, $invoiceLineQuantity, $priceUnit): int {
+                    DB::transaction(function () use ($journal, $package, $partner, $packagesCount, $packageCards, $priceUnit, $cloudId): void {
                         $invoice = Invoice::query()->create([
                             'journal_id'            => $journal->id,
                             'company_id'            => $journal->company_id,
@@ -157,6 +156,7 @@ class VoucherInvoices extends Page implements HasTable
                             'partner_id'            => $partner->id,
                             'commercial_partner_id' => $partner->id,
                             'invoice_user_id'       => Auth::guard('web')->id(),
+                            'creator_id'            => Auth::guard('web')->id(),
                             'state'                 => MoveState::DRAFT,
                             'move_type'             => MoveType::OUT_INVOICE,
                             'date'                  => now()->toDateString(),
@@ -164,33 +164,35 @@ class VoucherInvoices extends Page implements HasTable
                             'invoice_date_due'      => now()->addDays(30)->toDateString(),
                         ]);
 
-                        $moveLine = $invoice->invoiceLines()->create([
-                            'product_id' => $package->product_id,
-                            'uom_id'     => $package->product?->uom_id,
-                            'quantity'   => $invoiceLineQuantity,
-                            'price_unit' => $priceUnit,
-                        ]);
+                        for ($i = 0; $i < $packagesCount; $i++) {
+                            $moveLine = $invoice->invoiceLines()->create([
+                                'product_id' => $package->product_id,
+                                'uom_id'     => $package->product?->uom_id,
+                                'quantity'   => 1,
+                                'price_unit' => $priceUnit,
+                            ]);
+
+                            WifiPurchase::create([
+                                'wifi_package_id'    => $package->id,
+                                'move_line_id'       => $moveLine->id,
+                                'cloud_id'           => $cloudId,
+                                'quantity'           => $packageCards,
+                                'remaining_quantity' => $packageCards,
+                                'is_default'         => false,
+                            ]);
+                        }
 
                         AccountFacade::computeAccountMove($invoice);
                         $invoice = AccountFacade::confirmMove($invoice->refresh());
 
                         $this->applyOutstandingAdvancePayments($invoice->refresh());
-
-                        return $moveLine->id;
                     });
 
-                    WifiPurchase::create([
-                        'wifi_package_id'    => $package->id,
-                        'move_line_id'       => $invoiceLineId,
-                        'cloud_id'           => $cloudId,
-                        'quantity'           => $cardsQuantity,
-                        'remaining_quantity' => $cardsQuantity,
-                        'is_default'         => false,
-                    ]);
+                    $totalCards = $packagesCount * $packageCards;
 
                     Notification::make()
                         ->title('تم إنشاء الفاتورة وتخصيص رصيد الكروت بنجاح')
-                        ->body(sprintf('تم خصم %s من رصيدك المسبق وتفعيل %d كارت في السحابة.', number_format($totalCost, 2), $cardsQuantity))
+                        ->body(sprintf('تم خصم %s من رصيدك المسبق وتفعيل %d كارت في السحابة (%d باقة).', number_format($totalCost, 2), $totalCards, $packagesCount))
                         ->success()
                         ->send();
                 }),

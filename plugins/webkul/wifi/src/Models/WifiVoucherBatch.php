@@ -93,7 +93,9 @@ class WifiVoucherBatch extends Model
     protected static function booted(): void
     {
         static::creating(function (self $batch): void {
-            $batch->creator_id ??= Auth::id();
+            if (! $batch->creator_id && Auth::user() instanceof User) {
+                $batch->creator_id = Auth::id();
+            }
 
             if (blank($batch->batch_code)) {
                 $batch->batch_code = static::generateUniqueBatchCode($batch->cloud_id);

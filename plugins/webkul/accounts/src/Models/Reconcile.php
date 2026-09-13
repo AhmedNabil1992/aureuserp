@@ -71,7 +71,9 @@ class Reconcile extends Model implements Sortable
         parent::boot();
 
         static::creating(function ($reconcile) {
-            $reconcile->creator_id ??= Auth::id();
+            if (! $reconcile->creator_id && Auth::user() instanceof User) {
+                $reconcile->creator_id = Auth::id();
+            }
         });
     }
 }
