@@ -4,6 +4,7 @@ namespace Webkul\Software\Http\Controllers\API\Legacy;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Storage;
 use Throwable;
 use Webkul\Software\Enums\ServiceType;
 use Webkul\Software\Http\Requests\API\Legacy\CheckForUpdateRequest;
@@ -108,16 +109,26 @@ class UpdateLegacyController extends Controller
 
             $updateDetails->increment('download_times');
 
+            $updateLink = $updateDetails->update_link;
+            if ($updateLink && ! str_starts_with($updateLink, 'http://') && ! str_starts_with($updateLink, 'https://')) {
+                $updateLink = Storage::disk('public')->url($updateLink);
+            }
+
+            $dbLink = $updateDetails->db_link;
+            if ($dbLink && ! str_starts_with($dbLink, 'http://') && ! str_starts_with($dbLink, 'https://')) {
+                $dbLink = Storage::disk('public')->url($dbLink);
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Update available',
                 'data'    => [
-                    'UpdateLink'    => $updateDetails->update_link,
+                    'UpdateLink'    => $updateLink,
                     'Filename'      => $updateDetails->file_name,
                     'LatestVersion' => $updateDetails->version_number,
                     'App_Terminate' => $updateDetails->app_terminate,
                     'IsDBUpdate'    => $updateDetails->is_db_update,
-                    'DB_Link'       => $updateDetails->db_link,
+                    'DB_Link'       => $dbLink,
                 ],
             ], 200, [], JSON_UNESCAPED_SLASHES);
         } catch (Throwable $exception) {

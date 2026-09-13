@@ -7,6 +7,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -18,6 +19,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Webkul\Software\Filament\Admin\Clusters\Catalog;
 use Webkul\Software\Filament\Admin\Resources\ProgramReleaseResource\Pages\ManageProgramReleases;
+use Webkul\Software\Models\Program;
 use Webkul\Software\Models\ProgramRelease;
 
 class ProgramReleaseResource extends Resource
@@ -45,14 +47,54 @@ class ProgramReleaseResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Select::make('program_id')->label(__('software::filament/admin/resources/program-release.form.fields.program'))->relationship('program', 'name')->searchable()->preload()->required(),
-            TextInput::make('version_number')->label(__('software::filament/admin/resources/program-release.form.fields.version_number'))->required()->maxLength(50),
-            TextInput::make('update_link')->label(__('software::filament/admin/resources/program-release.form.fields.update_link'))->url()->maxLength(500),
-            TextInput::make('file_name')->label(__('software::filament/admin/resources/program-release.form.fields.file_name'))->maxLength(255),
-            DatePicker::make('release_date')->label(__('software::filament/admin/resources/program-release.form.fields.release_date'))->native(false),
-            Toggle::make('is_db_update')->label(__('software::filament/admin/resources/program-release.form.fields.is_db_update'))->default(false),
-            TextInput::make('db_link')->label(__('software::filament/admin/resources/program-release.form.fields.db_link'))->maxLength(500),
-            Toggle::make('is_active')->label(__('software::filament/admin/resources/program-release.form.fields.is_active'))->default(true),
+            Select::make('program_id')
+                ->label(__('software::filament/admin/resources/program-release.form.fields.program'))
+                ->relationship('program', 'name')
+                ->searchable()
+                ->preload()
+                ->live()
+                ->required(),
+            TextInput::make('version_number')
+                ->label(__('software::filament/admin/resources/program-release.form.fields.version_number'))
+                ->required()
+                ->maxLength(50),
+            FileUpload::make('update_link')
+                ->label(__('software::filament/admin/resources/program-release.form.fields.update_link'))
+                ->disk('public')
+                ->directory(function ($get) {
+                    $programId = $get('program_id');
+                    $programName = $programId ? Program::find($programId)?->name : null;
+                    $cleanName = $programName ? str_replace(' ', '', $programName) : 'General';
+
+                    return 'Update/' . $cleanName;
+                })
+                ->visibility('public')
+                ->preserveFilenames()
+                ->required(),
+            TextInput::make('file_name')
+                ->label(__('software::filament/admin/resources/program-release.form.fields.file_name'))
+                ->maxLength(255),
+            DatePicker::make('release_date')
+                ->label(__('software::filament/admin/resources/program-release.form.fields.release_date'))
+                ->native(false),
+            Toggle::make('is_db_update')
+                ->label(__('software::filament/admin/resources/program-release.form.fields.is_db_update'))
+                ->default(false),
+            FileUpload::make('db_link')
+                ->label(__('software::filament/admin/resources/program-release.form.fields.db_link'))
+                ->disk('public')
+                ->directory(function ($get) {
+                    $programId = $get('program_id');
+                    $programName = $programId ? Program::find($programId)?->name : null;
+                    $cleanName = $programName ? str_replace(' ', '', $programName) : 'General';
+
+                    return 'Update/' . $cleanName . '/Database';
+                })
+                ->visibility('public')
+                ->preserveFilenames(),
+            Toggle::make('is_active')
+                ->label(__('software::filament/admin/resources/program-release.form.fields.is_active'))
+                ->default(true),
             Textarea::make('app_terminate')->label(__('software::filament/admin/resources/program-release.form.fields.app_terminate'))->rows(2)->columnSpanFull(),
             Textarea::make('remark')->label(__('software::filament/admin/resources/program-release.form.fields.remark'))->rows(2)->columnSpanFull(),
         ])->columns(2);
