@@ -4,9 +4,9 @@ return [
     'navigation' => ['group' => 'VPN Management'],
     'servers'    => ['title' => 'VPN Servers', 'singular' => 'VPN Server', 'connection' => 'SoftEther connection'],
     'console'    => ['title' => 'VPN Console'],
-    'users'      => ['title' => 'Users', 'empty' => 'No users were returned for this hub.'],
-    'sessions'   => ['title' => 'Live sessions', 'empty' => 'There are no active sessions on this hub.'],
-    'details'    => ['title' => 'Details'],
+    'users'      => ['title' => 'Users', 'empty' => 'No users were returned for this hub.', 'search-placeholder' => 'Search users...'],
+    'sessions'   => ['title' => 'Live sessions', 'empty' => 'There are no active sessions on this hub.', 'search-placeholder' => 'Search sessions...'],
+    'details'    => ['title' => 'Details', 'empty' => 'No details are available.'],
     'fields'     => [
         'name'           => 'Name', 'host' => 'Host or IP', 'host_help' => 'Enter a hostname or IP only; HTTPS and /api/ are added automatically.',
         'port'           => 'HTTPS port', 'admin_password' => 'Server administrator password', 'password_help' => 'Encrypted at rest. Leave blank while editing to keep the current password.',
@@ -23,5 +23,6 @@ return [
         'confirm_delete_user' => 'Delete this user from SoftEther?', 'confirm_disconnect' => 'Disconnect this active VPN session?',
     ],
     'common' => ['choose' => 'Choose…', 'never' => 'Never', 'actions' => 'Actions', 'yes' => 'Yes', 'no' => 'No'],
+    'search' => ['no-results' => 'No matching results.'],
     'auth'   => ['0' => 'Anonymous', '1' => 'Password', '2' => 'User certificate', '3' => 'Root certificate', '4' => 'RADIUS', '5' => 'NT domain'],
 ];

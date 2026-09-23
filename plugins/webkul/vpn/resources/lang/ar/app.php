@@ -4,9 +4,9 @@ return [
     'navigation' => ['group' => 'إدارة VPN'],
     'servers'    => ['title' => 'سيرفرات VPN', 'singular' => 'سيرفر VPN', 'connection' => 'اتصال SoftEther'],
     'console'    => ['title' => 'لوحة تحكم VPN'],
-    'users'      => ['title' => 'المستخدمون', 'empty' => 'لا يوجد مستخدمون على هذا الـ Hub.'],
-    'sessions'   => ['title' => 'الجلسات الحالية', 'empty' => 'لا توجد جلسات نشطة على هذا الـ Hub.'],
-    'details'    => ['title' => 'التفاصيل'],
+    'users'      => ['title' => 'المستخدمون', 'empty' => 'لا يوجد مستخدمون على هذا الـ Hub.', 'search-placeholder' => 'بحث في المستخدمين...'],
+    'sessions'   => ['title' => 'الجلسات الحالية', 'empty' => 'لا توجد جلسات نشطة على هذا الـ Hub.', 'search-placeholder' => 'بحث في الجلسات...'],
+    'details'    => ['title' => 'التفاصيل', 'empty' => 'لا توجد تفاصيل متاحة.'],
     'fields'     => [
         'name'           => 'الاسم', 'host' => 'الدومين أو IP', 'host_help' => 'اكتب الدومين أو IP فقط؛ سيتم إضافة HTTPS و /api/ تلقائياً.',
         'port'           => 'منفذ HTTPS', 'admin_password' => 'كلمة مرور مدير السيرفر', 'password_help' => 'تُحفظ مشفرة. اتركها فارغة عند التعديل للاحتفاظ بالقيمة الحالية.',
@@ -23,5 +23,6 @@ return [
         'confirm_delete_user' => 'هل تريد حذف هذا المستخدم من SoftEther؟', 'confirm_disconnect' => 'هل تريد قطع جلسة VPN الحالية؟',
     ],
     'common' => ['choose' => 'اختر…', 'never' => 'لم يحدث', 'actions' => 'إجراءات', 'yes' => 'نعم', 'no' => 'لا'],
+    'search' => ['no-results' => 'لا توجد نتائج مطابقة.'],
     'auth'   => ['0' => 'بدون تحقق', '1' => 'كلمة مرور', '2' => 'شهادة مستخدم', '3' => 'شهادة جذر', '4' => 'RADIUS', '5' => 'NT Domain'],
 ];

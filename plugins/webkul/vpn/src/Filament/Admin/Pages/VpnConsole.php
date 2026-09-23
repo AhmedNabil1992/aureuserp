@@ -42,6 +42,10 @@ class VpnConsole extends Page
 
     public array $sessions = [];
 
+    public string $userSearch = '';
+
+    public string $sessionSearch = '';
+
     public ?array $details = null;
 
     public ?string $error = null;
@@ -77,11 +81,13 @@ class VpnConsole extends Page
     public function updatedServerId(): void
     {
         $this->hub = null;
+        $this->resetSearch();
         $this->refreshData();
     }
 
     public function updatedHub(): void
     {
+        $this->resetSearch();
         $this->loadTab();
     }
 
@@ -141,12 +147,18 @@ class VpnConsole extends Page
 
     public function showUser(string $username): void
     {
-        $this->runRemote(fn ($client) => $this->details = $client->user($this->hub, $username));
+        $this->runRemote(function ($client) use ($username): void {
+            $this->details = $client->user($this->hub, $username);
+            $this->dispatch('open-modal', id: 'vpn-details-modal');
+        });
     }
 
     public function showSession(string $name): void
     {
-        $this->runRemote(fn ($client) => $this->details = $client->session($this->hub, $name));
+        $this->runRemote(function ($client) use ($name): void {
+            $this->details = $client->session($this->hub, $name);
+            $this->dispatch('open-modal', id: 'vpn-details-modal');
+        });
     }
 
     public function deleteUser(string $username): void
@@ -165,6 +177,27 @@ class VpnConsole extends Page
             Notification::make()->success()->title(__('vpn::app.messages.session_disconnected'))->send();
             $this->sessions = $client->sessions($this->hub);
         });
+    }
+
+    public function filteredUsers(): array
+    {
+        return $this->filterRows($this->users, $this->userSearch, [
+            'Name_str',
+            'Realname_utf',
+            'GroupName_str',
+            'Note_utf',
+        ]);
+    }
+
+    public function filteredSessions(): array
+    {
+        return $this->filterRows($this->sessions, $this->sessionSearch, [
+            'Name_str',
+            'Username_str',
+            'ClientIP_ip',
+            'Hostname_str',
+            'RemoteHostname_str',
+        ]);
     }
 
     protected function getHeaderActions(): array
@@ -215,5 +248,29 @@ class VpnConsole extends Page
             $this->error = $exception->getMessage();
             Notification::make()->danger()->title(__('vpn::app.messages.operation_failed'))->body($exception->getMessage())->send();
         }
+    }
+
+    private function filterRows(array $rows, string $search, array $fields): array
+    {
+        $needle = mb_strtolower(trim($search));
+        if ($needle === '') {
+            return $rows;
+        }
+
+        return array_values(array_filter($rows, function (array $row) use ($fields, $needle): bool {
+            foreach ($fields as $field) {
+                if (str_contains(mb_strtolower((string) ($row[$field] ?? '')), $needle)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }));
+    }
+
+    private function resetSearch(): void
+    {
+        $this->userSearch = '';
+        $this->sessionSearch = '';
     }
 }

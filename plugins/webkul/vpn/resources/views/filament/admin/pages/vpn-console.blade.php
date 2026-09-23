@@ -48,8 +48,19 @@
         </div>
 
         <x-filament::section>
+            <div class="mb-4 max-w-md">
+                <x-filament::input.wrapper prefix-icon="heroicon-o-magnifying-glass">
+                    @if ($tab === 'users')
+                        <x-filament::input type="search" wire:model.live.debounce.300ms="userSearch" :placeholder="__('vpn::app.users.search-placeholder')" />
+                    @else
+                        <x-filament::input type="search" wire:model.live.debounce.300ms="sessionSearch" :placeholder="__('vpn::app.sessions.search-placeholder')" />
+                    @endif
+                </x-filament::input.wrapper>
+            </div>
+
             <div class="overflow-x-auto">
                 @if ($tab === 'users')
+                    @php($filteredUsers = $this->filteredUsers())
                     <table class="w-full divide-y divide-gray-200 text-start text-sm dark:divide-white/10">
                         <thead><tr class="text-gray-500 dark:text-gray-400">
                             <th class="px-3 py-3 text-start">{{ __('vpn::app.fields.username') }}</th>
@@ -60,7 +71,7 @@
                             <th class="px-3 py-3 text-end">{{ __('vpn::app.common.actions') }}</th>
                         </tr></thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-white/5">
-                        @forelse ($users as $user)
+                        @forelse ($filteredUsers as $user)
                             @php($username = (string) ($user['Name_str'] ?? ''))
                             <tr wire:key="vpn-user-{{ md5($username) }}">
                                 <td class="px-3 py-3 font-medium text-gray-950 dark:text-white">{{ $username }}</td>
@@ -69,16 +80,17 @@
                                 <td class="px-3 py-3">{{ number_format((int) ($user['NumLogin_u32'] ?? 0)) }}</td>
                                 <td class="px-3 py-3">{{ \Webkul\Vpn\Support\SoftEtherValue::date($user['LastLoginTime_dt'] ?? null) }}</td>
                                 <td class="px-3 py-3 text-end whitespace-nowrap">
-                                    <x-filament::button size="xs" color="gray" wire:click='showUser({{ Illuminate\Support\Js::from($username) }})'>{{ __('vpn::app.actions.details') }}</x-filament::button>
+                                    <x-filament::button size="xs" color="gray" wire:click='showUser({{ Illuminate\Support\Js::from($username) }})' wire:loading.attr="disabled" wire:target="showUser">{{ __('vpn::app.actions.details') }}</x-filament::button>
                                     <x-filament::button size="xs" color="danger" wire:click='deleteUser({{ Illuminate\Support\Js::from($username) }})' wire:confirm="{{ __('vpn::app.messages.confirm_delete_user') }}">{{ __('vpn::app.actions.delete') }}</x-filament::button>
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="6" class="px-3 py-12 text-center text-gray-500">{{ __('vpn::app.users.empty') }}</td></tr>
+                            <tr><td colspan="6" class="px-3 py-12 text-center text-gray-500">{{ filled($userSearch) ? __('vpn::app.search.no-results') : __('vpn::app.users.empty') }}</td></tr>
                         @endforelse
                         </tbody>
                     </table>
                 @else
+                    @php($filteredSessions = $this->filteredSessions())
                     <table class="w-full divide-y divide-gray-200 text-start text-sm dark:divide-white/10">
                         <thead><tr class="text-gray-500 dark:text-gray-400">
                             <th class="px-3 py-3 text-start">{{ __('vpn::app.fields.session') }}</th>
@@ -89,7 +101,7 @@
                             <th class="px-3 py-3 text-end">{{ __('vpn::app.common.actions') }}</th>
                         </tr></thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-white/5">
-                        @forelse ($sessions as $session)
+                        @forelse ($filteredSessions as $session)
                             @php($sessionName = (string) ($session['Name_str'] ?? ''))
                             <tr wire:key="vpn-session-{{ md5($sessionName) }}">
                                 <td class="px-3 py-3 font-medium text-gray-950 dark:text-white">{{ $sessionName }}</td>
@@ -98,12 +110,12 @@
                                 <td class="px-3 py-3">{{ \Webkul\Vpn\Support\SoftEtherValue::date($session['CreatedTime_dt'] ?? null) }}</td>
                                 <td class="px-3 py-3">{{ \Webkul\Vpn\Support\SoftEtherValue::date($session['LastCommTime_dt'] ?? null) }}</td>
                                 <td class="px-3 py-3 text-end whitespace-nowrap">
-                                    <x-filament::button size="xs" color="gray" wire:click='showSession({{ Illuminate\Support\Js::from($sessionName) }})'>{{ __('vpn::app.actions.details') }}</x-filament::button>
+                                    <x-filament::button size="xs" color="gray" wire:click='showSession({{ Illuminate\Support\Js::from($sessionName) }})' wire:loading.attr="disabled" wire:target="showSession">{{ __('vpn::app.actions.details') }}</x-filament::button>
                                     <x-filament::button size="xs" color="danger" wire:click='disconnectSession({{ Illuminate\Support\Js::from($sessionName) }})' wire:confirm="{{ __('vpn::app.messages.confirm_disconnect') }}">{{ __('vpn::app.actions.disconnect') }}</x-filament::button>
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="6" class="px-3 py-12 text-center text-gray-500">{{ __('vpn::app.sessions.empty') }}</td></tr>
+                            <tr><td colspan="6" class="px-3 py-12 text-center text-gray-500">{{ filled($sessionSearch) ? __('vpn::app.search.no-results') : __('vpn::app.sessions.empty') }}</td></tr>
                         @endforelse
                         </tbody>
                     </table>
@@ -111,8 +123,12 @@
             </div>
         </x-filament::section>
 
-        @if ($details)
-            <x-filament::section :heading="__('vpn::app.details.title')" collapsible>
+        <x-filament::modal id="vpn-details-modal" width="5xl">
+            <x-slot name="heading">
+                {{ __('vpn::app.details.title') }}
+            </x-slot>
+
+            @if ($details)
                 <dl class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                     @foreach ($details as $key => $value)
                         @continue(is_array($value) || is_object($value) || str_contains((string) $key, '_bin'))
@@ -122,7 +138,11 @@
                         </div>
                     @endforeach
                 </dl>
-            </x-filament::section>
-        @endif
+            @else
+                <div class="py-8 text-center text-sm text-gray-500">
+                    {{ __('vpn::app.details.empty') }}
+                </div>
+            @endif
+        </x-filament::modal>
     </div>
 </x-filament-panels::page>

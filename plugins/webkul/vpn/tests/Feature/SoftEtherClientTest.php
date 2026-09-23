@@ -15,6 +15,7 @@ use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\TestCase;
 use Webkul\Vpn\Exceptions\SoftEtherApiException;
+use Webkul\Vpn\Filament\Admin\Pages\VpnConsole;
 use Webkul\Vpn\Models\VpnServer;
 use Webkul\Vpn\Services\SoftEtherClient;
 
@@ -99,6 +100,25 @@ class SoftEtherClientTest extends TestCase
         $server->setRawAttributes(['known_hubs' => json_encode(['DEFAULT', 'STAFF'])]);
 
         $this->assertSame('DEFAULT, STAFF', $server->known_hubs_display);
+    }
+
+    public function test_console_search_filters_users_and_sessions(): void
+    {
+        $console = new VpnConsole;
+        $console->users = [
+            ['Name_str' => 'ahmed', 'Realname_utf' => 'Ahmed Nabil', 'GroupName_str' => 'Admins'],
+            ['Name_str' => 'sara', 'Realname_utf' => 'Sara Ali', 'GroupName_str' => 'Staff'],
+        ];
+        $console->sessions = [
+            ['Name_str' => 'SID-1', 'Username_str' => 'ahmed', 'ClientIP_ip' => '10.0.0.5', 'Hostname_str' => 'office-pc'],
+            ['Name_str' => 'SID-2', 'Username_str' => 'sara', 'ClientIP_ip' => '10.0.0.9', 'Hostname_str' => 'laptop'],
+        ];
+
+        $console->userSearch = 'admins';
+        $console->sessionSearch = '10.0.0.9';
+
+        $this->assertSame(['ahmed'], array_column($console->filteredUsers(), 'Name_str'));
+        $this->assertSame(['SID-2'], array_column($console->filteredSessions(), 'Name_str'));
     }
 
     private function server(): VpnServer
