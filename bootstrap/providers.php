@@ -33,6 +33,7 @@ use Webkul\Support\SupportServiceProvider;
 use Webkul\TableViews\TableViewsServiceProvider;
 use Webkul\TimeOff\TimeOffServiceProvider;
 use Webkul\Timesheet\TimesheetServiceProvider;
+use Webkul\Vpn\VpnServiceProvider;
 use Webkul\Website\WebsiteServiceProvider;
 use Webkul\Wifi\WifiServiceProvider;
 use Webkul\Psmonitor\PsmonitorServiceProvider;
@@ -110,5 +111,6 @@ return [
     ArticleServiceProvider::class,
     LeadServiceProvider::class,
     TechnicalSupportServiceProvider::class,
+    VpnServiceProvider::class,
     \Webkul\SoftwareOnline\SoftwareOnlineServiceProvider::class,
 ];
