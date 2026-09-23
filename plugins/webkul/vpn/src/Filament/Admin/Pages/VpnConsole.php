@@ -16,6 +16,7 @@ use Filament\Pages\Page;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Gate;
 use Throwable;
+use Webkul\Support\Enums\NavigationGroup;
 use Webkul\Vpn\Models\VpnServer;
 use Webkul\Vpn\Services\SoftEtherClientFactory;
 
@@ -52,9 +53,9 @@ class VpnConsole extends Page
         return 'page_vpn_vpn_console';
     }
 
-    public static function getNavigationGroup(): string
+    public static function getNavigationGroup(): string|\UnitEnum
     {
-        return __('vpn::app.navigation.group');
+        return NavigationGroup::Vpn;
     }
 
     public static function getNavigationLabel(): string

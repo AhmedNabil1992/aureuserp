@@ -20,6 +20,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Throwable;
+use Webkul\Support\Enums\NavigationGroup;
 use Webkul\Vpn\Filament\Admin\Resources\VpnServerResource\Pages\ManageVpnServers;
 use Webkul\Vpn\Models\VpnServer;
 use Webkul\Vpn\Services\SoftEtherClientFactory;
@@ -34,9 +35,9 @@ class VpnServerResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    public static function getNavigationGroup(): string
+    public static function getNavigationGroup(): string|\UnitEnum
     {
-        return __('vpn::app.navigation.group');
+        return NavigationGroup::Vpn;
     }
 
     public static function getNavigationLabel(): string
