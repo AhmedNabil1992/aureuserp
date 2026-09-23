@@ -57,6 +57,11 @@ class VpnServer extends Model
         return "https://{$host}:{$this->port}/api/";
     }
 
+    public function getKnownHubsDisplayAttribute(): string
+    {
+        return implode(', ', $this->known_hubs ?? []);
+    }
+
     protected static function booted(): void
     {
         static::creating(function (self $server): void {

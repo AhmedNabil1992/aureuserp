@@ -87,7 +87,10 @@ class VpnServerResource extends Resource
             ->columns([
                 TextColumn::make('name')->label(__('vpn::app.fields.name'))->searchable()->sortable(),
                 TextColumn::make('host')->label(__('vpn::app.fields.host'))->formatStateUsing(fn (VpnServer $record) => "{$record->host}:{$record->port}")->copyable(),
-                TextColumn::make('known_hubs')->label(__('vpn::app.fields.hubs'))->formatStateUsing(fn (?array $state) => implode(', ', $state ?? []))->placeholder('—')->wrap(),
+                TextColumn::make('known_hubs_display')
+                    ->label(__('vpn::app.fields.hubs'))
+                    ->placeholder('—')
+                    ->wrap(),
                 IconColumn::make('is_active')->label(__('vpn::app.fields.active'))->boolean(),
                 TextColumn::make('last_connected_at')->label(__('vpn::app.fields.last_connected'))->since()->placeholder(__('vpn::app.common.never'))->sortable(),
                 TextColumn::make('last_error')->label(__('vpn::app.fields.last_error'))->limit(45)->tooltip(fn (VpnServer $record) => $record->last_error)->placeholder('—')->color('danger'),

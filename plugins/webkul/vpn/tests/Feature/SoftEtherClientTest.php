@@ -93,6 +93,14 @@ class SoftEtherClientTest extends TestCase
         (new SoftEtherClient($this->server()))->serverInfo();
     }
 
+    public function test_known_hubs_table_state_is_rendered_as_one_string(): void
+    {
+        $server = new VpnServer;
+        $server->setRawAttributes(['known_hubs' => json_encode(['DEFAULT', 'STAFF'])]);
+
+        $this->assertSame('DEFAULT, STAFF', $server->known_hubs_display);
+    }
+
     private function server(): VpnServer
     {
         /** @var VpnServer&MockInterface $server */
