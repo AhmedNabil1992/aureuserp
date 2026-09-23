@@ -14,31 +14,31 @@ class VpnServerPolicy
 
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_vpn_server');
+        return $user->can('view_any_vpn_vpn::server');
     }
 
     public function view(User $user, VpnServer $server): bool
     {
-        return $user->can('view_vpn_server');
+        return $user->can('view_vpn_vpn::server');
     }
 
     public function create(User $user): bool
     {
-        return $user->can('create_vpn_server');
+        return $user->can('create_vpn_vpn::server');
     }
 
     public function update(User $user, VpnServer $server): bool
     {
-        return $user->can('update_vpn_server');
+        return $user->can('update_vpn_vpn::server');
     }
 
     public function delete(User $user, VpnServer $server): bool
     {
-        return $user->can('delete_vpn_server');
+        return $user->can('delete_vpn_vpn::server');
     }
 
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_vpn_server');
+        return $user->can('delete_any_vpn_vpn::server');
     }
 }

@@ -49,7 +49,7 @@ class VpnConsole extends Page
 
     protected static function getPagePermission(): ?string
     {
-        return 'page_vpn_console';
+        return 'page_vpn_vpn_console';
     }
 
     public static function getNavigationGroup(): string
@@ -203,7 +203,7 @@ class VpnConsole extends Page
 
     private function runRemote(callable $callback): void
     {
-        Gate::authorize('page_vpn_console');
+        Gate::authorize('page_vpn_vpn_console');
         $server = $this->server();
         abort_unless($server && filled($this->hub), 404);
 

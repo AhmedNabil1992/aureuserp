@@ -16,7 +16,11 @@
     },
     "autoload": {
         "psr-4": {
-            "Webkul\\Vpn\\": "src/",
+            "Webkul\\Vpn\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
             "Webkul\\Vpn\\Tests\\": "tests/"
         }
     }
