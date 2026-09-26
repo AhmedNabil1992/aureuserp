@@ -7,8 +7,8 @@ namespace Webkul\Referral\Filament\Customer\Pages;
 use BackedEnum;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Locked;
 use Webkul\Partner\Models\Partner;
-use Webkul\Referral\Models\ReferralCode;
 use Webkul\Referral\Models\ReferralRedemption;
 use Webkul\Referral\Services\ReferralService;
 use Webkul\Support\Enums\NavigationGroup;
@@ -21,7 +21,11 @@ class MyReferralCode extends Page
 
     protected string $view = 'referrals::filament.customer.pages.my-referral-code';
 
-    public ?ReferralCode $referralCode = null;
+    #[Locked]
+    public string $referralCode = '';
+
+    #[Locked]
+    public int $referralCompanyId = 0;
 
     public static function getNavigationGroup(): string|\UnitEnum|null
     {
@@ -44,21 +48,34 @@ class MyReferralCode extends Page
 
         abort_unless($partner instanceof Partner, 403);
 
-        $this->referralCode = $referrals->codeForPartner($partner);
+        $code = $referrals->codeForPartner($partner);
+
+        $this->referralCode = $code->code;
+        $this->referralCompanyId = (int) $code->company_id;
     }
 
     public function getEarnedTotalProperty(): float
     {
+        $partner = Auth::guard('customer')->user();
+
+        abort_unless($partner instanceof Partner, 403);
+
         return (float) ReferralRedemption::query()
-            ->where('referrer_partner_id', $this->referralCode?->partner_id)
+            ->where('company_id', $this->referralCompanyId)
+            ->where('referrer_partner_id', $partner->id)
             ->where('status', 'earned')
             ->sum('referrer_reward');
     }
 
     public function getPendingTotalProperty(): float
     {
+        $partner = Auth::guard('customer')->user();
+
+        abort_unless($partner instanceof Partner, 403);
+
         return (float) ReferralRedemption::query()
-            ->where('referrer_partner_id', $this->referralCode?->partner_id)
+            ->where('company_id', $this->referralCompanyId)
+            ->where('referrer_partner_id', $partner->id)
             ->where('status', 'pending')
             ->sum('referrer_reward');
     }

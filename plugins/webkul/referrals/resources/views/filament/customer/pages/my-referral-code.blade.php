@@ -3,10 +3,15 @@
         <div class="md:col-span-2 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
             <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('referrals::app.customer.share_help') }}</p>
             <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-                <code class="flex-1 rounded-xl bg-gray-100 px-5 py-4 text-center text-2xl font-bold tracking-widest text-primary-700 dark:bg-gray-800 dark:text-primary-300">{{ $referralCode?->code }}</code>
+                <code
+                    dir="ltr"
+                    data-testid="referral-code"
+                    class="flex-1 rounded-xl bg-gray-100 px-5 py-4 text-center text-2xl font-bold tracking-widest text-primary-700 dark:bg-gray-800 dark:text-primary-300"
+                    style="min-width: 16rem"
+                >{{ $referralCode }}</code>
                 <x-filament::button
                     icon="heroicon-o-clipboard"
-                    x-on:click="navigator.clipboard.writeText(@js($referralCode?->code)); $tooltip(@js(__('referrals::app.customer.copied')), { timeout: 2000 })"
+                    x-on:click="navigator.clipboard.writeText(@js($referralCode)); $tooltip(@js(__('referrals::app.customer.copied')), { timeout: 2000 })"
                 >
                     {{ __('referrals::app.customer.copy') }}
                 </x-filament::button>
