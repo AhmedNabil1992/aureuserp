@@ -37,7 +37,7 @@ class ReferralService
         }
 
         return DB::transaction(function () use ($companyId, $partner): ReferralCode {
-            Partner::query()->whereKey($partner->id)->lockForUpdate()->firstOrFail();
+            Partner::withoutGlobalScopes()->whereKey($partner->id)->lockForUpdate()->firstOrFail();
 
             return ReferralCode::query()->firstOrCreate(
                 ['company_id' => $companyId, 'partner_id' => $partner->id],

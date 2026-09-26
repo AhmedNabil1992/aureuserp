@@ -5,7 +5,14 @@ return [
     'statuses'       => ['pending' => 'Pending payment', 'earned' => 'Earned', 'reversed' => 'Reversed', 'void' => 'Void'],
     'contexts'       => ['license' => 'Software licenses', 'online_subscription' => 'Online systems', 'sales_invoice' => 'Sales invoices'],
     'campaigns'      => ['title' => 'Referral Campaigns', 'singular' => 'Referral Campaign', 'rules' => 'Campaign Rules'],
-    'codes'          => ['title' => 'Referral Codes', 'singular' => 'Referral Code', 'auto_help' => 'Leave blank to generate a secure code automatically.'],
+    'codes'          => [
+        'title'            => 'Referral Codes',
+        'singular'         => 'Referral Code',
+        'auto_help'        => 'Leave blank to generate a secure code automatically.',
+        'generate_missing' => 'Generate missing codes',
+        'generated'        => 'Referral codes generated',
+        'generated_count'  => ':count missing referral code(s) were created.',
+    ],
     'redemptions'    => ['title' => 'Referral Redemptions', 'singular' => 'Referral Redemption', 'details' => 'Redemption Details'],
     'fields'         => [
         'name'            => 'Name', 'company' => 'Company', 'currency' => 'Currency', 'contexts' => 'Eligible sales paths',

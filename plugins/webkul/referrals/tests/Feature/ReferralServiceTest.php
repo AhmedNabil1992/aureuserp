@@ -11,6 +11,7 @@ use Webkul\Referral\Enums\DiscountType;
 use Webkul\Referral\Enums\RedemptionStatus;
 use Webkul\Referral\Models\ReferralCampaign;
 use Webkul\Referral\Models\ReferralCode;
+use Webkul\Referral\Services\ReferralCodeIssuer;
 use Webkul\Referral\Services\ReferralRewardService;
 use Webkul\Referral\Services\ReferralService;
 
@@ -93,6 +94,24 @@ it('rejects self referrals', function () {
         ReferralService::CONTEXT_SALES_INVOICE,
     );
 })->throws(ValidationException::class);
+
+it('backfills missing customer codes idempotently', function () {
+    $fixture = referralFixture();
+    $fixture['referred']->update(['customer_rank' => 1, 'company_id' => null]);
+
+    app(ReferralCodeIssuer::class)->issueForCompany($fixture['campaign']->company_id);
+    $firstCode = ReferralCode::query()
+        ->where('company_id', $fixture['campaign']->company_id)
+        ->where('partner_id', $fixture['referred']->id)
+        ->first();
+    $countAfterFirstRun = ReferralCode::query()->count();
+
+    app(ReferralCodeIssuer::class)->issueForCompany($fixture['campaign']->company_id);
+
+    expect($firstCode)->not->toBeNull()
+        ->and($firstCode->code)->toStartWith('REF-')
+        ->and(ReferralCode::query()->count())->toBe($countAfterFirstRun);
+});
 
 it('books an earned reward once as marketing expense and customer credit', function () {
     $fixture = referralFixture();

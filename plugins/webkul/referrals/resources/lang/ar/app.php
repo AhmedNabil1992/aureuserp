@@ -5,7 +5,14 @@ return [
     'statuses'       => ['pending' => 'بانتظار السداد', 'earned' => 'مستحقة', 'reversed' => 'معكوسة', 'void' => 'ملغاة'],
     'contexts'       => ['license' => 'تراخيص البرامج', 'online_subscription' => 'الأنظمة الأونلاين', 'sales_invoice' => 'فواتير المبيعات'],
     'campaigns'      => ['title' => 'حملات الإحالة', 'singular' => 'حملة إحالة', 'rules' => 'قواعد الحملة'],
-    'codes'          => ['title' => 'أكواد الإحالة', 'singular' => 'كود إحالة', 'auto_help' => 'اتركه فارغًا لتوليد كود آمن تلقائيًا.'],
+    'codes'          => [
+        'title'            => 'أكواد الإحالة',
+        'singular'         => 'كود إحالة',
+        'auto_help'        => 'اتركه فارغًا لتوليد كود آمن تلقائيًا.',
+        'generate_missing' => 'توليد الأكواد الناقصة',
+        'generated'        => 'تم توليد أكواد الإحالة',
+        'generated_count'  => 'تم إنشاء :count كود إحالة ناقص.',
+    ],
     'redemptions'    => ['title' => 'عمليات الإحالة', 'singular' => 'عملية إحالة', 'details' => 'تفاصيل عملية الإحالة'],
     'fields'         => [
         'name'            => 'الاسم', 'company' => 'الشركة', 'currency' => 'العملة', 'contexts' => 'مسارات البيع المؤهلة',
