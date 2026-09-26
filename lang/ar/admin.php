@@ -30,5 +30,6 @@ return [
         'technical-support' => 'الدعم الفني',
         'vpn'               => 'إدارة VPN',
         'software-online'   => 'الأنظمة الأونلاين',
+        'referrals'         => 'الإحالات والمكافآت',
     ],
 ];

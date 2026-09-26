@@ -244,6 +244,20 @@
                 />
             </div>
 
+            @if($modalBillingCycle !== 'trial' && class_exists(\Webkul\Referral\Services\ReferralService::class) && \Webkul\PluginManager\Package::isPluginInstalled('referrals'))
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        {{ __('referrals::app.fields.code') }}
+                    </label>
+                    <input
+                        type="text"
+                        wire:model.defer="referralCode"
+                        class="w-full rounded-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                        placeholder="REF-XXXXXXXX"
+                    />
+                </div>
+            @endif
+
             @if($modalBillingCycle === 'trial')
                 <div class="p-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl text-xs text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
                     <x-filament::icon icon="heroicon-o-check-badge" class="w-5 h-5 flex-shrink-0" />

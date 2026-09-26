@@ -7,16 +7,23 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema as DatabaseSchema;
+use Illuminate\Validation\ValidationException;
 use Webkul\Account\Enums\AccountType;
 use Webkul\Account\Enums\DisplayType;
 use Webkul\Account\Enums\JournalType;
 use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Enums\MoveType;
+use Webkul\Account\Enums\PaymentState;
+use Webkul\Account\Events\MovePaid;
 use Webkul\Account\Facades\Account as AccountFacade;
 use Webkul\Account\Models\Journal;
 use Webkul\Account\Models\Move as AccountMove;
 use Webkul\Account\Models\MoveLine;
+use Webkul\Account\Services\MoveWorkflow;
+use Webkul\Account\Services\Reconciler;
 use Webkul\Partner\Models\Partner;
+use Webkul\PluginManager\Package;
+use Webkul\Referral\Services\ReferralService;
 use Webkul\SoftwareOnline\Enums\BillingCycle;
 use Webkul\SoftwareOnline\Enums\InstanceStatus;
 use Webkul\SoftwareOnline\Enums\TransactionType;
@@ -32,8 +39,17 @@ class OnlineBillingService
      */
     public function getAvailableBalance(Partner $partner): float
     {
+        $companyId = (int) ($partner->company_id ?: current_company_id());
+        $currencyId = Company::query()->whereKey($companyId)->value('currency_id');
+
+        if (! $companyId || ! $currencyId) {
+            return 0.0;
+        }
+
         $balance = (float) MoveLine::query()
             ->where('partner_id', $partner->id)
+            ->where('company_id', $companyId)
+            ->where('currency_id', $currencyId)
             ->where('parent_state', MoveState::POSTED)
             ->where('reconciled', false)
             ->where('balance', '<', 0)
@@ -80,7 +96,8 @@ class OnlineBillingService
         ?string $subdomain,
         BillingCycle $cycle,
         ?string $adminEmail = null,
-        ?string $adminUsername = null
+        ?string $adminUsername = null,
+        ?string $referralCode = null,
     ): OnlineInstance {
         if ($cycle === BillingCycle::Trial) {
             if ($this->hasUsedTrial($partner)) {
@@ -93,11 +110,7 @@ class OnlineBillingService
             $price = (float) $plan->monthly_price;
         }
 
-        if ($price > 0 && ! $this->hasSufficientBalance($partner, (float) $price)) {
-            throw new Exception(__('software-online::filament/customer/pages/explore.insufficient_balance'));
-        }
-
-        return DB::transaction(function () use ($partner, $plan, $name, $subdomain, $cycle, $price, $adminEmail, $adminUsername) {
+        return DB::transaction(function () use ($partner, $plan, $name, $subdomain, $cycle, $price, $adminEmail, $adminUsername, $referralCode) {
             $startsAt = now();
             if ($cycle === BillingCycle::Trial) {
                 $trialDays = $plan->trial_days > 0 ? $plan->trial_days : 14;
@@ -127,7 +140,7 @@ class OnlineBillingService
 
             // Generate invoice move only if price > 0
             $moveData = $price > 0
-                ? $this->createSubscriptionInvoice($instance, $plan, $partner, $price, $cycle, 'new_subscription')
+                ? $this->createSubscriptionInvoice($instance, $plan, $partner, $price, $cycle, 'new_subscription', $referralCode)
                 : null;
 
             if ($moveData) {
@@ -140,7 +153,7 @@ class OnlineBillingService
                 'partner_id'    => $partner->id,
                 'type'          => TransactionType::NewSubscription,
                 'billing_cycle' => $cycle,
-                'amount'        => $price,
+                'amount'        => $moveData ? (float) $moveData['move']->amount_total : $price,
                 'status'        => 'paid',
                 'period_start'  => $startsAt->toDateString(),
                 'period_end'    => $expiresAt->toDateString(),
@@ -226,24 +239,26 @@ class OnlineBillingService
         Partner $partner,
         float $price,
         BillingCycle $cycle,
-        string $context
-    ): ?array {
+        string $context,
+        ?string $referralCode = null,
+    ): array {
         if (! DatabaseSchema::hasTable('accounts_account_moves') || ! DatabaseSchema::hasTable('accounts_account_move_lines')) {
-            return null;
+            throw new Exception('Accounts tables are required for online-system billing.');
         }
 
         try {
-            $company = $partner->company ?? Company::first();
+            $companyId = (int) ($partner->company_id ?: current_company_id());
+            $company = Company::query()->find($companyId);
             if (! $company || ! $company->currency_id) {
-                return null;
+                throw new Exception('A company with a currency is required for online-system billing.');
             }
 
-            $journal = Journal::where('type', JournalType::SALE->value ?? 'sale')
+            $journal = Journal::where('type', JournalType::SALE)
                 ->where('company_id', $company->id)
-                ->first() ?? Journal::first();
+                ->first();
 
             if (! $journal) {
-                return null;
+                throw new Exception('A sales journal is required for online-system billing.');
             }
 
             $userId = Auth::guard('web')->id();
@@ -252,7 +267,7 @@ class OnlineBillingService
                 'move_type'        => MoveType::OUT_INVOICE->value ?? 'out_invoice',
                 'state'            => MoveState::DRAFT->value ?? 'draft',
                 'journal_id'       => $journal->id,
-                'invoice_origin'   => 'SITE-#' . ($instance->instance_number ?? $instance->id),
+                'invoice_origin'   => 'SITE-#'.($instance->instance_number ?? $instance->id),
                 'date'             => now()->toDateString(),
                 'invoice_date'     => now()->toDateString(),
                 'invoice_date_due' => now()->toDateString(),
@@ -264,10 +279,13 @@ class OnlineBillingService
             ]);
 
             $product = $plan->product;
-            $itemName = $product ? $product->name : ($plan->name . ' — ' . $plan->system?->name);
+            if (! $product) {
+                throw new Exception('The online plan must be linked to a product before billing.');
+            }
+            $itemName = $product ? $product->name : ($plan->name.' — '.$plan->system?->name);
 
             $line = $accountMove->invoiceLines()->create([
-                'name'         => $itemName . ' (' . $cycle->getLabel() . ') - ' . $instance->name,
+                'name'         => $itemName.' ('.$cycle->getLabel().') - '.$instance->name,
                 'date'         => $accountMove->date,
                 'display_type' => DisplayType::PRODUCT->value ?? 'product',
                 'parent_state' => MoveState::DRAFT->value ?? 'draft',
@@ -279,37 +297,67 @@ class OnlineBillingService
                 'creator_id'   => $userId,
             ]);
 
-            try {
-                if (class_exists(AccountFacade::class)) {
-                    AccountFacade::computeAccountMove($accountMove);
-                }
-            } catch (\Throwable $e) {
-                // Calculation fallback
+            if (
+                filled($referralCode)
+                && class_exists(ReferralService::class)
+                && Package::isPluginInstalled('referrals')
+            ) {
+                app(ReferralService::class)->applyToDraftMove(
+                    $accountMove,
+                    $referralCode,
+                    ReferralService::CONTEXT_ONLINE,
+                    OnlineInstance::class,
+                    $instance->id,
+                );
             }
 
-            // Post the invoice so it appears in ERP and affects the customer balance
-            try {
-                $accountMove = app(\Webkul\Account\Services\MoveWorkflow::class)->post($accountMove);
-            } catch (\Throwable $e) {
-                Log::warning('Failed to post subscription invoice: ' . $e->getMessage());
+            AccountFacade::computeAccountMove($accountMove->refresh());
+            $accountMove->refresh();
+
+            if (! $this->hasSufficientBalanceLocked($partner, (float) $accountMove->amount_total, $company->id, $company->currency_id)) {
+                throw ValidationException::withMessages([
+                    'referralCode' => __('software-online::filament/customer/pages/explore.insufficient_balance'),
+                ]);
             }
 
-            // Auto-reconcile the posted invoice against the customer's available credit
-            try {
-                $this->reconcileWithCustomerCredit($accountMove, $partner);
-            } catch (\Throwable $e) {
-                Log::warning('Failed to reconcile subscription invoice with customer credit: ' . $e->getMessage());
+            $accountMove = app(MoveWorkflow::class)->post($accountMove);
+            $this->reconcileWithCustomerCredit($accountMove, $partner);
+            $accountMove->refresh();
+            $accountMove->computePaymentState();
+            $accountMove->save();
+
+            if ($accountMove->payment_state !== PaymentState::PAID) {
+                throw new Exception('Online subscription invoice could not be fully settled from customer credit.');
             }
+
+            MovePaid::dispatch($accountMove);
 
             return [
                 'move' => $accountMove,
                 'line' => $line,
             ];
         } catch (\Throwable $e) {
-            Log::error('Failed to create subscription invoice: ' . $e->getMessage());
+            Log::error('Failed to create subscription invoice: '.$e->getMessage());
 
-            return null;
+            throw $e;
         }
+    }
+
+    private function hasSufficientBalanceLocked(Partner $partner, float $amount, int $companyId, int $currencyId): bool
+    {
+        $available = MoveLine::query()
+            ->where('partner_id', $partner->id)
+            ->where('company_id', $companyId)
+            ->where('currency_id', $currencyId)
+            ->where('parent_state', MoveState::POSTED)
+            ->where('reconciled', false)
+            ->where('amount_residual', '<', 0)
+            ->whereHas('account', fn ($query) => $query->where('account_type', AccountType::ASSET_RECEIVABLE))
+            ->lockForUpdate()
+            ->get()
+            ->sum(fn (MoveLine $line): float => abs((float) $line->amount_residual));
+
+        return $available + 0.0001 >= $amount;
     }
 
     /**
@@ -320,7 +368,10 @@ class OnlineBillingService
     {
         $invoiceLine = $move->lines()
             ->where('balance', '>', 0)
+            ->where('company_id', $move->company_id)
+            ->where('currency_id', $move->currency_id)
             ->whereHas('account', fn ($q) => $q->where('account_type', AccountType::ASSET_RECEIVABLE))
+            ->lockForUpdate()
             ->first();
 
         if (! $invoiceLine) {
@@ -329,48 +380,20 @@ class OnlineBillingService
 
         $creditLines = MoveLine::query()
             ->where('partner_id', $partner->id)
+            ->where('company_id', $move->company_id)
+            ->where('currency_id', $move->currency_id)
+            ->where('account_id', $invoiceLine->account_id)
             ->where('parent_state', MoveState::POSTED)
             ->where('reconciled', false)
             ->where('balance', '<', 0)
             ->where('amount_residual', '<', 0)
             ->whereHas('account', fn ($query) => $query->where('account_type', AccountType::ASSET_RECEIVABLE))
             ->orderBy('date')
+            ->lockForUpdate()
             ->get();
 
-        $remaining = (float) $invoiceLine->amount_residual;
-        $userId = Auth::guard('web')->id();
-
-        foreach ($creditLines as $creditLine) {
-            if ($remaining <= 0.001) {
-                break;
-            }
-
-            $available = abs((float) $creditLine->amount_residual);
-
-            if ($available <= 0.001) {
-                continue;
-            }
-
-            $partial = min($available, $remaining);
-
-            $creditLine->matchedDebits()->create([
-                'company_id'          => $move->company_id,
-                'credit_move_line_id' => $creditLine->id,
-                'debit_move_line_id'  => $invoiceLine->id,
-                'debit_currency_id'   => $invoiceLine->currency_id,
-                'credit_currency_id'  => $creditLine->currency_id,
-                'debit_amount_currency'  => $partial,
-                'credit_amount_currency' => $partial,
-                'creator_id'          => $userId,
-                'max_date'            => now()->toDateString(),
-                'amount'              => $partial,
-            ]);
-
-            $remaining -= $partial;
-        }
-
-        app(\Webkul\Account\Services\Reconciler::class)->refreshMatchingNumbers(
-            $creditLines->pluck('id')->push($invoiceLine->id)->unique()->all()
+        app(Reconciler::class)->reconcile(
+            $creditLines->push($invoiceLine)
         );
     }
 }

@@ -30,5 +30,6 @@ return [
         'technical-support' => 'Technical Support',
         'vpn'               => 'VPN Management',
         'software-online'   => 'Online Systems',
+        'referrals'         => 'Referrals',
     ],
 ];

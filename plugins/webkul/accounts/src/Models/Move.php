@@ -92,6 +92,7 @@ class Move extends Model implements Sortable
         'invoice_source_email',
         'invoice_partner_display_name',
         'invoice_origin',
+        'referral_code',
         'incoterm_location',
         'date',
         'auto_post_until',

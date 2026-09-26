@@ -28,9 +28,10 @@ class LicenseManager
     public function billLicense(
         License $license,
         int $editionId,
-        string $licensePlan
+        string $licensePlan,
+        ?string $referralCode = null,
     ): array {
-        return DB::transaction(function () use ($license, $editionId, $licensePlan) {
+        return DB::transaction(function () use ($license, $editionId, $licensePlan, $referralCode) {
             // Validate
             $this->validateBillingRequest($license, $editionId, $licensePlan);
 
@@ -57,7 +58,8 @@ class LicenseManager
                 $updatedLicense,
                 $editionId,
                 $licensePlan,
-                'initial'
+                'initial',
+                $referralCode,
             );
 
             // Create Subscriptions

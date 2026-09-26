@@ -2,16 +2,14 @@
 
 namespace Webkul\SoftwareOnline\Filament\Customer\Pages;
 
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
 use Webkul\SoftwareOnline\Enums\BillingCycle;
 use Webkul\SoftwareOnline\Models\OnlineSystem;
 use Webkul\SoftwareOnline\Models\OnlineSystemPlan;
 use Webkul\SoftwareOnline\Services\OnlineBillingService;
+use Webkul\Support\Enums\NavigationGroup;
 
 class ExploreSystemsPage extends Page
 {
@@ -39,9 +37,11 @@ class ExploreSystemsPage extends Page
 
     public string $adminEmail = '';
 
+    public string $referralCode = '';
+
     public static function getNavigationGroup(): string|\UnitEnum|null
     {
-        return \Webkul\Support\Enums\NavigationGroup::SoftwareOnline;
+        return NavigationGroup::SoftwareOnline;
     }
 
     public static function getNavigationLabel(): string
@@ -110,6 +110,7 @@ class ExploreSystemsPage extends Page
             'subdomain'         => 'nullable|string|alpha_dash|max:50',
             'adminEmail'        => 'required|email',
             'modalBillingCycle' => 'required|in:trial,monthly,annual',
+            'referralCode'      => 'nullable|string|max:32',
         ]);
 
         $partner = Auth::guard('customer')->user();
@@ -129,7 +130,8 @@ class ExploreSystemsPage extends Page
                 subdomain: $this->subdomain,
                 cycle: $cycle,
                 adminEmail: $this->adminEmail,
-                adminUsername: $this->adminUsername
+                adminUsername: $this->adminUsername,
+                referralCode: filled($this->referralCode) ? $this->referralCode : null,
             );
 
             Notification::make()

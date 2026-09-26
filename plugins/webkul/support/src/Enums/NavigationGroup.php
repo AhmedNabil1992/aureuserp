@@ -63,6 +63,8 @@ enum NavigationGroup: string implements HasIcon, HasLabel
 
     case SoftwareOnline = 'software-online';
 
+    case Referrals = 'referrals';
+
     public function getLabel(): string
     {
         return __('admin.navigation.'.$this->value);
@@ -99,6 +101,7 @@ enum NavigationGroup: string implements HasIcon, HasLabel
             self::TechnicalSupport => 'heroicon-o-lifebuoy',
             self::Vpn              => 'heroicon-o-shield-check',
             self::SoftwareOnline   => 'heroicon-o-globe-alt',
+            self::Referrals        => 'heroicon-o-gift',
         };
     }
 }
