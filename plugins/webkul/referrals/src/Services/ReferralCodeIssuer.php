@@ -56,7 +56,13 @@ class ReferralCodeIssuer
 
     public function issueForPartner(Partner $partner): int
     {
-        if (! $this->isReady() || (int) $partner->customer_rank <= 0) {
+        if (! $this->isReady()) {
+            return 0;
+        }
+
+        $partner = AccountPartner::withoutGlobalScopes()->find($partner->getKey());
+
+        if (! $partner || (int) $partner->customer_rank <= 0) {
             return 0;
         }
 

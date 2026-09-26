@@ -121,6 +121,23 @@ it('backfills missing customer codes idempotently', function () {
         ->and(ReferralCode::query()->count())->toBe($countAfterFirstRun);
 });
 
+it('reloads a partner after a database expression updates the customer rank', function () {
+    $fixture = referralFixture();
+
+    DB::table('partners_partners')
+        ->where('id', $fixture['referred']->id)
+        ->update(['customer_rank' => 1, 'company_id' => null]);
+
+    $fixture['referred']->setAttribute('customer_rank', DB::raw('COALESCE(customer_rank, 0) + 1'));
+
+    app(ReferralCodeIssuer::class)->issueForPartner($fixture['referred']);
+
+    expect(ReferralCode::query()
+        ->where('company_id', $fixture['campaign']->company_id)
+        ->where('partner_id', $fixture['referred']->id)
+        ->exists())->toBeTrue();
+});
+
 it('resolves an existing referral code when the portal customer has no company', function () {
     $fixture = referralFixture();
     $fixture['referrer']->forceFill(['company_id' => null]);
