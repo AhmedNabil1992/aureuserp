@@ -11,6 +11,9 @@ use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Schema as DatabaseSchema;
+use Webkul\PluginManager\Package;
+use Webkul\Referral\Services\ReferralService;
 use Webkul\Sale\Enums\AdvancedPayment;
 use Webkul\Sale\Enums\InvoiceStatus;
 use Webkul\Sale\Facades\SaleOrder as SalesFacade;
@@ -51,6 +54,14 @@ class CreateInvoiceAction extends Action
                     })
                     ->default(AdvancedPayment::DELIVERED->value)
                     ->live(),
+                TextInput::make('referral_code')
+                    ->label(__('referrals::app.fields.code'))
+                    ->helperText(__('referrals::app.codes.invoice_help'))
+                    ->maxLength(32)
+                    ->dehydrateStateUsing(fn (?string $state): ?string => filled($state) ? strtoupper(trim($state)) : null)
+                    ->visible(fn (): bool => class_exists(ReferralService::class)
+                        && DatabaseSchema::hasColumn('accounts_account_moves', 'referral_code')
+                        && Package::isPluginInstalled('referrals')),
                 Group::make()
                     ->columns(2)
                     ->schema([

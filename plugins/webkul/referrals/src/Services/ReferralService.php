@@ -31,6 +31,28 @@ class ReferralService
         $companyId ??= (int) ($partner->company_id ?: current_company_id());
 
         if (! $companyId) {
+            $existingCode = ReferralCode::query()
+                ->where('partner_id', $partner->id)
+                ->orderByDesc('is_active')
+                ->orderBy('id')
+                ->first();
+
+            if ($existingCode) {
+                return $existingCode;
+            }
+
+            $activeCampaignCompanyIds = ReferralCampaign::query()
+                ->active()
+                ->distinct()
+                ->limit(2)
+                ->pluck('company_id');
+
+            if ($activeCampaignCompanyIds->count() === 1) {
+                $companyId = (int) $activeCampaignCompanyIds->first();
+            }
+        }
+
+        if (! $companyId) {
             throw ValidationException::withMessages([
                 'referral_code' => __('referrals::app.validation.company_required'),
             ]);

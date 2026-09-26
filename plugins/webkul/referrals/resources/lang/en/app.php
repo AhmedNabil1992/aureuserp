@@ -9,6 +9,7 @@ return [
         'title'            => 'Referral Codes',
         'singular'         => 'Referral Code',
         'auto_help'        => 'Leave blank to generate a secure code automatically.',
+        'invoice_help'     => 'Enter the customer referral code to apply the campaign discount to eligible products.',
         'generate_missing' => 'Generate missing codes',
         'generated'        => 'Referral codes generated',
         'generated_count'  => ':count missing referral code(s) were created.',

@@ -118,7 +118,7 @@ class InvoiceForm
                                             ->disabled(fn ($record) => in_array($record?->state, [MoveState::POSTED, MoveState::CANCEL])),
                                         TextInput::make('referral_code')
                                             ->label(__('referrals::app.fields.code'))
-                                            ->helperText(__('referrals::app.customer.share_help'))
+                                            ->helperText(__('referrals::app.codes.invoice_help'))
                                             ->maxLength(32)
                                             ->dehydrateStateUsing(fn (?string $state): ?string => filled($state) ? strtoupper(trim($state)) : null)
                                             ->visible(fn (): bool => class_exists(ReferralService::class)

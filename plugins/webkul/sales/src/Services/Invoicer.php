@@ -2,11 +2,15 @@
 
 namespace Webkul\Sale\Services;
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema as DatabaseSchema;
 use Webkul\Account\Enums as AccountEnums;
 use Webkul\Account\Enums\InvoicePolicy;
 use Webkul\Account\Facades\Account as AccountFacade;
 use Webkul\Account\Models\Move as AccountMove;
+use Webkul\PluginManager\Package;
+use Webkul\Referral\Services\ReferralService;
 use Webkul\Sale\Enums\AdvancedPayment;
 use Webkul\Sale\Models\AdvancedPaymentInvoice;
 use Webkul\Sale\Models\Order;
@@ -20,11 +24,25 @@ class Invoicer
     public function invoiceOrder(Order $record, array $data = []): AdvancedPaymentInvoice
     {
         if ($data['advance_payment_method'] == AdvancedPayment::DELIVERED->value) {
-            $this->createInvoice($record);
+            $accountMove = $this->createInvoice($record, $data['referral_code'] ?? null);
+
+            if (
+                filled($data['referral_code'] ?? null)
+                && class_exists(ReferralService::class)
+                && Package::isPluginInstalled('referrals')
+            ) {
+                app(ReferralService::class)->applyToDraftMove(
+                    $accountMove,
+                    $data['referral_code'],
+                    ReferralService::CONTEXT_SALES_INVOICE,
+                    Order::class,
+                    $record->id,
+                );
+            }
         }
 
         $invoice = AdvancedPaymentInvoice::create([
-            ...$data,
+            ...Arr::except($data, ['referral_code']),
             'currency_id'          => $record->currency_id,
             'company_id'           => $record->company_id,
             'creator_id'           => Auth::id(),
@@ -37,9 +55,9 @@ class Invoicer
         return $invoice;
     }
 
-    public function createInvoice(Order $record): AccountMove
+    public function createInvoice(Order $record, ?string $referralCode = null): AccountMove
     {
-        $accountMove = AccountMove::create([
+        $values = [
             'move_type'               => AccountEnums\MoveType::OUT_INVOICE,
             'invoice_origin'          => $record->name,
             'date'                    => now(),
@@ -48,7 +66,13 @@ class Invoicer
             'invoice_payment_term_id' => $record->payment_term_id,
             'partner_id'              => $record->partner_id,
             'fiscal_position_id'      => $record->fiscal_position_id,
-        ]);
+        ];
+
+        if (filled($referralCode) && DatabaseSchema::hasColumn('accounts_account_moves', 'referral_code')) {
+            $values['referral_code'] = strtoupper(trim($referralCode));
+        }
+
+        $accountMove = AccountMove::create($values);
 
         $record->accountMoves()->attach($accountMove->id);
 
