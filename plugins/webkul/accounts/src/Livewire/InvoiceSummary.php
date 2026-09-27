@@ -7,6 +7,8 @@ use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Component;
 use Webkul\Account\Enums\MoveType;
 use Webkul\Account\Facades\Account as AccountFacade;
@@ -42,6 +44,8 @@ class InvoiceSummary extends Component implements HasActions, HasSchemas
     public $reconcilablePayments = null;
 
     public $reconciledPayments = null;
+
+    public float $referralWalletApplied = 0;
 
     protected $listeners = [
         'itemUpdated'           => 'refreshSummary',
@@ -111,6 +115,30 @@ class InvoiceSummary extends Component implements HasActions, HasSchemas
         $this->reconcilablePayments = $this->record?->getReconcilablePayments();
 
         $this->reconciledPayments = $this->record?->getReconciledPayments();
+
+        $this->referralWalletApplied = (float) ($this->record?->referral_wallet_amount ?? 0);
+
+        if (Schema::hasTable('referral_wallet_transactions') && ! empty($this->reconciledPayments['lines'])) {
+            $moveIds = collect($this->reconciledPayments['lines'])->pluck('move_id')->filter()->unique();
+            $walletMoveIds = DB::table('referral_wallet_transactions')
+                ->whereIn('accounting_move_id', $moveIds)->pluck('accounting_move_id')->all();
+
+            $this->reconciledPayments['lines'] = array_values(array_filter(
+                $this->reconciledPayments['lines'],
+                fn (array $line): bool => ! in_array($line['move_id'], $walletMoveIds, true),
+            ));
+        }
+
+        if (Schema::hasTable('referral_wallet_transactions') && $this->record?->id) {
+            $walletHistory = DB::table('referral_wallet_transactions')
+                ->where('invoice_move_id', $this->record->id)
+                ->selectRaw('COUNT(*) as transaction_count, COALESCE(SUM(amount), 0) as net_amount')
+                ->first();
+
+            if ((int) ($walletHistory->transaction_count ?? 0) > 0) {
+                $this->referralWalletApplied = max(0, -(float) $walletHistory->net_amount);
+            }
+        }
 
         return view('accounts::livewire/invoice-summary');
     }

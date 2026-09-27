@@ -24,7 +24,11 @@ class Invoicer
     public function invoiceOrder(Order $record, array $data = []): AdvancedPaymentInvoice
     {
         if ($data['advance_payment_method'] == AdvancedPayment::DELIVERED->value) {
-            $accountMove = $this->createInvoice($record, $data['referral_code'] ?? null);
+            $accountMove = $this->createInvoice(
+                $record,
+                $data['referral_code'] ?? null,
+                (float) ($data['referral_wallet_amount'] ?? 0),
+            );
 
             if (
                 filled($data['referral_code'] ?? null)
@@ -42,7 +46,7 @@ class Invoicer
         }
 
         $invoice = AdvancedPaymentInvoice::create([
-            ...Arr::except($data, ['referral_code']),
+            ...Arr::except($data, ['referral_code', 'referral_wallet_amount']),
             'currency_id'          => $record->currency_id,
             'company_id'           => $record->company_id,
             'creator_id'           => Auth::id(),
@@ -55,7 +59,7 @@ class Invoicer
         return $invoice;
     }
 
-    public function createInvoice(Order $record, ?string $referralCode = null): AccountMove
+    public function createInvoice(Order $record, ?string $referralCode = null, float $referralWalletAmount = 0): AccountMove
     {
         $values = [
             'move_type'               => AccountEnums\MoveType::OUT_INVOICE,
@@ -70,6 +74,10 @@ class Invoicer
 
         if (filled($referralCode) && DatabaseSchema::hasColumn('accounts_account_moves', 'referral_code')) {
             $values['referral_code'] = strtoupper(trim($referralCode));
+        }
+
+        if (DatabaseSchema::hasColumn('accounts_account_moves', 'referral_wallet_amount')) {
+            $values['referral_wallet_amount'] = max(0, $referralWalletAmount);
         }
 
         $accountMove = AccountMove::create($values);

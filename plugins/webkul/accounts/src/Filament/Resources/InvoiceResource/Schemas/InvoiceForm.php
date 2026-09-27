@@ -48,6 +48,7 @@ use Webkul\Field\Filament\Forms\Components\ProgressStepper as FormProgressSteppe
 use Webkul\PluginManager\Package;
 use Webkul\Product\Settings\ProductSettings;
 use Webkul\Referral\Services\ReferralService;
+use Webkul\Referral\Services\ReferralWalletService;
 use Webkul\Support\Filament\Forms\Components\Repeater;
 use Webkul\Support\Filament\Forms\Components\Repeater\TableColumn;
 use Webkul\Support\Models\Company;
@@ -123,6 +124,25 @@ class InvoiceForm
                                             ->dehydrateStateUsing(fn (?string $state): ?string => filled($state) ? strtoupper(trim($state)) : null)
                                             ->visible(fn (): bool => class_exists(ReferralService::class)
                                                 && DatabaseSchema::hasColumn('accounts_account_moves', 'referral_code')
+                                                && Package::isPluginInstalled('referrals'))
+                                            ->disabled(fn ($record) => in_array($record?->state, [MoveState::POSTED, MoveState::CANCEL])),
+                                        TextInput::make('referral_wallet_amount')
+                                            ->label(__('referrals::app.wallet.use_on_invoice'))
+                                            ->helperText(function (Get $get): string {
+                                                if (! $get('company_id') || ! $get('currency_id') || ! $get('partner_id')) {
+                                                    return __('referrals::app.wallet.select_customer');
+                                                }
+
+                                                $available = app(ReferralWalletService::class)->balance(
+                                                    (int) $get('company_id'), (int) $get('currency_id'), (int) $get('partner_id')
+                                                );
+
+                                                return __('referrals::app.wallet.available', ['amount' => number_format($available, 2)]).
+                                                    ' '.__('referrals::app.wallet.usage_policy');
+                                            })
+                                            ->numeric()->minValue(0)->default(0)
+                                            ->visible(fn (): bool => class_exists(ReferralWalletService::class)
+                                                && DatabaseSchema::hasColumn('accounts_account_moves', 'referral_wallet_amount')
                                                 && Package::isPluginInstalled('referrals'))
                                             ->disabled(fn ($record) => in_array($record?->state, [MoveState::POSTED, MoveState::CANCEL])),
                                     ]),

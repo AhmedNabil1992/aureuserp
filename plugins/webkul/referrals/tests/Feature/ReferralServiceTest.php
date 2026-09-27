@@ -12,6 +12,8 @@ use Webkul\Referral\Enums\DiscountType;
 use Webkul\Referral\Enums\RedemptionStatus;
 use Webkul\Referral\Models\ReferralCampaign;
 use Webkul\Referral\Models\ReferralCode;
+use Webkul\Referral\Models\ReferralRedemption;
+use Webkul\Referral\Models\ReferralWalletBalance;
 use Webkul\Referral\Services\ReferralCodeIssuer;
 use Webkul\Referral\Services\ReferralRewardService;
 use Webkul\Referral\Services\ReferralService;
@@ -72,8 +74,11 @@ function referralFixture(float $discount = 100, float $reward = 100): array
         'is_active'               => true,
     ]);
     $campaign->products()->attach($line->product_id);
+    $campaign->refresh();
+    $expense = $campaign->expenseAccount;
+    $liability = $campaign->liabilityAccount;
 
-    return compact('move', 'line', 'code', 'campaign', 'referrer', 'referred', 'expense');
+    return compact('move', 'line', 'code', 'campaign', 'referrer', 'referred', 'expense', 'liability');
 }
 
 it('applies a fixed discount only to eligible invoice products', function () {
@@ -214,7 +219,7 @@ it('applies a referral code while creating an invoice from a sale order', functi
         ->and($redemption->source_id)->toBe($order->id);
 });
 
-it('books an earned reward once as marketing expense and customer credit', function () {
+it('books an earned reward once as marketing expense and referral liability', function () {
     $fixture = referralFixture();
     $redemption = app(ReferralService::class)->applyToDraftMove(
         $fixture['move'],
@@ -229,11 +234,12 @@ it('books an earned reward once as marketing expense and customer credit', funct
     expect($earned->status)->toBe(RedemptionStatus::Earned)
         ->and($again->reward_move_id)->toBe($earned->reward_move_id)
         ->and((float) $earned->rewardMove->lines()->where('account_id', $fixture['expense']->id)->sum('debit'))->toBe(100.0)
-        ->and((float) $earned->rewardMove->lines()->where('partner_id', $fixture['referrer']->id)->sum('credit'))->toBe(100.0)
+        ->and((float) $earned->rewardMove->lines()->where('account_id', $fixture['liability']->id)->sum('credit'))->toBe(100.0)
+        ->and((float) ReferralWalletBalance::query()->where('partner_id', $fixture['referrer']->id)->value('available_amount'))->toBe(100.0)
         ->and($redemption->refresh()->reward_move_id)->not->toBeNull();
 });
 
-it('reverses the customer credit when an earned referral is cancelled', function () {
+it('reverses the referral liability and wallet balance when an earned referral is cancelled', function () {
     $fixture = referralFixture();
     app(ReferralService::class)->applyToDraftMove(
         $fixture['move'],
@@ -248,5 +254,6 @@ it('reverses the customer credit when an earned referral is cancelled', function
 
     expect($reversed->status)->toBe(RedemptionStatus::Reversed)
         ->and($reversed->reward_reversal_move_id)->not->toBeNull()
-        ->and($originalCredit->refresh()->reconciled)->toBeTrue();
+        ->and($originalCredit->refresh()->reconciled)->toBeTrue()
+        ->and((float) ReferralWalletBalance::query()->where('partner_id', $fixture['referrer']->id)->value('available_amount'))->toBe(0.0);
 });

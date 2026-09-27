@@ -20,10 +20,6 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Webkul\Account\Enums\AccountType;
-use Webkul\Account\Enums\JournalType;
-use Webkul\Account\Models\Account;
-use Webkul\Account\Models\Journal;
 use Webkul\Referral\Enums\DiscountType;
 use Webkul\Referral\Filament\Admin\Resources\ReferralCampaignResource\Pages\ManageReferralCampaigns;
 use Webkul\Referral\Models\ReferralCampaign;
@@ -105,26 +101,6 @@ class ReferralCampaignResource extends Resource
                     TextInput::make('customer_discount')->label(__('referrals::app.fields.customer_discount'))->numeric()->minValue(0)->required(),
                     TextInput::make('referrer_reward')->label(__('referrals::app.fields.referrer_reward'))->numeric()->minValue(0)->required(),
                     TextInput::make('minimum_eligible_amount')->label(__('referrals::app.fields.minimum_eligible_amount'))->numeric()->minValue(0)->default(0)->required(),
-                    Select::make('journal_id')
-                        ->label(__('referrals::app.fields.journal'))
-                        ->options(fn (Get $get): array => Journal::query()
-                            ->where('company_id', $get('company_id'))
-                            ->where('type', JournalType::GENERAL)
-                            ->pluck('name', 'id')->all())
-                        ->required()
-                        ->searchable(),
-                    Select::make('expense_account_id')
-                        ->label(__('referrals::app.fields.expense_account'))
-                        ->options(fn (Get $get): array => Account::query()
-                            ->whereIn('account_type', [AccountType::EXPENSE, AccountType::EXPENSE_DIRECT_COST])
-                            ->where('deprecated', false)
-                            ->where(function (Builder $query) use ($get): void {
-                                $query->whereHas('companies', fn (Builder $companyQuery) => $companyQuery->where('companies.id', $get('company_id')))
-                                    ->orWhereDoesntHave('companies');
-                            })
-                            ->pluck('name', 'id')->all())
-                        ->required()
-                        ->searchable(),
                     TextInput::make('max_redemptions')->label(__('referrals::app.fields.max_redemptions'))->integer()->minValue(1)->nullable(),
                     DateTimePicker::make('starts_at')->label(__('referrals::app.fields.starts_at'))->native(false),
                     DateTimePicker::make('ends_at')->label(__('referrals::app.fields.ends_at'))->native(false)->after('starts_at'),

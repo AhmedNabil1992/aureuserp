@@ -11,7 +11,9 @@ use Livewire\Attributes\Locked;
 use Webkul\Partner\Models\Partner;
 use Webkul\Referral\Models\ReferralRedemption;
 use Webkul\Referral\Services\ReferralService;
+use Webkul\Referral\Services\ReferralWalletService;
 use Webkul\Support\Enums\NavigationGroup;
+use Webkul\Support\Models\Company;
 
 class MyReferralCode extends Page
 {
@@ -60,11 +62,10 @@ class MyReferralCode extends Page
 
         abort_unless($partner instanceof Partner, 403);
 
-        return (float) ReferralRedemption::query()
-            ->where('company_id', $this->referralCompanyId)
-            ->where('referrer_partner_id', $partner->id)
-            ->where('status', 'earned')
-            ->sum('referrer_reward');
+        $currencyId = (int) Company::withoutGlobalScopes()
+            ->whereKey($this->referralCompanyId)->value('currency_id');
+
+        return app(ReferralWalletService::class)->balance($this->referralCompanyId, $currencyId, (int) $partner->id);
     }
 
     public function getPendingTotalProperty(): float

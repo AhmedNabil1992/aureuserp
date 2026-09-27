@@ -14,6 +14,7 @@ use Webkul\Account\Models\Account;
 use Webkul\Account\Models\Journal;
 use Webkul\Product\Models\Product;
 use Webkul\Referral\Enums\DiscountType;
+use Webkul\Referral\Services\ReferralAccountingDefaults;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
@@ -27,6 +28,7 @@ class ReferralCampaign extends Model
         'currency_id',
         'journal_id',
         'expense_account_id',
+        'liability_account_id',
         'name',
         'contexts',
         'discount_type',
@@ -84,6 +86,11 @@ class ReferralCampaign extends Model
         return $this->belongsTo(Account::class, 'expense_account_id');
     }
 
+    public function liabilityAccount(): BelongsTo
+    {
+        return $this->belongsTo(Account::class, 'liability_account_id');
+    }
+
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_id');
@@ -104,6 +111,14 @@ class ReferralCampaign extends Model
     {
         static::creating(function (self $campaign): void {
             $campaign->creator_id ??= Auth::guard('web')->id();
+
+            if ($campaign->company_id) {
+                $defaults = app(ReferralAccountingDefaults::class)
+                    ->ensureForCompany((int) $campaign->company_id);
+                $campaign->journal_id = $defaults->journal_id;
+                $campaign->expense_account_id = $defaults->expense_account_id;
+                $campaign->liability_account_id = $defaults->liability_account_id;
+            }
         });
     }
 }

@@ -24,6 +24,7 @@ use Webkul\Account\Services\Reconciler;
 use Webkul\Partner\Models\Partner;
 use Webkul\PluginManager\Package;
 use Webkul\Referral\Services\ReferralService;
+use Webkul\Referral\Services\ReferralWalletService;
 use Webkul\SoftwareOnline\Enums\BillingCycle;
 use Webkul\SoftwareOnline\Enums\InstanceStatus;
 use Webkul\SoftwareOnline\Enums\TransactionType;
@@ -57,7 +58,7 @@ class OnlineBillingService
             ->whereHas('account', fn ($query) => $query->where('account_type', AccountType::ASSET_RECEIVABLE))
             ->sum('amount_residual');
 
-        return abs($balance);
+        return abs($balance) + $this->getReferralWalletBalance($partner, $companyId, (int) $currencyId);
     }
 
     /**
@@ -314,7 +315,7 @@ class OnlineBillingService
             AccountFacade::computeAccountMove($accountMove->refresh());
             $accountMove->refresh();
 
-            if (! $this->hasSufficientBalanceLocked($partner, (float) $accountMove->amount_total, $company->id, $company->currency_id)) {
+            if (! $this->hasSufficientBalanceLocked($partner, $accountMove, $company->id, $company->currency_id)) {
                 throw ValidationException::withMessages([
                     'referralCode' => __('software-online::filament/customer/pages/explore.insufficient_balance'),
                 ]);
@@ -343,7 +344,7 @@ class OnlineBillingService
         }
     }
 
-    private function hasSufficientBalanceLocked(Partner $partner, float $amount, int $companyId, int $currencyId): bool
+    private function hasSufficientBalanceLocked(Partner $partner, AccountMove $invoice, int $companyId, int $currencyId): bool
     {
         $available = MoveLine::query()
             ->where('partner_id', $partner->id)
@@ -357,7 +358,29 @@ class OnlineBillingService
             ->get()
             ->sum(fn (MoveLine $line): float => abs((float) $line->amount_residual));
 
-        return $available + 0.0001 >= $amount;
+        $referralWallet = $this->getReferralWalletBalance($partner, $companyId, $currencyId);
+
+        if ($referralWallet > 0) {
+            $referralWallet = min(
+                $referralWallet,
+                app(ReferralWalletService::class)->maximumUsableForInvoice($invoice),
+            );
+        }
+
+        return $available + $referralWallet + 0.0001 >= (float) $invoice->amount_total;
+    }
+
+    private function getReferralWalletBalance(Partner $partner, int $companyId, int $currencyId): float
+    {
+        if (
+            ! class_exists(ReferralWalletService::class)
+            || ! Package::isPluginInstalled('referrals')
+            || ! DatabaseSchema::hasTable('referral_wallet_balances')
+        ) {
+            return 0.0;
+        }
+
+        return app(ReferralWalletService::class)->balance($companyId, $currencyId, (int) $partner->id);
     }
 
     /**

@@ -14,6 +14,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Schema as DatabaseSchema;
 use Webkul\PluginManager\Package;
 use Webkul\Referral\Services\ReferralService;
+use Webkul\Referral\Services\ReferralWalletService;
 use Webkul\Sale\Enums\AdvancedPayment;
 use Webkul\Sale\Enums\InvoiceStatus;
 use Webkul\Sale\Facades\SaleOrder as SalesFacade;
@@ -61,6 +62,17 @@ class CreateInvoiceAction extends Action
                     ->dehydrateStateUsing(fn (?string $state): ?string => filled($state) ? strtoupper(trim($state)) : null)
                     ->visible(fn (): bool => class_exists(ReferralService::class)
                         && DatabaseSchema::hasColumn('accounts_account_moves', 'referral_code')
+                        && Package::isPluginInstalled('referrals')),
+                TextInput::make('referral_wallet_amount')
+                    ->label(__('referrals::app.wallet.use_on_invoice'))
+                    ->helperText(fn (Order $record): string => __('referrals::app.wallet.available', [
+                        'amount' => number_format(app(ReferralWalletService::class)->balance(
+                            (int) $record->company_id, (int) $record->currency_id, (int) $record->partner_id
+                        ), 2),
+                    ]).' '.__('referrals::app.wallet.usage_policy'))
+                    ->numeric()->minValue(0)->default(0)
+                    ->visible(fn (): bool => class_exists(ReferralWalletService::class)
+                        && DatabaseSchema::hasColumn('accounts_account_moves', 'referral_wallet_amount')
                         && Package::isPluginInstalled('referrals')),
                 Group::make()
                     ->columns(2)
