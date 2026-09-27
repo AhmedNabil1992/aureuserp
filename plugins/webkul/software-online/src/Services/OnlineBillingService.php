@@ -96,7 +96,6 @@ class OnlineBillingService
         string $name,
         ?string $subdomain,
         BillingCycle $cycle,
-        ?string $adminEmail = null,
         ?string $adminUsername = null,
         ?string $referralCode = null,
     ): OnlineInstance {
@@ -111,7 +110,7 @@ class OnlineBillingService
             $price = (float) $plan->monthly_price;
         }
 
-        return DB::transaction(function () use ($partner, $plan, $name, $subdomain, $cycle, $price, $adminEmail, $adminUsername, $referralCode) {
+        $instance = DB::transaction(function () use ($partner, $plan, $name, $subdomain, $cycle, $price, $adminUsername, $referralCode) {
             $startsAt = now();
             if ($cycle === BillingCycle::Trial) {
                 $trialDays = $plan->trial_days > 0 ? $plan->trial_days : 14;
@@ -128,7 +127,7 @@ class OnlineBillingService
                 'plan_id'         => $plan->id,
                 'name'            => $name,
                 'subdomain'       => $subdomain,
-                'admin_email'     => $adminEmail ?? $partner->email,
+                'admin_email'     => $partner->email,
                 'admin_username'  => $adminUsername ?? 'admin',
                 'billing_cycle'   => $cycle,
                 'price'           => $price,
@@ -162,73 +161,141 @@ class OnlineBillingService
                 'move_line_id'  => $moveData['line']->id ?? null,
             ]);
 
-            // Trigger API Provisioning
-            app(OnlineSystemProvisioningService::class)->provisionInstance($instance);
-
             return $instance;
         });
+
+        app(OnlineSystemProvisioningService::class)->provisionInstance($instance->fresh(['partner', 'plan', 'system']));
+
+        return $instance->fresh();
     }
 
     /**
      * Renew an existing instance subscription from customer balance
      */
-    public function renewInstance(OnlineInstance $instance, ?BillingCycle $cycle = null): bool
-    {
-        $partner = $instance->partner;
-        $plan = $instance->plan;
+    public function renewInstance(
+        OnlineInstance $instance,
+        ?BillingCycle $cycle = null,
+        ?\DateTimeInterface $dueBefore = null,
+    ): bool {
+        $transaction = DB::transaction(function () use ($instance, $cycle, $dueBefore): ?OnlineInstanceTransaction {
+            $lockedInstance = OnlineInstance::query()
+                ->with(['partner', 'plan', 'system'])
+                ->lockForUpdate()
+                ->findOrFail($instance->id);
 
-        // Renewal is only allowed as Monthly or Annual (never Trial)
-        $cycle = $cycle ?? $instance->billing_cycle ?? BillingCycle::Monthly;
-        if ($cycle === BillingCycle::Trial) {
-            $cycle = BillingCycle::Monthly;
-        }
+            if ($dueBefore !== null && (
+                ! $lockedInstance->auto_renew
+                || $lockedInstance->expires_at === null
+                || $lockedInstance->expires_at->gt($dueBefore)
+            )) {
+                return null;
+            }
 
-        $price = $cycle === BillingCycle::Annual ? (float) $plan->annual_price : (float) $plan->monthly_price;
+            $partner = $lockedInstance->partner;
+            $plan = $lockedInstance->plan;
+            $renewalCycle = $cycle ?? $lockedInstance->billing_cycle ?? BillingCycle::Monthly;
+            if ($renewalCycle === BillingCycle::Trial) {
+                $renewalCycle = BillingCycle::Monthly;
+            }
 
-        if ($price > 0 && ! $this->hasSufficientBalance($partner, (float) $price)) {
-            throw new Exception(__('software-online::filament/customer/pages/explore.insufficient_balance'));
-        }
+            $price = $renewalCycle === BillingCycle::Annual
+                ? (float) $plan->annual_price
+                : (float) $plan->monthly_price;
 
-        return DB::transaction(function () use ($instance, $plan, $partner, $cycle, $price) {
-            $currentExpiry = ($instance->expires_at && $instance->expires_at->isFuture())
-                ? $instance->expires_at
+            $currentExpiry = ($lockedInstance->expires_at && $lockedInstance->expires_at->isFuture())
+                ? $lockedInstance->expires_at
                 : now();
 
-            $newExpiry = $cycle === BillingCycle::Annual
+            $newExpiry = $renewalCycle === BillingCycle::Annual
                 ? (clone $currentExpiry)->addYear()
                 : (clone $currentExpiry)->addMonth();
 
-            // Generate renewal invoice move
-            $moveData = $this->createSubscriptionInvoice($instance, $plan, $partner, $price, $cycle, 'renewal');
+            $moveData = $this->createSubscriptionInvoice(
+                $lockedInstance,
+                $plan,
+                $partner,
+                $price,
+                $renewalCycle,
+                'renewal',
+            );
 
-            $instance->update([
-                'billing_cycle'   => $cycle,
-                'price'           => $price,
-                'expires_at'      => $newExpiry,
-                'last_renewed_at' => now(),
-                'status'          => InstanceStatus::Active,
-                'move_id'         => $moveData['move']->id ?? $instance->move_id,
+            $lockedInstance->update([
+                'billing_cycle'           => $renewalCycle,
+                'price'                   => $price,
+                'expires_at'              => $newExpiry,
+                'last_renewed_at'         => now(),
+                'last_renewal_attempt_at' => now(),
+                'last_renewal_error'      => null,
+                'status'                  => InstanceStatus::Active,
+                'move_id'                 => $moveData['move']->id ?? $lockedInstance->move_id,
             ]);
 
-            // Record renewal transaction
-            OnlineInstanceTransaction::create([
-                'instance_id'   => $instance->id,
-                'partner_id'    => $partner->id,
-                'type'          => TransactionType::Renewal,
-                'billing_cycle' => $cycle,
-                'amount'        => $price,
-                'status'        => 'paid',
-                'period_start'  => $currentExpiry->toDateString(),
-                'period_end'    => $newExpiry->toDateString(),
-                'move_id'       => $moveData['move']->id ?? null,
-                'move_line_id'  => $moveData['line']->id ?? null,
+            return OnlineInstanceTransaction::create([
+                'instance_id'        => $lockedInstance->id,
+                'partner_id'         => $partner->id,
+                'type'               => TransactionType::Renewal,
+                'billing_cycle'      => $renewalCycle,
+                'amount'             => (float) $moveData['move']->amount_total,
+                'status'             => 'paid',
+                'idempotency_key'    => 'tenant-renewal:'.$lockedInstance->id.':'.$newExpiry->utc()->format('YmdHis'),
+                'remote_sync_status' => 'pending',
+                'period_start'       => $currentExpiry->toDateString(),
+                'period_end'         => $newExpiry->toDateString(),
+                'move_id'            => $moveData['move']->id ?? null,
+                'move_line_id'       => $moveData['line']->id ?? null,
             ]);
-
-            // Notify remote system
-            app(OnlineSystemProvisioningService::class)->renewInstance($instance);
-
-            return true;
         });
+
+        if (! $transaction) {
+            return false;
+        }
+
+        $this->syncRenewalTransaction($transaction);
+
+        return true;
+    }
+
+    public function renewDueInstance(OnlineInstance $instance, \DateTimeInterface $dueBefore): bool
+    {
+        try {
+            return $this->renewInstance($instance, null, $dueBefore);
+        } catch (\Throwable $exception) {
+            $instance->update([
+                'last_renewal_attempt_at' => now(),
+                'last_renewal_error'      => $exception->getMessage(),
+            ]);
+
+            throw $exception;
+        }
+    }
+
+    public function syncRenewalTransaction(OnlineInstanceTransaction $transaction): bool
+    {
+        $transaction->loadMissing('instance.system');
+
+        if ($transaction->remote_sync_status === 'synced') {
+            return true;
+        }
+
+        $success = app(OnlineSystemProvisioningService::class)->renewInstance(
+            $transaction->instance,
+            $transaction->idempotency_key,
+        );
+
+        $transaction->update([
+            'remote_sync_status'   => $success ? 'synced' : 'failed',
+            'remote_sync_attempts' => $transaction->remote_sync_attempts + 1,
+            'remote_sync_error'    => $success ? null : $transaction->instance->fresh()->last_api_error,
+            'remote_synced_at'     => $success ? now() : null,
+        ]);
+
+        $transaction->instance->update([
+            'last_renewal_error' => $success
+                ? null
+                : ($transaction->instance->fresh()->last_api_error ?: 'Remote renewal synchronization failed.'),
+        ]);
+
+        return $success;
     }
 
     /**

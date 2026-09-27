@@ -5,9 +5,11 @@ namespace Webkul\SoftwareOnline\Filament\Customer\Pages;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Webkul\SoftwareOnline\Enums\BillingCycle;
 use Webkul\SoftwareOnline\Models\OnlineSystem;
 use Webkul\SoftwareOnline\Models\OnlineSystemPlan;
+use Webkul\SoftwareOnline\Rules\Subdomain;
 use Webkul\SoftwareOnline\Services\OnlineBillingService;
 use Webkul\Support\Enums\NavigationGroup;
 
@@ -104,11 +106,19 @@ class ExploreSystemsPage extends Page
 
     public function createWebsite(): void
     {
+        $this->subdomain = strtolower(trim($this->subdomain));
+
         $this->validate([
             'selectedPlanId'    => 'required|exists:online_system_plans,id',
             'websiteName'       => 'required|string|min:3|max:100',
-            'subdomain'         => 'nullable|string|alpha_dash|max:50',
-            'adminEmail'        => 'required|email',
+            'subdomain'         => [
+                'required',
+                'string',
+                'max:50',
+                new Subdomain,
+                Rule::unique('online_instances', 'subdomain')
+                    ->where(fn ($query) => $query->where('system_id', $this->selectedSystemId)),
+            ],
             'modalBillingCycle' => 'required|in:trial,monthly,annual',
             'referralCode'      => 'nullable|string|max:32',
         ]);
@@ -129,7 +139,6 @@ class ExploreSystemsPage extends Page
                 name: $this->websiteName,
                 subdomain: $this->subdomain,
                 cycle: $cycle,
-                adminEmail: $this->adminEmail,
                 adminUsername: $this->adminUsername,
                 referralCode: filled($this->referralCode) ? $this->referralCode : null,
             );

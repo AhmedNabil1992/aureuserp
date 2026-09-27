@@ -16,11 +16,12 @@ use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Webkul\Partner\Models\Partner;
+use Illuminate\Validation\Rules\Unique;
 use Webkul\SoftwareOnline\Enums\BillingCycle;
 use Webkul\SoftwareOnline\Enums\InstanceStatus;
 use Webkul\SoftwareOnline\Filament\Admin\Resources\OnlineInstanceResource\Pages\CreateOnlineInstance;
@@ -29,8 +30,10 @@ use Webkul\SoftwareOnline\Filament\Admin\Resources\OnlineInstanceResource\Pages\
 use Webkul\SoftwareOnline\Filament\Admin\Resources\OnlineInstanceResource\Pages\ViewOnlineInstance;
 use Webkul\SoftwareOnline\Models\OnlineInstance;
 use Webkul\SoftwareOnline\Models\OnlineSystemPlan;
+use Webkul\SoftwareOnline\Rules\Subdomain;
 use Webkul\SoftwareOnline\Services\OnlineBillingService;
 use Webkul\SoftwareOnline\Services\OnlineSystemProvisioningService;
+use Webkul\Support\Enums\NavigationGroup;
 
 class OnlineInstanceResource extends Resource
 {
@@ -46,7 +49,7 @@ class OnlineInstanceResource extends Resource
 
     public static function getNavigationGroup(): string|\UnitEnum|null
     {
-        return \Webkul\Support\Enums\NavigationGroup::SoftwareOnline;
+        return NavigationGroup::SoftwareOnline;
     }
 
     public static function getNavigationLabel(): string
@@ -89,6 +92,7 @@ class OnlineInstanceResource extends Resource
                             if (! $systemId) {
                                 return [];
                             }
+
                             return OnlineSystemPlan::where('system_id', $systemId)->pluck('name', 'id');
                         })
                         ->required()
@@ -98,7 +102,15 @@ class OnlineInstanceResource extends Resource
                         ->required(),
                     TextInput::make('subdomain')
                         ->label(__('software-online::filament/admin/resources/instance.fields.subdomain'))
-                        ->placeholder('my-store'),
+                        ->placeholder('my-store')
+                        ->required()
+                        ->maxLength(50)
+                        ->dehydrateStateUsing(fn (mixed $state): string => strtolower(trim((string) $state)))
+                        ->rules([new Subdomain])
+                        ->unique(
+                            ignoreRecord: true,
+                            modifyRuleUsing: fn (Unique $rule, Get $get): Unique => $rule->where('system_id', $get('system_id')),
+                        ),
                     TextInput::make('custom_domain')
                         ->label(__('software-online::filament/admin/resources/instance.fields.custom_domain'))
                         ->placeholder('store.example.com'),
@@ -127,9 +139,12 @@ class OnlineInstanceResource extends Resource
                         ->default(0.00),
                     DateTimePicker::make('starts_at')
                         ->label(__('software-online::filament/admin/resources/instance.fields.starts_at'))
-                        ->default(now()),
+                        ->default(now())
+                        ->required(),
                     DateTimePicker::make('expires_at')
-                        ->label(__('software-online::filament/admin/resources/instance.fields.expires_at')),
+                        ->label(__('software-online::filament/admin/resources/instance.fields.expires_at'))
+                        ->required()
+                        ->after('starts_at'),
                     Toggle::make('auto_renew')
                         ->label(__('software-online::filament/admin/resources/instance.fields.auto_renew'))
                         ->default(true),

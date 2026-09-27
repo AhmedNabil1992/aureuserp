@@ -17,6 +17,7 @@ use Webkul\Referral\Models\ReferralWalletBalance;
 use Webkul\Referral\Services\ReferralCodeIssuer;
 use Webkul\Referral\Services\ReferralRewardService;
 use Webkul\Referral\Services\ReferralService;
+use Webkul\Referral\Services\ReferralWalletService;
 use Webkul\Sale\Enums\AdvancedPayment;
 use Webkul\Sale\Enums\InvoiceStatus;
 use Webkul\Sale\Enums\OrderState;
@@ -153,6 +154,18 @@ it('resolves an existing referral code when the portal customer has no company',
 
     expect($code->is($fixture['code']))->toBeTrue()
         ->and($code->company_id)->toBe($fixture['campaign']->company_id);
+});
+
+it('does not use a portal partner id as the internal creator id', function () {
+    $partner = AccountHelper::partner();
+
+    auth()->logout();
+    auth()->shouldUse('customer');
+    auth('customer')->login($partner);
+
+    $creatorId = (fn (): ?int => $this->creatorId())->call(app(ReferralWalletService::class));
+
+    expect($creatorId)->toBeNull();
 });
 
 it('applies a referral code while creating an invoice from a sale order', function () {

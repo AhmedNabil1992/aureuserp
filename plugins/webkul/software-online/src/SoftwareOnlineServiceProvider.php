@@ -7,6 +7,9 @@ use Webkul\PluginManager\Console\Commands\InstallCommand;
 use Webkul\PluginManager\Console\Commands\UninstallCommand;
 use Webkul\PluginManager\Package;
 use Webkul\PluginManager\PackageServiceProvider;
+use Webkul\SoftwareOnline\Console\Commands\RenewOnlineInstancesCommand;
+use Webkul\SoftwareOnline\Services\OnlineBillingService;
+use Webkul\SoftwareOnline\Services\OnlineSystemProvisioningService;
 
 class SoftwareOnlineServiceProvider extends PackageServiceProvider
 {
@@ -19,12 +22,15 @@ class SoftwareOnlineServiceProvider extends PackageServiceProvider
         $package->name(static::$name)
             ->hasViews()
             ->hasTranslations()
-            ->hasDependencies(['partners', 'accounts'])
+            ->hasRoute('api')
+            ->hasDependencies(['partners', 'products', 'accounts'])
             ->hasMigrations([
                 '2026_08_24_000001_create_online_systems_tables',
                 '2026_08_24_000002_add_product_and_invoicing_to_online_systems_tables',
+                '2026_09_27_000003_add_remote_lifecycle_and_webhooks',
             ])
             ->runsMigrations()
+            ->hasCommand(RenewOnlineInstancesCommand::class)
             ->hasInstallCommand(function (InstallCommand $command): void {
                 $command
                     ->installDependencies()
@@ -39,5 +45,8 @@ class SoftwareOnlineServiceProvider extends PackageServiceProvider
         Panel::configureUsing(function (Panel $panel): void {
             $panel->plugin(SoftwareOnlinePlugin::make());
         });
+
+        $this->app->singleton(OnlineBillingService::class);
+        $this->app->singleton(OnlineSystemProvisioningService::class);
     }
 }

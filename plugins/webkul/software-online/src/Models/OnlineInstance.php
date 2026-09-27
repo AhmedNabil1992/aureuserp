@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Webkul\Account\Models\Move;
 use Webkul\Partner\Models\Partner;
 use Webkul\SoftwareOnline\Enums\BillingCycle;
 use Webkul\SoftwareOnline\Enums\InstanceStatus;
@@ -36,22 +37,30 @@ class OnlineInstance extends Model
         'last_renewed_at',
         'auto_renew',
         'remote_tenant_id',
+        'provisioning_request_id',
         'remote_data',
         'last_api_sync_at',
+        'provisioned_at',
+        'last_webhook_at',
         'last_api_error',
+        'last_renewal_attempt_at',
+        'last_renewal_error',
     ];
 
     protected $casts = [
-        'instance_number'  => 'integer',
-        'price'            => 'decimal:2',
-        'status'           => InstanceStatus::class,
-        'billing_cycle'    => BillingCycle::class,
-        'starts_at'        => 'datetime',
-        'expires_at'       => 'datetime',
-        'last_renewed_at'  => 'datetime',
-        'auto_renew'       => 'boolean',
-        'remote_data'      => 'array',
-        'last_api_sync_at' => 'datetime',
+        'instance_number'         => 'integer',
+        'price'                   => 'decimal:2',
+        'status'                  => InstanceStatus::class,
+        'billing_cycle'           => BillingCycle::class,
+        'starts_at'               => 'datetime',
+        'expires_at'              => 'datetime',
+        'last_renewed_at'         => 'datetime',
+        'auto_renew'              => 'boolean',
+        'remote_data'             => 'array',
+        'last_api_sync_at'        => 'datetime',
+        'provisioned_at'          => 'datetime',
+        'last_webhook_at'         => 'datetime',
+        'last_renewal_attempt_at' => 'datetime',
     ];
 
     protected static function boot()
@@ -83,12 +92,17 @@ class OnlineInstance extends Model
 
     public function move(): BelongsTo
     {
-        return $this->belongsTo(\Webkul\Account\Models\Move::class, 'move_id');
+        return $this->belongsTo(Move::class, 'move_id');
     }
 
     public function transactions(): HasMany
     {
         return $this->hasMany(OnlineInstanceTransaction::class, 'instance_id');
+    }
+
+    public function webhookEvents(): HasMany
+    {
+        return $this->hasMany(OnlineTenantWebhookEvent::class, 'instance_id');
     }
 
     public function getFullUrlAttribute(): string
@@ -98,7 +112,7 @@ class OnlineInstance extends Model
         }
 
         if (! empty($this->custom_domain)) {
-            return 'https://' . ltrim($this->custom_domain, 'https://');
+            return 'https://'.ltrim($this->custom_domain, 'https://');
         }
 
         if (! empty($this->subdomain) && ! empty($this->system?->base_url)) {

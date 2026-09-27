@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Webkul\Referral\Services;
 
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use RuntimeException;
@@ -22,6 +21,7 @@ use Webkul\Referral\Models\ReferralRedemption;
 use Webkul\Referral\Models\ReferralWalletBalance;
 use Webkul\Referral\Models\ReferralWalletTransaction;
 use Webkul\Support\Models\Scopes\CompaniesScope;
+use Webkul\Support\Services\CompanyContext;
 
 class ReferralWalletService
 {
@@ -48,6 +48,7 @@ class ReferralWalletService
     public function importLegacyEarnedReward(ReferralRedemption $redemption): bool
     {
         return DB::transaction(function () use ($redemption): bool {
+            $creatorId = $this->creatorId();
             $redemption = ReferralRedemption::query()->lockForUpdate()->findOrFail($redemption->id);
             $key = 'earn:'.$redemption->id;
             if (ReferralWalletTransaction::query()->where('idempotency_key', $key)->exists()) {
@@ -76,12 +77,12 @@ class ReferralWalletService
                     'company_id' => $redemption->company_id, 'currency_id' => $redemption->currency_id,
                     'partner_id' => $redemption->referrer_partner_id,
                     'date'       => now()->toDateString(), 'reference' => 'Legacy referral reward reclassification #'.$redemption->id,
-                    'creator_id' => Auth::id(),
+                    'creator_id' => $creatorId,
                 ]);
                 $common = [
                     'partner_id'  => $redemption->referrer_partner_id,
                     'currency_id' => $redemption->currency_id,
-                    'creator_id'  => Auth::id(),
+                    'creator_id'  => $creatorId,
                 ];
                 $entry->lines()->create($common + [
                     'name'            => 'Legacy referral customer credit reclassification', 'account_id' => $legacyCredit->account_id,
@@ -112,7 +113,7 @@ class ReferralWalletService
                 'accounting_move_id' => $entry?->id, 'type' => 'earn', 'amount' => $amount,
                 'idempotency_key'    => $key, 'metadata' => [
                     'legacy_reclassified' => true, 'original_reward_amount' => $rewardAmount,
-                ], 'creator_id' => Auth::id(),
+                ], 'creator_id' => $creatorId,
             ]);
 
             return true;
@@ -128,6 +129,7 @@ class ReferralWalletService
 
     public function recordEarn(ReferralRedemption $redemption, Move $accountingMove, bool $reverse = false): void
     {
+        $creatorId = $this->creatorId();
         $key = ($reverse ? 'earn-reversal:' : 'earn:').$redemption->id;
         if (ReferralWalletTransaction::query()->where('idempotency_key', $key)->exists()) {
             return;
@@ -150,7 +152,7 @@ class ReferralWalletService
             'company_id'         => $redemption->company_id, 'currency_id' => $redemption->currency_id,
             'partner_id'         => $redemption->referrer_partner_id, 'referral_redemption_id' => $redemption->id,
             'accounting_move_id' => $accountingMove->id, 'type' => $reverse ? 'earn_reversal' : 'earn',
-            'amount'             => $reverse ? -$amount : $amount, 'idempotency_key' => $key, 'creator_id' => Auth::id(),
+            'amount'             => $reverse ? -$amount : $amount, 'idempotency_key' => $key, 'creator_id' => $creatorId,
         ]);
     }
 
@@ -161,6 +163,7 @@ class ReferralWalletService
         }
 
         return DB::transaction(function () use ($invoice): ?ReferralWalletTransaction {
+            $creatorId = $this->creatorId();
             $key = 'redeem:'.$invoice->id;
             $existing = ReferralWalletTransaction::query()->where('idempotency_key', $key)->first();
             if ($existing) {
@@ -234,7 +237,7 @@ class ReferralWalletService
                 'company_id'      => $invoice->company_id, 'currency_id' => $invoice->currency_id,
                 'partner_id'      => $invoice->partner_id, 'accounting_move_id' => $settlement->id,
                 'invoice_move_id' => $invoice->id, 'type' => 'redeem', 'amount' => -$amount,
-                'idempotency_key' => $key, 'creator_id' => Auth::id(),
+                'idempotency_key' => $key, 'creator_id' => $creatorId,
             ]);
         }, 3);
     }
@@ -267,6 +270,7 @@ class ReferralWalletService
     public function reverseInvoiceUsage(Move $invoice): void
     {
         DB::transaction(function () use ($invoice): void {
+            $creatorId = $this->creatorId();
             $usage = ReferralWalletTransaction::query()
                 ->where('invoice_move_id', $invoice->id)->where('type', 'redeem')->lockForUpdate()->first();
             if (! $usage || ReferralWalletTransaction::query()->where('idempotency_key', 'redeem-reversal:'.$invoice->id)->exists()) {
@@ -303,7 +307,7 @@ class ReferralWalletService
             ReferralWalletTransaction::query()->create([
                 'company_id'         => $usage->company_id, 'currency_id' => $usage->currency_id, 'partner_id' => $usage->partner_id,
                 'accounting_move_id' => $reversal?->id, 'invoice_move_id' => $invoice->id, 'type' => 'redeem_reversal',
-                'amount'             => $amount, 'idempotency_key' => 'redeem-reversal:'.$invoice->id, 'creator_id' => Auth::id(),
+                'amount'             => $amount, 'idempotency_key' => 'redeem-reversal:'.$invoice->id, 'creator_id' => $creatorId,
             ]);
         }, 3);
     }
@@ -340,14 +344,15 @@ class ReferralWalletService
 
     private function settlementEntry(Move $invoice, float $amount, int $journalId, int $liabilityId, int $receivableId): Move
     {
+        $creatorId = $this->creatorId();
         $entry = Move::query()->create([
             'move_type'  => MoveType::ENTRY, 'state' => MoveState::DRAFT, 'journal_id' => $journalId,
             'company_id' => $invoice->company_id, 'currency_id' => $invoice->currency_id,
             'partner_id' => $invoice->partner_id,
             'date'       => now()->toDateString(), 'reference' => 'Referral wallet used on '.$invoice->name,
-            'creator_id' => Auth::id(),
+            'creator_id' => $creatorId,
         ]);
-        $common = ['partner_id' => $invoice->partner_id, 'currency_id' => $invoice->currency_id, 'creator_id' => Auth::id()];
+        $common = ['partner_id' => $invoice->partner_id, 'currency_id' => $invoice->currency_id, 'creator_id' => $creatorId];
         $entry->lines()->create($common + [
             'name'            => 'Referral reward liability settlement', 'account_id' => $liabilityId,
             'debit'           => $amount, 'credit' => 0, 'balance' => $amount, 'amount_currency' => $amount,
@@ -360,5 +365,10 @@ class ReferralWalletService
         ]);
 
         return app(MoveWorkflow::class)->post($entry->refresh());
+    }
+
+    private function creatorId(): ?int
+    {
+        return app(CompanyContext::class)->internalUser()?->id;
     }
 }

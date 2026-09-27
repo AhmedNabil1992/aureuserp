@@ -5,6 +5,7 @@ namespace Webkul\SoftwareOnline\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Webkul\Account\Models\Move;
+use Webkul\Account\Models\MoveLine;
 use Webkul\Partner\Models\Partner;
 use Webkul\SoftwareOnline\Enums\BillingCycle;
 use Webkul\SoftwareOnline\Enums\TransactionType;
@@ -20,6 +21,11 @@ class OnlineInstanceTransaction extends Model
         'billing_cycle',
         'amount',
         'status',
+        'idempotency_key',
+        'remote_sync_status',
+        'remote_sync_attempts',
+        'remote_sync_error',
+        'remote_synced_at',
         'period_start',
         'period_end',
         'move_id',
@@ -27,11 +33,13 @@ class OnlineInstanceTransaction extends Model
     ];
 
     protected $casts = [
-        'type'          => TransactionType::class,
-        'billing_cycle' => BillingCycle::class,
-        'amount'        => 'decimal:2',
-        'period_start'  => 'date',
-        'period_end'    => 'date',
+        'type'                 => TransactionType::class,
+        'billing_cycle'        => BillingCycle::class,
+        'amount'               => 'decimal:2',
+        'period_start'         => 'date',
+        'period_end'           => 'date',
+        'remote_sync_attempts' => 'integer',
+        'remote_synced_at'     => 'datetime',
     ];
 
     public function instance(): BelongsTo
@@ -51,6 +59,6 @@ class OnlineInstanceTransaction extends Model
 
     public function moveLine(): BelongsTo
     {
-        return $this->belongsTo(\Webkul\Account\Models\MoveLine::class, 'move_line_id');
+        return $this->belongsTo(MoveLine::class, 'move_line_id');
     }
 }

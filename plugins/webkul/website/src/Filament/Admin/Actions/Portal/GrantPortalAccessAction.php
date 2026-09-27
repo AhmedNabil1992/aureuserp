@@ -4,6 +4,7 @@ namespace Webkul\Website\Filament\Admin\Actions\Portal;
 
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -50,9 +51,17 @@ class GrantPortalAccessAction extends Action
                     return;
                 }
 
-                $record->forceFill(['password' => Hash::make(Str::password(40))])->save();
+                $status = DB::transaction(function () use ($record): string {
+                    $record->forceFill(['password' => Hash::make(Str::password(40))])->save();
 
-                $status = PortalAccess::sendSetPasswordLink($record);
+                    $status = PortalAccess::sendSetPasswordLink($record);
+
+                    if ($status !== Password::RESET_LINK_SENT) {
+                        $record->forceFill(['password' => null])->save();
+                    }
+
+                    return $status;
+                });
 
                 if ($status === Password::RESET_LINK_SENT) {
                     Notification::make()

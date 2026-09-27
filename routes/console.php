@@ -9,3 +9,7 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote')->hourly();
 
 Schedule::command('partner:sync-tags')->hourly();
+Schedule::command('online-systems:renew-due')
+    ->dailyAt('00:05')
+    ->timezone('UTC')
+    ->withoutOverlapping();

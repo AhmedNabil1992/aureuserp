@@ -51,4 +51,9 @@ class OnlineSystem extends Model
     {
         return $this->hasMany(OnlineInstance::class, 'system_id');
     }
+
+    public function webhookEvents(): HasMany
+    {
+        return $this->hasMany(OnlineTenantWebhookEvent::class, 'system_id');
+    }
 }
