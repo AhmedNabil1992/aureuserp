@@ -560,7 +560,9 @@ class Move extends Model implements Sortable
             if ($this->invoice_source_email) {
                 $vendorDisplayName = "@From: {$this->invoice_source_email}";
             } else {
-                $vendorDisplayName = "#Created by: {$this->creator->name}";
+                $vendorDisplayName = $this->creator
+                    ? "#Created by: {$this->creator->name}"
+                    : '#Created automatically';
             }
         }
 

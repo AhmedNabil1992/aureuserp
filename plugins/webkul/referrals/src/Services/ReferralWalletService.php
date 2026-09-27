@@ -73,6 +73,7 @@ class ReferralWalletService
                 $entry = Move::query()->create([
                     'move_type'  => MoveType::ENTRY, 'state' => MoveState::DRAFT, 'journal_id' => $defaults->journal_id,
                     'company_id' => $redemption->company_id, 'currency_id' => $redemption->currency_id,
+                    'partner_id' => $redemption->referrer_partner_id,
                     'date'       => now()->toDateString(), 'reference' => 'Legacy referral reward reclassification #'.$redemption->id,
                     'creator_id' => Auth::id(),
                 ]);
@@ -341,6 +342,7 @@ class ReferralWalletService
         $entry = Move::query()->create([
             'move_type'  => MoveType::ENTRY, 'state' => MoveState::DRAFT, 'journal_id' => $journalId,
             'company_id' => $invoice->company_id, 'currency_id' => $invoice->currency_id,
+            'partner_id' => $invoice->partner_id,
             'date'       => now()->toDateString(), 'reference' => 'Referral wallet used on '.$invoice->name,
             'creator_id' => Auth::id(),
         ]);

@@ -108,6 +108,7 @@ class ReferralRewardService
             'journal_id'  => $defaults->journal_id,
             'company_id'  => $redemption->company_id,
             'currency_id' => $redemption->currency_id,
+            'partner_id'  => $redemption->referrer_partner_id,
             'date'        => now()->toDateString(),
             'reference'   => ($reverse ? 'Referral reward reversal #' : 'Referral reward #').$redemption->id,
             'creator_id'  => $userId,
