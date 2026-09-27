@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Webkul\Referral\Services;
 
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -94,7 +95,7 @@ class ReferralWalletService
                 ]);
                 $entry = app(MoveWorkflow::class)->post($entry->refresh());
 
-                app(Reconciler::class)->reconcile(collect([
+                app(Reconciler::class)->reconcile(new EloquentCollection([
                     $legacyCredit->refresh(),
                     $entry->lines()->where('account_id', $legacyCredit->account_id)->firstOrFail(),
                 ]));
@@ -214,7 +215,7 @@ class ReferralWalletService
             $receivableLines = $invoice->lines()->where('account_id', $receivableId)->get()
                 ->merge($settlement->lines()->where('account_id', $receivableId)->get())
                 ->reject->reconciled->values();
-            app(Reconciler::class)->reconcile($receivableLines);
+            app(Reconciler::class)->reconcile(new EloquentCollection($receivableLines->all()));
 
             $liabilityLines = MoveLine::query()
                 ->where('account_id', $defaults->liability_account_id)
@@ -223,7 +224,7 @@ class ReferralWalletService
                 ->where('reconciled', false)
                 ->whereHas('move', fn ($query) => $query->where('state', MoveState::POSTED))
                 ->get();
-            app(Reconciler::class)->reconcile($liabilityLines);
+            app(Reconciler::class)->reconcile(new EloquentCollection($liabilityLines->all()));
 
             $balance->available_amount = (float) $balance->available_amount - $amount;
             $balance->lifetime_redeemed = (float) $balance->lifetime_redeemed + $amount;

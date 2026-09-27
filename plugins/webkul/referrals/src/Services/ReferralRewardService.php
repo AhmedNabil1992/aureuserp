@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Webkul\Referral\Services;
 
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Webkul\Account\Enums\MoveState;
@@ -161,7 +162,7 @@ class ReferralRewardService
             ->values();
 
         if ($receivableLines->count() >= 2) {
-            app(Reconciler::class)->reconcile($receivableLines);
+            app(Reconciler::class)->reconcile(new EloquentCollection($receivableLines->all()));
         }
     }
 }
