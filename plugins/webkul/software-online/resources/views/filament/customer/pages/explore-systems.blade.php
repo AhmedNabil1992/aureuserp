@@ -242,6 +242,11 @@
                         {{ $this->instanceUrlPreview }}
                     </p>
                 @endif
+                @error('subdomain')
+                    <p class="mt-1.5 text-xs font-medium text-danger-600 dark:text-danger-400">
+                        {{ $message }}
+                    </p>
+                @enderror
             </div>
 
             <div>

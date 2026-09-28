@@ -20,22 +20,47 @@ class OnlineSystemProvisioningService
     public function assertDomainAvailable(OnlineSystem $system, string $subdomain): string
     {
         $domain = $system->tenantHost($subdomain);
-        if (blank($domain) || blank($system->api_base_url) || blank($system->check_domain_endpoint)) {
+        $endpoint = filled($system->check_domain_endpoint)
+            ? (string) $system->check_domain_endpoint
+            : '/api/tenants/check-domain';
+
+        if (blank($domain) || blank($system->api_base_url)) {
+            Log::warning('Remote tenant domain check is not configured.', [
+                'online_system_id'   => $system->getKey(),
+                'online_system_slug' => $system->slug,
+                'has_api_base_url'   => filled($system->api_base_url),
+                'domain'             => $domain,
+            ]);
+
             throw ValidationException::withMessages([
                 'subdomain' => __('software-online::validation.domain_check_failed'),
             ]);
         }
 
         try {
-            $url = rtrim((string) $system->api_base_url, '/').'/'.ltrim((string) $system->check_domain_endpoint, '/');
+            $url = rtrim((string) $system->api_base_url, '/').'/'.ltrim($endpoint, '/');
             $response = $this->buildHttpClient($system)->get($url, ['domain' => $domain]);
-        } catch (Exception) {
+        } catch (Exception $exception) {
+            Log::warning('Remote tenant domain check request failed.', [
+                'online_system_id'   => $system->getKey(),
+                'online_system_slug' => $system->slug,
+                'domain'             => $domain,
+                'error'              => $exception->getMessage(),
+            ]);
+
             throw ValidationException::withMessages([
                 'subdomain' => __('software-online::validation.domain_check_failed'),
             ]);
         }
 
         if (! $response->successful() || ! is_bool($response->json('available'))) {
+            Log::warning('Remote tenant domain check returned an invalid response.', [
+                'online_system_id'   => $system->getKey(),
+                'online_system_slug' => $system->slug,
+                'domain'             => $domain,
+                'status'             => $response->status(),
+            ]);
+
             throw ValidationException::withMessages([
                 'subdomain' => __('software-online::validation.domain_check_failed'),
             ]);

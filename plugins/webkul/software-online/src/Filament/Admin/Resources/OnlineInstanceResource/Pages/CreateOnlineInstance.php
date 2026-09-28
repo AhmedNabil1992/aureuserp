@@ -2,7 +2,9 @@
 
 namespace Webkul\SoftwareOnline\Filament\Admin\Resources\OnlineInstanceResource\Pages;
 
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Validation\ValidationException;
 use Webkul\SoftwareOnline\Enums\BillingCycle;
 use Webkul\SoftwareOnline\Enums\InstanceStatus;
 use Webkul\SoftwareOnline\Filament\Admin\Resources\OnlineInstanceResource;
@@ -22,11 +24,6 @@ class CreateOnlineInstance extends CreateRecord
         $cycle = BillingCycle::tryFrom($cycleValue) ?? BillingCycle::Monthly;
         $startsAt = now();
 
-        app(OnlineSystemProvisioningService::class)->assertDomainAvailable(
-            $plan->system,
-            (string) ($data['subdomain'] ?? ''),
-        );
-
         $data['system_id'] = $plan->system_id;
         $data['status'] = InstanceStatus::Pending;
         $data['starts_at'] = $startsAt;
@@ -35,6 +32,31 @@ class CreateOnlineInstance extends CreateRecord
         $data['instance_url'] = $plan->system?->tenantLoginUrl((string) ($data['subdomain'] ?? ''));
 
         return $data;
+    }
+
+    protected function beforeCreate(): void
+    {
+        $plan = OnlineSystemPlan::query()->with('system')->findOrFail($this->data['plan_id']);
+
+        try {
+            app(OnlineSystemProvisioningService::class)->assertDomainAvailable(
+                $plan->system,
+                strtolower(trim((string) ($this->data['subdomain'] ?? ''))),
+            );
+        } catch (ValidationException $exception) {
+            $message = collect($exception->errors())->flatten()->first()
+                ?? __('software-online::validation.domain_check_failed');
+
+            $this->addError('data.subdomain', $message);
+
+            Notification::make()
+                ->danger()
+                ->title(__('software-online::validation.domain_check_title'))
+                ->body($message)
+                ->send();
+
+            $this->halt();
+        }
     }
 
     protected function afterCreate(): void
