@@ -2,10 +2,14 @@
 
 namespace Webkul\SoftwareOnline\Models;
 
+use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Webkul\Product\Models\Product;
+use Webkul\SoftwareOnline\Enums\BillingCycle;
 
 class OnlineSystemPlan extends Model
 {
@@ -45,7 +49,7 @@ class OnlineSystemPlan extends Model
 
     public function product(): BelongsTo
     {
-        return $this->belongsTo(\Webkul\Product\Models\Product::class, 'product_id');
+        return $this->belongsTo(Product::class, 'product_id');
     }
 
     public function system(): BelongsTo
@@ -56,5 +60,25 @@ class OnlineSystemPlan extends Model
     public function instances(): HasMany
     {
         return $this->hasMany(OnlineInstance::class, 'plan_id');
+    }
+
+    public function priceFor(BillingCycle $cycle): float
+    {
+        return match ($cycle) {
+            BillingCycle::Trial   => 0.0,
+            BillingCycle::Annual  => (float) $this->annual_price,
+            BillingCycle::Monthly => (float) $this->monthly_price,
+        };
+    }
+
+    public function expiresAtFor(BillingCycle $cycle, ?CarbonInterface $startsAt = null): CarbonImmutable
+    {
+        $startsAt = $startsAt?->toImmutable() ?? now()->toImmutable();
+
+        return match ($cycle) {
+            BillingCycle::Trial   => $startsAt->addDays($this->trial_days > 0 ? $this->trial_days : 14),
+            BillingCycle::Annual  => $startsAt->addYear(),
+            BillingCycle::Monthly => $startsAt->addMonth(),
+        };
     }
 }

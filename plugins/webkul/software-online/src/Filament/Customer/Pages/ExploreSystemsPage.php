@@ -2,6 +2,7 @@
 
 namespace Webkul\SoftwareOnline\Filament\Customer\Pages;
 
+use Carbon\CarbonImmutable;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
@@ -99,17 +100,53 @@ class ExploreSystemsPage extends Page
 
     public function selectPlan(int $planId): void
     {
-        $this->selectedPlanId = $planId;
+        $plan = OnlineSystemPlan::query()
+            ->where('is_active', true)
+            ->whereHas('system', fn ($query) => $query->where('is_active', true))
+            ->findOrFail($planId);
+
+        $this->selectedPlanId = $plan->id;
+        $this->selectedSystemId = $plan->system_id;
         $this->modalBillingCycle = $this->billingPeriod;
         $this->dispatch('open-modal', id: 'create-instance-modal');
+    }
+
+    public function getInstanceUrlPreviewProperty(): ?string
+    {
+        $system = $this->systems->firstWhere('id', $this->selectedSystemId);
+
+        return $system?->tenantLoginUrl($this->subdomain);
+    }
+
+    public function getSubscriptionExpiresAtPreviewProperty(): ?CarbonImmutable
+    {
+        $plan = $this->systems
+            ->flatMap(fn (OnlineSystem $system) => $system->plans)
+            ->firstWhere('id', $this->selectedPlanId);
+
+        if (! $plan) {
+            return null;
+        }
+
+        $cycle = BillingCycle::tryFrom($this->modalBillingCycle) ?? BillingCycle::Monthly;
+
+        return $plan->expiresAtFor($cycle);
     }
 
     public function createWebsite(): void
     {
         $this->subdomain = strtolower(trim($this->subdomain));
+        $plan = OnlineSystemPlan::query()
+            ->where('is_active', true)
+            ->whereHas('system', fn ($query) => $query->where('is_active', true))
+            ->findOrFail($this->selectedPlanId);
+        $this->selectedSystemId = $plan->system_id;
 
         $this->validate([
-            'selectedPlanId'    => 'required|exists:online_system_plans,id',
+            'selectedPlanId'    => [
+                'required',
+                Rule::exists('online_system_plans', 'id')->where('is_active', true),
+            ],
             'websiteName'       => 'required|string|min:3|max:100',
             'subdomain'         => [
                 'required',
@@ -124,7 +161,6 @@ class ExploreSystemsPage extends Page
         ]);
 
         $partner = Auth::guard('customer')->user();
-        $plan = OnlineSystemPlan::findOrFail($this->selectedPlanId);
 
         $cycle = match ($this->modalBillingCycle) {
             'trial'  => BillingCycle::Trial,

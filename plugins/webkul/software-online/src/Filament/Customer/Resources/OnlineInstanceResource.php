@@ -4,8 +4,10 @@ namespace Webkul\SoftwareOnline\Filament\Customer\Resources;
 
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -17,6 +19,7 @@ use Webkul\SoftwareOnline\Filament\Customer\Resources\OnlineInstanceResource\Pag
 use Webkul\SoftwareOnline\Filament\Customer\Resources\OnlineInstanceResource\Pages\ViewOnlineInstance;
 use Webkul\SoftwareOnline\Models\OnlineInstance;
 use Webkul\SoftwareOnline\Services\OnlineBillingService;
+use Webkul\Support\Enums\NavigationGroup;
 
 class OnlineInstanceResource extends Resource
 {
@@ -32,7 +35,7 @@ class OnlineInstanceResource extends Resource
 
     public static function getNavigationGroup(): string|\UnitEnum|null
     {
-        return \Webkul\Support\Enums\NavigationGroup::SoftwareOnline;
+        return NavigationGroup::SoftwareOnline;
     }
 
     public static function getNavigationLabel(): string
@@ -58,6 +61,53 @@ class OnlineInstanceResource extends Resource
             ->where('partner_id', $partnerId);
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema->components([
+            Section::make(__('software-online::filament/customer/resources/my_instances.sections.website'))
+                ->schema([
+                    TextEntry::make('name')
+                        ->label(__('software-online::filament/customer/resources/my_instances.columns.name')),
+                    TextEntry::make('system.name')
+                        ->label(__('software-online::filament/customer/resources/my_instances.columns.system'))
+                        ->badge(),
+                    TextEntry::make('plan.name')
+                        ->label(__('software-online::filament/customer/resources/my_instances.columns.plan'))
+                        ->badge(),
+                    TextEntry::make('status')
+                        ->label(__('software-online::filament/customer/resources/my_instances.columns.status'))
+                        ->badge(),
+                    TextEntry::make('full_url')
+                        ->label(__('software-online::filament/customer/resources/my_instances.columns.url'))
+                        ->url(fn (OnlineInstance $record): ?string => $record->status === InstanceStatus::Active
+                            ? $record->full_url
+                            : null)
+                        ->openUrlInNewTab()
+                        ->columnSpanFull(),
+                ])
+                ->columns(2),
+            Section::make(__('software-online::filament/customer/resources/my_instances.sections.subscription'))
+                ->schema([
+                    TextEntry::make('billing_cycle')
+                        ->label(__('software-online::filament/customer/resources/my_instances.fields.billing_cycle'))
+                        ->badge(),
+                    TextEntry::make('price')
+                        ->label(__('software-online::filament/customer/resources/my_instances.columns.price'))
+                        ->money('EGP'),
+                    TextEntry::make('expires_at')
+                        ->label(__('software-online::filament/customer/resources/my_instances.columns.expires_at'))
+                        ->dateTime(),
+                    TextEntry::make('auto_renew')
+                        ->label(__('software-online::filament/customer/resources/my_instances.columns.auto_renew'))
+                        ->badge()
+                        ->formatStateUsing(fn (bool $state): string => $state
+                            ? __('software-online::filament/customer/resources/my_instances.values.enabled')
+                            : __('software-online::filament/customer/resources/my_instances.values.disabled')),
+                ])
+                ->columns(2),
+        ]);
+    }
+
     public static function table(Table $table): Table
     {
         return $table
@@ -69,7 +119,7 @@ class OnlineInstanceResource extends Resource
                 TextColumn::make('name')
                     ->label(__('software-online::filament/customer/resources/my_instances.columns.name'))
                     ->searchable()
-                    ->description(fn (OnlineInstance $record) => $record->subdomain ? "{$record->subdomain}" : null),
+                    ->description(fn (OnlineInstance $record) => $record->full_url !== '#' ? $record->full_url : null),
                 TextColumn::make('system.name')
                     ->label(__('software-online::filament/customer/resources/my_instances.columns.system'))
                     ->badge()
@@ -93,7 +143,7 @@ class OnlineInstanceResource extends Resource
                     ->color('success')
                     ->url(fn (OnlineInstance $record) => $record->full_url)
                     ->openUrlInNewTab()
-                    ->visible(fn (OnlineInstance $record) => ! empty($record->full_url)),
+                    ->visible(fn (OnlineInstance $record) => $record->status === InstanceStatus::Active && $record->full_url !== '#'),
                 Action::make('renew')
                     ->label(__('software-online::filament/customer/resources/my_instances.actions.renew'))
                     ->icon('heroicon-o-arrow-path')

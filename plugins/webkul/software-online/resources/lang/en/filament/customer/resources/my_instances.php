@@ -15,6 +15,17 @@ return [
         'plan'       => 'Plan',
         'status'     => 'Status',
         'expires_at' => 'Expires At',
+        'url'        => 'Website URL',
+        'price'      => 'Subscription Price',
+        'auto_renew' => 'Automatic Renewal',
+    ],
+    'sections' => [
+        'website'      => 'Website',
+        'subscription' => 'Subscription',
+    ],
+    'values' => [
+        'enabled'  => 'Enabled',
+        'disabled' => 'Disabled',
     ],
     'fields' => [
         'billing_cycle' => 'Renewal Period',

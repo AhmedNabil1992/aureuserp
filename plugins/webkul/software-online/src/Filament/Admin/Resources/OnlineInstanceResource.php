@@ -14,6 +14,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -26,6 +27,7 @@ use Webkul\SoftwareOnline\Filament\Admin\Resources\OnlineInstanceResource\Pages\
 use Webkul\SoftwareOnline\Filament\Admin\Resources\OnlineInstanceResource\Pages\ListOnlineInstances;
 use Webkul\SoftwareOnline\Filament\Admin\Resources\OnlineInstanceResource\Pages\ViewOnlineInstance;
 use Webkul\SoftwareOnline\Models\OnlineInstance;
+use Webkul\SoftwareOnline\Models\OnlineSystem;
 use Webkul\SoftwareOnline\Models\OnlineSystemPlan;
 use Webkul\SoftwareOnline\Rules\Subdomain;
 use Webkul\SoftwareOnline\Services\OnlineBillingService;
@@ -80,6 +82,14 @@ class OnlineInstanceResource extends Resource
                         ->relationship('system', 'name')
                         ->required()
                         ->live()
+                        ->afterStateUpdated(function (Get $get, Set $set, ?string $state, string $operation): void {
+                            if ($operation !== 'create') {
+                                return;
+                            }
+
+                            $set('plan_id', null);
+                            static::updateCreateUrlPreview($get, $set);
+                        })
                         ->searchable()
                         ->preload(),
                     Select::make('plan_id')
@@ -93,6 +103,10 @@ class OnlineInstanceResource extends Resource
                             return OnlineSystemPlan::where('system_id', $systemId)->pluck('name', 'id');
                         })
                         ->required()
+                        ->live()
+                        ->afterStateUpdated(fn (Get $get, Set $set, string $operation) => $operation === 'create'
+                            ? static::updateCreateSubscriptionPreview($get, $set)
+                            : null)
                         ->searchable(),
                     TextInput::make('name')
                         ->label(__('software-online::filament/admin/resources/instance.fields.name'))
@@ -101,19 +115,29 @@ class OnlineInstanceResource extends Resource
                         ->label(__('software-online::filament/admin/resources/instance.fields.subdomain'))
                         ->placeholder('my-store')
                         ->required()
+                        ->live(debounce: 400)
                         ->maxLength(50)
                         ->dehydrateStateUsing(fn (mixed $state): string => strtolower(trim((string) $state)))
                         ->rules([new Subdomain])
                         ->unique(
                             ignoreRecord: true,
                             modifyRuleUsing: fn (Unique $rule, Get $get): Unique => $rule->where('system_id', $get('system_id')),
-                        ),
+                        )
+                        ->afterStateUpdated(fn (Get $get, Set $set, string $operation) => $operation === 'create'
+                            ? static::updateCreateUrlPreview($get, $set)
+                            : null),
                     TextInput::make('custom_domain')
                         ->label(__('software-online::filament/admin/resources/instance.fields.custom_domain'))
                         ->placeholder('store.example.com'),
                     TextInput::make('instance_url')
                         ->label(__('software-online::filament/admin/resources/instance.fields.instance_url'))
-                        ->placeholder('https://my-store.poscloud.com')
+                        ->readOnly()
+                        ->afterStateHydrated(function (TextInput $component, ?OnlineInstance $record): void {
+                            if ($record) {
+                                $component->state($record->full_url);
+                            }
+                        })
+                        ->placeholder('https://my-store.example.com/admin/login')
                         ->columnSpanFull(),
                 ])->columns(3),
 
@@ -122,25 +146,33 @@ class OnlineInstanceResource extends Resource
                     Select::make('status')
                         ->label(__('software-online::filament/admin/resources/instance.fields.status'))
                         ->options(InstanceStatus::class)
-                        ->default(InstanceStatus::Active)
-                        ->required(),
+                        ->default(InstanceStatus::Pending)
+                        ->required()
+                        ->hidden(fn (string $operation): bool => $operation === 'create'),
                     Select::make('billing_cycle')
                         ->label(__('software-online::filament/admin/resources/instance.fields.billing_cycle'))
                         ->options(BillingCycle::class)
                         ->default(BillingCycle::Monthly)
+                        ->live()
+                        ->afterStateUpdated(fn (Get $get, Set $set, string $operation) => $operation === 'create'
+                            ? static::updateCreateSubscriptionPreview($get, $set)
+                            : null)
                         ->required(),
                     TextInput::make('price')
                         ->label(__('software-online::filament/admin/resources/instance.fields.price'))
                         ->numeric()
                         ->prefix('EGP')
+                        ->readOnly(fn (string $operation): bool => $operation === 'create')
                         ->default(0.00),
                     DateTimePicker::make('starts_at')
                         ->label(__('software-online::filament/admin/resources/instance.fields.starts_at'))
                         ->default(now())
-                        ->required(),
+                        ->required()
+                        ->hidden(fn (string $operation): bool => $operation === 'create'),
                     DateTimePicker::make('expires_at')
                         ->label(__('software-online::filament/admin/resources/instance.fields.expires_at'))
                         ->required()
+                        ->readOnly(fn (string $operation): bool => $operation === 'create')
                         ->after('starts_at'),
                     Toggle::make('auto_renew')
                         ->label(__('software-online::filament/admin/resources/instance.fields.auto_renew'))
@@ -158,8 +190,37 @@ class OnlineInstanceResource extends Resource
                     KeyValue::make('remote_data')
                         ->label(__('software-online::filament/admin/resources/instance.fields.remote_data'))
                         ->columnSpanFull(),
-                ])->columns(2)->collapsed(),
+                ])
+                ->columns(2)
+                ->collapsed()
+                ->hidden(fn (string $operation): bool => $operation === 'create'),
         ]);
+    }
+
+    public static function updateCreateUrlPreview(Get $get, Set $set): void
+    {
+        $system = OnlineSystem::query()->find($get('system_id'));
+        $set('instance_url', $system?->tenantLoginUrl((string) $get('subdomain')));
+    }
+
+    public static function updateCreateSubscriptionPreview(Get $get, Set $set): void
+    {
+        $plan = OnlineSystemPlan::query()->find($get('plan_id'));
+        $cycle = BillingCycle::tryFrom($get('billing_cycle') instanceof BillingCycle
+            ? $get('billing_cycle')->value
+            : (string) $get('billing_cycle')) ?? BillingCycle::Monthly;
+
+        if (! $plan) {
+            $set('price', 0);
+            $set('expires_at', null);
+
+            return;
+        }
+
+        $startsAt = now();
+        $set('starts_at', $startsAt);
+        $set('price', $plan->priceFor($cycle));
+        $set('expires_at', $plan->expiresAtFor($cycle, $startsAt));
     }
 
     public static function table(Table $table): Table

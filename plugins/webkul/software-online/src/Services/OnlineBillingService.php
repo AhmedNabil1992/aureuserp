@@ -104,22 +104,13 @@ class OnlineBillingService
                 throw new Exception(__('software-online::filament/customer/pages/explore.trial_already_used'));
             }
             $price = 0.00;
-        } elseif ($cycle === BillingCycle::Annual) {
-            $price = (float) $plan->annual_price;
         } else {
-            $price = (float) $plan->monthly_price;
+            $price = $plan->priceFor($cycle);
         }
 
         $instance = DB::transaction(function () use ($partner, $plan, $name, $subdomain, $cycle, $price, $adminUsername, $referralCode) {
             $startsAt = now();
-            if ($cycle === BillingCycle::Trial) {
-                $trialDays = $plan->trial_days > 0 ? $plan->trial_days : 14;
-                $expiresAt = now()->addDays($trialDays);
-            } elseif ($cycle === BillingCycle::Annual) {
-                $expiresAt = now()->addYear();
-            } else {
-                $expiresAt = now()->addMonth();
-            }
+            $expiresAt = $plan->expiresAtFor($cycle, $startsAt);
 
             $instance = OnlineInstance::create([
                 'partner_id'      => $partner->id,
@@ -127,6 +118,7 @@ class OnlineBillingService
                 'plan_id'         => $plan->id,
                 'name'            => $name,
                 'subdomain'       => $subdomain,
+                'instance_url'    => $plan->system?->tenantLoginUrl($subdomain),
                 'admin_email'     => $partner->email,
                 'admin_username'  => $adminUsername ?? 'admin',
                 'billing_cycle'   => $cycle,

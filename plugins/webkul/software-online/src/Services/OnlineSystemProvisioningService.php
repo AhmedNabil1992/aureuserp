@@ -426,12 +426,18 @@ class OnlineSystemProvisioningService
 
     private function resolveDomain(OnlineInstance $instance): string
     {
-        $host = parse_url($instance->full_url, PHP_URL_HOST);
+        if (filled($instance->custom_domain)) {
+            $customDomain = str_contains((string) $instance->custom_domain, '://')
+                ? (string) $instance->custom_domain
+                : 'https://'.$instance->custom_domain;
+            $host = parse_url($customDomain, PHP_URL_HOST);
 
-        if (is_string($host) && $host !== '') {
-            return strtolower($host);
+            if (is_string($host) && $host !== '') {
+                return strtolower($host);
+            }
         }
 
-        return strtolower((string) ($instance->custom_domain ?: $instance->subdomain));
+        return $instance->system?->tenantHost($instance->subdomain)
+            ?? strtolower((string) $instance->subdomain);
     }
 }

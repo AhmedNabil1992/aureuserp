@@ -107,25 +107,23 @@ class OnlineInstance extends Model
 
     public function getFullUrlAttribute(): string
     {
+        if (! empty($this->custom_domain)) {
+            $customDomain = str_contains($this->custom_domain, '://')
+                ? $this->custom_domain
+                : 'https://'.$this->custom_domain;
+            $host = parse_url($customDomain, PHP_URL_HOST);
+
+            if (is_string($host) && $host !== '') {
+                return 'https://'.strtolower($host).'/admin/login';
+            }
+        }
+
+        if (! empty($this->subdomain) && $this->system) {
+            return $this->system->tenantLoginUrl($this->subdomain) ?? '#';
+        }
+
         if (! empty($this->instance_url)) {
             return $this->instance_url;
-        }
-
-        if (! empty($this->custom_domain)) {
-            return 'https://'.ltrim($this->custom_domain, 'https://');
-        }
-
-        if (! empty($this->subdomain) && ! empty($this->system?->base_url)) {
-            $base = $this->system->base_url;
-            if (str_contains($base, '{subdomain}')) {
-                return str_replace('{subdomain}', $this->subdomain, $base);
-            }
-
-            $parsed = parse_url($base);
-            $scheme = $parsed['scheme'] ?? 'https';
-            $host = $parsed['host'] ?? $base;
-
-            return "{$scheme}://{$this->subdomain}.{$host}";
         }
 
         return $this->system?->base_url ?? '#';
