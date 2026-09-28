@@ -120,12 +120,12 @@ class ExploreSystemsPage extends Page
 
     public function updatedSubdomain(string $value): void
     {
-        $this->subdomain = strtolower(trim($value));
+        $this->subdomain = strtolower(preg_replace('/[^a-zA-Z0-9-]/', '', $value));
     }
 
     public function createWebsite(): void
     {
-        $this->subdomain = strtolower(trim($this->subdomain));
+        $this->subdomain = strtolower(preg_replace('/[^a-zA-Z0-9-]/', '', $this->subdomain));
         $plan = OnlineSystemPlan::query()
             ->where('is_active', true)
             ->whereHas('system', fn ($query) => $query->where('is_active', true))

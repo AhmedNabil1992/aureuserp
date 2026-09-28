@@ -219,7 +219,9 @@
                     <input
                         type="text"
                         wire:model.live.debounce.400ms="subdomain"
-                        x-on:input="$event.target.value = $event.target.value.toLowerCase()"
+                        x-on:keydown="if ($event.ctrlKey || $event.metaKey || $event.altKey || $event.key.length > 1) { return; } if (!/^[a-zA-Z0-9-]$/.test($event.key)) { $event.preventDefault(); }"
+                        x-on:beforeinput="if ($event.data && !/^[a-zA-Z0-9-]+$/.test($event.data)) { $event.preventDefault(); }"
+                        x-on:input="$event.target.value = $event.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')"
                         autocapitalize="none"
                         autocomplete="off"
                         spellcheck="false"

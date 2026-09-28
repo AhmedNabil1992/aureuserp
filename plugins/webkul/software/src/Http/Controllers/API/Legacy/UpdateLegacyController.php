@@ -127,7 +127,7 @@ class UpdateLegacyController extends Controller
                     'Filename'      => $updateDetails->file_name,
                     'LatestVersion' => $updateDetails->version_number,
                     'App_Terminate' => $updateDetails->app_terminate,
-                    'IsDBUpdate'    => $updateDetails->is_db_update,
+                    'IsDBUpdate'    => $updateDetails->is_db_update ? 'True' : 'False',
                     'DB_Link'       => $dbLink,
                 ],
             ], 200, [], JSON_UNESCAPED_SLASHES);
