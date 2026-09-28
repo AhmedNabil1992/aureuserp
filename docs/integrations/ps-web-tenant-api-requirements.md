@@ -26,6 +26,13 @@ Content-Type: application/json
 Idempotency-Key: <stable-unique-operation-key>
 ```
 
+إعداد الربط المقابل بين المشروعين:
+
+- قيمة `API Token` في سجل النظام داخل `aureuserp` يجب أن تكون واحدة من القيم الموجودة في `TENANT_PROVISIONING_API_TOKENS` داخل بيئة `ps-web`.
+- قيمة `API Secret` في سجل النظام ذي `slug=ps-web` داخل `aureuserp` يجب أن تساوي `TENANT_WEBHOOK_SECRET` داخل بيئة `ps-web`، وتُحفظ مشفرة في قاعدة بيانات `aureuserp`.
+- داخل `ps-web` تكون `AUREUSERP_BASE_URL` هي رابط `aureuserp` العام، و`TENANT_WEBHOOK_SYSTEM=ps-web`، و`SOFTWARE_ONLINE_WEBHOOK_PATH=api/webhooks/ps-web/tenant-events`.
+- لا تُستخدم قيمة `TENANT_WEBHOOK_SECRET` كـ Bearer token؛ مفتاح الـ API وسر توقيع الـ Webhook قيمتان مستقلتان.
+
 المطلوب من `ps-web`:
 
 - عدم تخزين التوكن في logs.
@@ -155,6 +162,21 @@ POST /api/tenants/{tenantId}/renew
 ```
 
 ## 6. المزايا والحذف
+
+### الإيقاف والتفعيل
+
+```http
+POST /api/tenants/{tenantId}/suspend
+POST /api/tenants/{tenantId}/activate
+```
+
+- الطلبان لا يستقبلان مبلغًا أو تاريخًا ولا ينشئان عمليات مالية داخل `ps-web`.
+- الإيقاف يضبط `is_active=false` والحالة `suspended` ثم يرسل `tenant.suspended`.
+- التفعيل يضبط `is_active=true` والحالة `ready` ثم يرسل `tenant.activated`.
+- لا يجوز تفعيل Tenant منتهي؛ يجب تنفيذ التجديد أولًا.
+- كلا الطلبين يدعمان `Idempotency-Key` وقفل دورة حياة التينانت.
+
+### المزايا والحذف
 
 تظل endpoints الحالية مطلوبة:
 

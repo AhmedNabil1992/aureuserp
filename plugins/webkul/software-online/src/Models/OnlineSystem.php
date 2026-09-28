@@ -31,6 +31,7 @@ class OnlineSystem extends Model
         'suspend_tenant_endpoint',
         'activate_tenant_endpoint',
         'delete_tenant_endpoint',
+        'entitlements_endpoint',
         'sync_status_endpoint',
     ];
 

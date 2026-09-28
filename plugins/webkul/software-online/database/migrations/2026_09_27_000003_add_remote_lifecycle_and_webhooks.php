@@ -9,6 +9,12 @@ return new class extends Migration
 {
     public function up(): void
     {
+        Schema::table('online_systems', function (Blueprint $table): void {
+            $table->string('entitlements_endpoint')
+                ->default('/api/tenants/{tenant_id}/entitlements')
+                ->after('delete_tenant_endpoint');
+        });
+
         Schema::table('online_instances', function (Blueprint $table): void {
             $table->string('provisioning_request_id')->nullable()->after('remote_tenant_id')->index();
             $table->dateTime('provisioned_at')->nullable()->after('last_api_sync_at');
@@ -47,6 +53,12 @@ return new class extends Migration
             ->where('renew_tenant_endpoint', '/api/v1/tenants/{tenant_id}/renew')
             ->update(['renew_tenant_endpoint' => '/api/tenants/{tenant_id}/renew']);
         DB::table('online_systems')
+            ->where('suspend_tenant_endpoint', '/api/v1/tenants/{tenant_id}/suspend')
+            ->update(['suspend_tenant_endpoint' => '/api/tenants/{tenant_id}/suspend']);
+        DB::table('online_systems')
+            ->where('activate_tenant_endpoint', '/api/v1/tenants/{tenant_id}/activate')
+            ->update(['activate_tenant_endpoint' => '/api/tenants/{tenant_id}/activate']);
+        DB::table('online_systems')
             ->where('delete_tenant_endpoint', '/api/v1/tenants/{tenant_id}')
             ->update(['delete_tenant_endpoint' => '/api/tenants/{tenant_id}']);
         DB::table('online_systems')
@@ -57,6 +69,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('online_tenant_webhook_events');
+
+        Schema::table('online_systems', function (Blueprint $table): void {
+            $table->dropColumn('entitlements_endpoint');
+        });
 
         Schema::table('online_instance_transactions', function (Blueprint $table): void {
             $table->dropUnique(['idempotency_key']);

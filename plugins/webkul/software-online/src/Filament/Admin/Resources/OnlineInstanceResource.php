@@ -3,9 +3,6 @@
 namespace Webkul\SoftwareOnline\Filament\Admin\Resources;
 
 use Filament\Actions\Action;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DateTimePicker;
@@ -262,15 +259,95 @@ class OnlineInstanceResource extends Resource
                                 ->send();
                         }
                     }),
+                Action::make('syncStatus')
+                    ->label(__('software-online::filament/admin/resources/instance.actions.sync_status'))
+                    ->icon('heroicon-o-arrow-path-rounded-square')
+                    ->action(fn (OnlineInstance $record) => static::runRemoteAction(
+                        $record,
+                        fn (OnlineSystemProvisioningService $service): bool => $service->syncStatus($record),
+                        'sync_success',
+                        'sync_failed',
+                    ))
+                    ->visible(fn (OnlineInstance $record): bool => filled($record->remote_tenant_id)),
+                Action::make('syncEntitlements')
+                    ->label(__('software-online::filament/admin/resources/instance.actions.sync_entitlements'))
+                    ->icon('heroicon-o-adjustments-horizontal')
+                    ->requiresConfirmation()
+                    ->action(fn (OnlineInstance $record) => static::runRemoteAction(
+                        $record,
+                        fn (OnlineSystemProvisioningService $service): bool => $service->updateEntitlements($record),
+                        'entitlements_success',
+                        'entitlements_failed',
+                    ))
+                    ->visible(fn (OnlineInstance $record): bool => filled($record->remote_tenant_id)),
+                Action::make('suspend')
+                    ->label(__('software-online::filament/admin/resources/instance.actions.suspend'))
+                    ->icon('heroicon-o-pause-circle')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->action(fn (OnlineInstance $record) => static::runRemoteAction(
+                        $record,
+                        fn (OnlineSystemProvisioningService $service): bool => $service->suspendInstance($record),
+                        'suspend_success',
+                        'suspend_failed',
+                    ))
+                    ->visible(fn (OnlineInstance $record): bool => $record->status === InstanceStatus::Active && filled($record->remote_tenant_id)),
+                Action::make('activate')
+                    ->label(__('software-online::filament/admin/resources/instance.actions.activate'))
+                    ->icon('heroicon-o-play-circle')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->action(fn (OnlineInstance $record) => static::runRemoteAction(
+                        $record,
+                        fn (OnlineSystemProvisioningService $service): bool => $service->activateInstance($record),
+                        'activate_success',
+                        'activate_failed',
+                    ))
+                    ->visible(fn (OnlineInstance $record): bool => $record->status === InstanceStatus::Suspended && filled($record->remote_tenant_id)),
                 ViewAction::make(),
                 EditAction::make(),
-                DeleteAction::make(),
+                static::deleteRemoteAction(),
             ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->toolbarActions([]);
+    }
+
+    public static function deleteRemoteAction(): Action
+    {
+        return Action::make('deleteRemote')
+            ->label(__('software-online::filament/admin/resources/instance.actions.delete'))
+            ->icon('heroicon-o-trash')
+            ->color('danger')
+            ->requiresConfirmation()
+            ->action(fn (OnlineInstance $record) => static::runRemoteAction(
+                $record,
+                fn (OnlineSystemProvisioningService $service): bool => $service->deleteInstance($record),
+                'delete_started',
+                'delete_failed',
+            ))
+            ->visible(fn (OnlineInstance $record): bool => filled($record->remote_tenant_id)
+                && ! in_array($record->status, [InstanceStatus::Deleting, InstanceStatus::Deleted], true));
+    }
+
+    private static function runRemoteAction(
+        OnlineInstance $record,
+        \Closure $callback,
+        string $successMessage,
+        string $failureMessage,
+    ): void {
+        $success = $callback(app(OnlineSystemProvisioningService::class));
+        $record->refresh();
+
+        $notification = Notification::make()
+            ->title(__('software-online::filament/admin/resources/instance.notifications.'.($success ? $successMessage : $failureMessage)))
+            ->body($success ? null : $record->last_api_error);
+
+        if ($success) {
+            $notification->success();
+        } else {
+            $notification->danger();
+        }
+
+        $notification->send();
     }
 
     public static function getPages(): array

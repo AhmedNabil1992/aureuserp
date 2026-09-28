@@ -113,18 +113,31 @@ class OnlineSystemResource extends Resource
                         ->columnSpanFull(),
                     TextInput::make('create_tenant_endpoint')
                         ->label(__('software-online::filament/admin/resources/system.fields.create_endpoint'))
+                        ->required()
                         ->default('/api/tenants'),
                     TextInput::make('renew_tenant_endpoint')
                         ->label(__('software-online::filament/admin/resources/system.fields.renew_endpoint'))
+                        ->required()
                         ->default('/api/tenants/{tenant_id}/renew'),
                     TextInput::make('suspend_tenant_endpoint')
                         ->label(__('software-online::filament/admin/resources/system.fields.suspend_endpoint'))
-                        ->default('/api/v1/tenants/{tenant_id}/suspend'),
+                        ->required()
+                        ->default('/api/tenants/{tenant_id}/suspend'),
                     TextInput::make('activate_tenant_endpoint')
                         ->label(__('software-online::filament/admin/resources/system.fields.activate_endpoint'))
-                        ->default('/api/v1/tenants/{tenant_id}/activate'),
+                        ->required()
+                        ->default('/api/tenants/{tenant_id}/activate'),
+                    TextInput::make('delete_tenant_endpoint')
+                        ->label(__('software-online::filament/admin/resources/system.fields.delete_endpoint'))
+                        ->required()
+                        ->default('/api/tenants/{tenant_id}'),
+                    TextInput::make('entitlements_endpoint')
+                        ->label(__('software-online::filament/admin/resources/system.fields.entitlements_endpoint'))
+                        ->required()
+                        ->default('/api/tenants/{tenant_id}/entitlements'),
                     TextInput::make('sync_status_endpoint')
                         ->label(__('software-online::filament/admin/resources/system.fields.sync_endpoint'))
+                        ->required()
                         ->default('/api/tenants/{tenant_id}/status'),
                 ])->columns(2)->collapsed(),
         ]);

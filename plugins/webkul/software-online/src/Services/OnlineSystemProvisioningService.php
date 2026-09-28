@@ -184,9 +184,9 @@ class OnlineSystemProvisioningService
     {
         $system = $instance->system;
         if (! $system || empty($system->api_base_url) || empty($instance->remote_tenant_id)) {
-            $instance->update(['status' => InstanceStatus::Suspended]);
+            $instance->update(['last_api_error' => 'Remote API URL and tenant ID are required before suspension.']);
 
-            return true;
+            return false;
         }
 
         try {
@@ -195,14 +195,21 @@ class OnlineSystemProvisioningService
 
             $response = $client->post($url, ['tenant_id' => $instance->remote_tenant_id]);
 
+            if (! $response->successful()) {
+                $instance->update(['last_api_error' => $this->responseError($response->status(), $response->body())]);
+
+                return false;
+            }
+
             $instance->update([
                 'status'           => InstanceStatus::Suspended,
                 'last_api_sync_at' => now(),
+                'last_api_error'   => null,
             ]);
 
-            return $response->successful();
+            return true;
         } catch (Exception $e) {
-            $instance->update(['status' => InstanceStatus::Suspended, 'last_api_error' => $e->getMessage()]);
+            $instance->update(['last_api_error' => $e->getMessage()]);
 
             return false;
         }
@@ -215,9 +222,9 @@ class OnlineSystemProvisioningService
     {
         $system = $instance->system;
         if (! $system || empty($system->api_base_url) || empty($instance->remote_tenant_id)) {
-            $instance->update(['status' => InstanceStatus::Active]);
+            $instance->update(['last_api_error' => 'Remote API URL and tenant ID are required before activation.']);
 
-            return true;
+            return false;
         }
 
         try {
@@ -226,14 +233,21 @@ class OnlineSystemProvisioningService
 
             $response = $client->post($url, ['tenant_id' => $instance->remote_tenant_id]);
 
+            if (! $response->successful()) {
+                $instance->update(['last_api_error' => $this->responseError($response->status(), $response->body())]);
+
+                return false;
+            }
+
             $instance->update([
                 'status'           => InstanceStatus::Active,
                 'last_api_sync_at' => now(),
+                'last_api_error'   => null,
             ]);
 
-            return $response->successful();
+            return true;
         } catch (Exception $e) {
-            $instance->update(['status' => InstanceStatus::Active, 'last_api_error' => $e->getMessage()]);
+            $instance->update(['last_api_error' => $e->getMessage()]);
 
             return false;
         }
@@ -246,7 +260,9 @@ class OnlineSystemProvisioningService
     {
         $system = $instance->system;
         if (! $system || empty($system->api_base_url) || empty($instance->remote_tenant_id)) {
-            return true;
+            $instance->update(['last_api_error' => 'Remote API URL and tenant ID are required before status synchronization.']);
+
+            return false;
         }
 
         try {
@@ -257,16 +273,117 @@ class OnlineSystemProvisioningService
 
             if ($response->successful()) {
                 $data = $response->json();
-                $instance->update([
+                $data = is_array($data) ? $data : [];
+                $attributes = [
                     'remote_data'      => $data,
                     'last_api_sync_at' => now(),
                     'last_api_error'   => null,
-                ]);
+                ];
+
+                $attributes['status'] = match ($data['status'] ?? null) {
+                    'ready'     => InstanceStatus::Active,
+                    'suspended' => InstanceStatus::Suspended,
+                    'deleting'  => InstanceStatus::Deleting,
+                    'deleted'   => InstanceStatus::Deleted,
+                    'failed'    => InstanceStatus::Failed,
+                    default     => $instance->status,
+                };
+
+                if (filled($data['ended_at'] ?? null)) {
+                    $attributes['expires_at'] = $data['ended_at'];
+                }
+
+                $instance->update($attributes);
 
                 return true;
             }
 
+            $instance->update(['last_api_error' => $this->responseError($response->status(), $response->body())]);
+
             return false;
+        } catch (Exception $e) {
+            $instance->update(['last_api_error' => $e->getMessage()]);
+
+            return false;
+        }
+    }
+
+    public function updateEntitlements(OnlineInstance $instance): bool
+    {
+        $instance->loadMissing('plan', 'system');
+        $system = $instance->system;
+        if (! $system || empty($system->api_base_url) || empty($system->entitlements_endpoint) || empty($instance->remote_tenant_id)) {
+            $instance->update(['last_api_error' => 'Remote API URL, entitlements endpoint, and tenant ID are required before entitlement synchronization.']);
+
+            return false;
+        }
+
+        $customPayload = $instance->plan?->custom_api_payload ?? [];
+        $payload = [
+            'branches_limit'      => max(1, (int) ($instance->plan?->max_branches ?? 1)),
+            'has_ai_subscription' => (bool) ($customPayload['has_ai_subscription'] ?? true),
+            'ai_requests_limit'   => max(0, (int) ($customPayload['ai_requests_limit'] ?? 10)),
+        ];
+
+        try {
+            $url = $this->formatUrl($system->api_base_url, $system->entitlements_endpoint, $instance);
+            $idempotencyKey = 'tenant-entitlements:'.$instance->id.':'.hash('sha256', json_encode($payload, JSON_THROW_ON_ERROR));
+            $response = $this->buildHttpClient($system)
+                ->withHeader('Idempotency-Key', $idempotencyKey)
+                ->patch($url, $payload);
+
+            if (! $response->successful()) {
+                $instance->update(['last_api_error' => $this->responseError($response->status(), $response->body())]);
+
+                return false;
+            }
+
+            $responseData = $response->json();
+            $instance->update([
+                'remote_data'      => array_replace_recursive(
+                    $instance->remote_data ?? [],
+                    is_array($responseData) ? $responseData : [],
+                ),
+                'last_api_sync_at' => now(),
+                'last_api_error'   => null,
+            ]);
+
+            return true;
+        } catch (Exception $e) {
+            $instance->update(['last_api_error' => $e->getMessage()]);
+
+            return false;
+        }
+    }
+
+    public function deleteInstance(OnlineInstance $instance): bool
+    {
+        $system = $instance->system;
+        if (! $system || empty($system->api_base_url) || empty($system->delete_tenant_endpoint) || empty($instance->remote_tenant_id)) {
+            $instance->update(['last_api_error' => 'Remote API URL, delete endpoint, and tenant ID are required before deletion.']);
+
+            return false;
+        }
+
+        try {
+            $url = $this->formatUrl($system->api_base_url, $system->delete_tenant_endpoint, $instance);
+            $response = $this->buildHttpClient($system)
+                ->withHeader('Idempotency-Key', 'tenant-delete:'.$instance->id)
+                ->delete($url);
+
+            if (! $response->successful()) {
+                $instance->update(['last_api_error' => $this->responseError($response->status(), $response->body())]);
+
+                return false;
+            }
+
+            $instance->update([
+                'status'           => InstanceStatus::Deleting,
+                'last_api_sync_at' => now(),
+                'last_api_error'   => null,
+            ]);
+
+            return true;
         } catch (Exception $e) {
             $instance->update(['last_api_error' => $e->getMessage()]);
 
@@ -300,6 +417,11 @@ class OnlineSystemProvisioningService
         ];
 
         return str_replace(array_keys($replacements), array_values($replacements), $url);
+    }
+
+    private function responseError(int $status, string $body): string
+    {
+        return "Remote API request failed ({$status}): ".mb_strimwidth($body, 0, 2000, '...');
     }
 
     private function resolveDomain(OnlineInstance $instance): string
