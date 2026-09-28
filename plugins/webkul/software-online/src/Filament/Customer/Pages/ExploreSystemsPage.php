@@ -117,6 +117,11 @@ class ExploreSystemsPage extends Page
         return $system?->tenantLoginUrl($this->subdomain);
     }
 
+    public function updatedSubdomain(string $value): void
+    {
+        $this->subdomain = strtolower(trim($value));
+    }
+
     public function createWebsite(): void
     {
         $this->subdomain = strtolower(trim($this->subdomain));

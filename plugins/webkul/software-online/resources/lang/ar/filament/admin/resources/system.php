@@ -27,6 +27,7 @@ return [
         'api_base_url'          => 'رابط الـ API الأساسي (Base URL)',
         'api_token'             => 'مفتاح الترخيص / Bearer Token',
         'api_headers'           => 'ترويسات إضافية (Custom Headers)',
+        'check_domain_endpoint' => 'مسار فحص توفر النطاق',
         'create_endpoint'       => 'مسار إنشاء تينانت جديد (Create Tenant)',
         'renew_endpoint'        => 'مسار تجديد الاشتراك (Renew Tenant)',
         'suspend_endpoint'      => 'مسار إيقاف التينانت (Suspend Tenant)',

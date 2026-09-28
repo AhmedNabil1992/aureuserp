@@ -27,6 +27,7 @@ return [
         'api_base_url'          => 'API Base URL',
         'api_token'             => 'API Bearer Token',
         'api_headers'           => 'Custom Headers',
+        'check_domain_endpoint' => 'Check Domain Endpoint',
         'create_endpoint'       => 'Create Tenant Endpoint',
         'renew_endpoint'        => 'Renew Tenant Endpoint',
         'suspend_endpoint'      => 'Suspend Tenant Endpoint',

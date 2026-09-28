@@ -28,6 +28,7 @@ class SoftwareOnlineServiceProvider extends PackageServiceProvider
                 '2026_08_24_000001_create_online_systems_tables',
                 '2026_08_24_000002_add_product_and_invoicing_to_online_systems_tables',
                 '2026_09_27_000003_add_remote_lifecycle_and_webhooks',
+                '2026_09_28_000004_add_domain_check_endpoint_to_online_systems',
             ])
             ->runsMigrations()
             ->hasCommand(RenewOnlineInstancesCommand::class)

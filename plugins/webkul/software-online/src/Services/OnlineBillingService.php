@@ -99,6 +99,9 @@ class OnlineBillingService
         ?string $adminUsername = null,
         ?string $referralCode = null,
     ): OnlineInstance {
+        $plan->loadMissing('system');
+        app(OnlineSystemProvisioningService::class)->assertDomainAvailable($plan->system, (string) $subdomain);
+
         if ($cycle === BillingCycle::Trial) {
             if ($this->hasUsedTrial($partner)) {
                 throw new Exception(__('software-online::filament/customer/pages/explore.trial_already_used'));

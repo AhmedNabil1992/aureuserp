@@ -111,6 +111,10 @@ class OnlineSystemResource extends Resource
                     KeyValue::make('api_headers')
                         ->label(__('software-online::filament/admin/resources/system.fields.api_headers'))
                         ->columnSpanFull(),
+                    TextInput::make('check_domain_endpoint')
+                        ->label(__('software-online::filament/admin/resources/system.fields.check_domain_endpoint'))
+                        ->required()
+                        ->default('/api/tenants/check-domain'),
                     TextInput::make('create_tenant_endpoint')
                         ->label(__('software-online::filament/admin/resources/system.fields.create_endpoint'))
                         ->required()

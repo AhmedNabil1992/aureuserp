@@ -22,6 +22,11 @@ class CreateOnlineInstance extends CreateRecord
         $cycle = BillingCycle::tryFrom($cycleValue) ?? BillingCycle::Monthly;
         $startsAt = now();
 
+        app(OnlineSystemProvisioningService::class)->assertDomainAvailable(
+            $plan->system,
+            (string) ($data['subdomain'] ?? ''),
+        );
+
         $data['system_id'] = $plan->system_id;
         $data['status'] = InstanceStatus::Pending;
         $data['starts_at'] = $startsAt;

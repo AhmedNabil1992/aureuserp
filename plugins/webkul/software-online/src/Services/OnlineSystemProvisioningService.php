@@ -5,12 +5,51 @@ namespace Webkul\SoftwareOnline\Services;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Webkul\SoftwareOnline\Enums\InstanceStatus;
 use Webkul\SoftwareOnline\Models\OnlineInstance;
 use Webkul\SoftwareOnline\Models\OnlineSystem;
 
 class OnlineSystemProvisioningService
 {
+    /**
+     * Verify availability against the remote system before any local creation
+     * or billing work starts. The provisioning endpoint still performs the
+     * final atomic reservation to protect against concurrent requests.
+     */
+    public function assertDomainAvailable(OnlineSystem $system, string $subdomain): string
+    {
+        $domain = $system->tenantHost($subdomain);
+        if (blank($domain) || blank($system->api_base_url) || blank($system->check_domain_endpoint)) {
+            throw ValidationException::withMessages([
+                'subdomain' => __('software-online::validation.domain_check_failed'),
+            ]);
+        }
+
+        try {
+            $url = rtrim((string) $system->api_base_url, '/').'/'.ltrim((string) $system->check_domain_endpoint, '/');
+            $response = $this->buildHttpClient($system)->get($url, ['domain' => $domain]);
+        } catch (Exception) {
+            throw ValidationException::withMessages([
+                'subdomain' => __('software-online::validation.domain_check_failed'),
+            ]);
+        }
+
+        if (! $response->successful() || ! is_bool($response->json('available'))) {
+            throw ValidationException::withMessages([
+                'subdomain' => __('software-online::validation.domain_check_failed'),
+            ]);
+        }
+
+        if (! $response->json('available')) {
+            throw ValidationException::withMessages([
+                'subdomain' => __('software-online::validation.domain_taken'),
+            ]);
+        }
+
+        return $domain;
+    }
+
     /**
      * Test connection to system API
      */

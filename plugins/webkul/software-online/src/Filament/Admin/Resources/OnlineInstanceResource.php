@@ -119,15 +119,30 @@ class OnlineInstanceResource extends Resource
                         ->required()
                         ->live(debounce: 400)
                         ->maxLength(50)
+                        ->extraInputAttributes([
+                            'autocapitalize' => 'none',
+                            'autocomplete'   => 'off',
+                            'spellcheck'     => 'false',
+                        ])
+                        ->mutateStateForValidationUsing(fn (mixed $state): string => strtolower(trim((string) $state)))
                         ->dehydrateStateUsing(fn (mixed $state): string => strtolower(trim((string) $state)))
                         ->rules([new Subdomain])
                         ->unique(
                             ignoreRecord: true,
                             modifyRuleUsing: fn (Unique $rule, Get $get): Unique => $rule->where('system_id', $get('system_id')),
                         )
-                        ->afterStateUpdated(fn (Get $get, Set $set, string $operation) => $operation === 'create'
-                            ? static::updateCreateUrlPreview($get, $set)
-                            : null),
+                        ->afterStateUpdated(function (Get $get, Set $set, mixed $state, string $operation): void {
+                            if ($operation !== 'create') {
+                                return;
+                            }
+
+                            $normalized = strtolower(trim((string) $state));
+                            if ($normalized !== $state) {
+                                $set('subdomain', $normalized);
+                            }
+
+                            static::updateCreateUrlPreview($get, $set);
+                        }),
                     TextInput::make('custom_domain')
                         ->label(__('software-online::filament/admin/resources/instance.fields.custom_domain'))
                         ->placeholder('store.example.com'),

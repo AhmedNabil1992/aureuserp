@@ -26,6 +26,7 @@ class OnlineSystem extends Model
         'api_token',
         'api_secret',
         'api_headers',
+        'check_domain_endpoint',
         'create_tenant_endpoint',
         'renew_tenant_endpoint',
         'suspend_tenant_endpoint',
