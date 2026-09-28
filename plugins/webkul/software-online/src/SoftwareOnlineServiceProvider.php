@@ -3,11 +3,14 @@
 namespace Webkul\SoftwareOnline;
 
 use Filament\Panel;
+use Illuminate\Support\Facades\Event;
+use Webkul\Account\Events\MovePaid;
 use Webkul\PluginManager\Console\Commands\InstallCommand;
 use Webkul\PluginManager\Console\Commands\UninstallCommand;
 use Webkul\PluginManager\Package;
 use Webkul\PluginManager\PackageServiceProvider;
 use Webkul\SoftwareOnline\Console\Commands\RenewOnlineInstancesCommand;
+use Webkul\SoftwareOnline\Listeners\MarkOnlineTransactionsPaid;
 use Webkul\SoftwareOnline\Services\OnlineBillingService;
 use Webkul\SoftwareOnline\Services\OnlineSystemProvisioningService;
 
@@ -49,5 +52,10 @@ class SoftwareOnlineServiceProvider extends PackageServiceProvider
 
         $this->app->singleton(OnlineBillingService::class);
         $this->app->singleton(OnlineSystemProvisioningService::class);
+    }
+
+    public function packageBooted(): void
+    {
+        Event::listen(MovePaid::class, MarkOnlineTransactionsPaid::class);
     }
 }

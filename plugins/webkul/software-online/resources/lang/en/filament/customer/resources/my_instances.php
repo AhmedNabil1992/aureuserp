@@ -29,14 +29,15 @@ return [
     ],
     'fields' => [
         'billing_cycle' => 'Renewal Period',
+        'periods'       => 'Number of Periods',
     ],
     'actions' => [
         'visit'      => 'Open Dashboard',
-        'renew'      => 'Renew from Balance',
+        'renew'      => 'Renew or Change Cycle from Balance',
         'create_new' => 'Create New Website',
     ],
     'notifications' => [
-        'renewed_success' => 'Subscription renewed successfully from balance',
+        'renewed_success' => 'Subscription renewed or changed successfully from balance',
         'renew_failed'    => 'Failed to renew subscription',
     ],
 ];

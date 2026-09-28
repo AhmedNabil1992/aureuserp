@@ -385,14 +385,31 @@ class OnlineInstanceResource extends Resource
                         ->form([
                             Select::make('billing_cycle')
                                 ->label(__('software-online::filament/admin/resources/instance.fields.billing_cycle'))
-                                ->options(BillingCycle::class)
-                                ->default(BillingCycle::Monthly)
+                                ->options([
+                                    BillingCycle::Monthly->value => BillingCycle::Monthly->getLabel(),
+                                    BillingCycle::Annual->value  => BillingCycle::Annual->getLabel(),
+                                ])
+                                ->default(fn (OnlineInstance $record): string => $record->billing_cycle === BillingCycle::Annual
+                                    ? BillingCycle::Annual->value
+                                    : BillingCycle::Monthly->value)
+                                ->required(),
+                            TextInput::make('periods')
+                                ->label(__('software-online::filament/admin/resources/instance.fields.periods'))
+                                ->integer()
+                                ->minValue(1)
+                                ->maxValue(120)
+                                ->default(1)
                                 ->required(),
                         ])
                         ->action(function (OnlineInstance $record, array $data) {
                             $cycle = BillingCycle::tryFrom($data['billing_cycle']) ?? BillingCycle::Monthly;
                             try {
-                                app(OnlineBillingService::class)->renewInstance($record, $cycle);
+                                app(OnlineBillingService::class)->renewInstance(
+                                    instance: $record,
+                                    cycle: $cycle,
+                                    periods: (int) ($data['periods'] ?? 1),
+                                    requireFullSettlement: false,
+                                );
                                 Notification::make()
                                     ->title(__('software-online::filament/admin/resources/instance.notifications.renew_success'))
                                     ->success()

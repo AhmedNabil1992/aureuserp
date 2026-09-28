@@ -5,4 +5,5 @@ return [
     'subdomain_reserved'  => 'The selected :attribute is reserved and cannot be used.',
     'domain_taken'        => 'This subdomain is already in use. Please choose another one.',
     'domain_check_failed' => 'The subdomain availability could not be verified. Please try again.',
+    'domain_check_title'  => 'Subdomain check failed',
 ];

@@ -6,6 +6,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Webkul\SoftwareOnline\Enums\BillingCycle;
 use Webkul\SoftwareOnline\Models\OnlineSystem;
 use Webkul\SoftwareOnline\Models\OnlineSystemPlan;
@@ -176,6 +177,17 @@ class ExploreSystemsPage extends Page
 
             $this->dispatch('close-modal', id: 'create-instance-modal');
             $this->redirect(route('filament.customer.resources.my-online-websites.index'));
+        } catch (ValidationException $exception) {
+            $message = collect($exception->errors())->flatten()->first()
+                ?? __('software-online::validation.domain_check_failed');
+
+            $this->addError('subdomain', $message);
+
+            Notification::make()
+                ->title(__('software-online::validation.domain_check_title'))
+                ->body($message)
+                ->danger()
+                ->send();
         } catch (\Exception $e) {
             Notification::make()
                 ->title(__('software-online::filament/customer/pages/explore.notifications.failed'))
