@@ -120,28 +120,29 @@ class OnlineInstanceResource extends Resource
                         ->live(debounce: 400)
                         ->maxLength(50)
                         ->extraInputAttributes([
-                            'autocapitalize' => 'none',
-                            'autocomplete'   => 'off',
-                            'spellcheck'     => 'false',
+                            'autocapitalize'   => 'none',
+                            'autocomplete'     => 'off',
+                            'spellcheck'       => 'false',
+                            'x-on:keydown'     => 'if ($event.ctrlKey || $event.metaKey || $event.altKey || $event.key.length > 1) { return; } if (!/^[a-zA-Z0-9-]$/.test($event.key)) { $event.preventDefault(); }',
+                            'x-on:beforeinput' => 'if ($event.data && !/^[a-zA-Z0-9-]+$/.test($event.data)) { $event.preventDefault(); }',
+                            'x-on:input'       => '$el.value = $el.value.toLowerCase().replace(/[^a-z0-9-]/g, \'\')',
                         ])
-                        ->mutateStateForValidationUsing(fn (mixed $state): string => strtolower(trim((string) $state)))
-                        ->dehydrateStateUsing(fn (mixed $state): string => strtolower(trim((string) $state)))
+                        ->mutateStateForValidationUsing(fn (mixed $state): string => strtolower(preg_replace('/[^a-zA-Z0-9-]/', '', (string) $state)))
+                        ->dehydrateStateUsing(fn (mixed $state): string => strtolower(preg_replace('/[^a-zA-Z0-9-]/', '', (string) $state)))
                         ->rules([new Subdomain])
                         ->unique(
                             ignoreRecord: true,
                             modifyRuleUsing: fn (Unique $rule, Get $get): Unique => $rule->where('system_id', $get('system_id')),
                         )
                         ->afterStateUpdated(function (Get $get, Set $set, mixed $state, string $operation): void {
-                            if ($operation !== 'create') {
-                                return;
-                            }
-
-                            $normalized = strtolower(trim((string) $state));
+                            $normalized = strtolower(preg_replace('/[^a-zA-Z0-9-]/', '', (string) $state));
                             if ($normalized !== $state) {
                                 $set('subdomain', $normalized);
                             }
 
-                            static::updateCreateUrlPreview($get, $set);
+                            if ($operation === 'create') {
+                                static::updateCreateUrlPreview($get, $set);
+                            }
                         }),
                     TextInput::make('custom_domain')
                         ->label(__('software-online::filament/admin/resources/instance.fields.custom_domain'))
