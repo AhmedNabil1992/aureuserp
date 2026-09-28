@@ -22,7 +22,6 @@ return [
         'trial_option'         => 'Free Trial Version',
         'monthly_option'       => 'Monthly Subscription',
         'annual_option'        => 'Annual Subscription',
-        'expires_at_preview'   => 'Expected expiration: :date',
         'trial_used_notice'    => 'You have already used the free trial (allowed only once per customer).',
         'trial_balance_notice' => 'The trial version is completely free and no balance will be deducted.',
         'balance_notice'       => 'The subscription price will be automatically deducted from your available balance and provisioned.',

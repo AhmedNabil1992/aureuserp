@@ -30,7 +30,12 @@ return [
         'auto_renew'       => 'تجديد تلقائي',
         'remote_tenant_id' => 'معرف التينانت البعيد (Remote Tenant ID)',
         'last_api_error'   => 'آخر خطأ API',
+        'last_api_sync_at' => 'آخر مزامنة مع الـ API',
         'remote_data'      => 'بيانات الاستجابة البعيدة',
+    ],
+    'values' => [
+        'enabled'  => 'مفعّل',
+        'disabled' => 'غير مفعّل',
     ],
     'actions' => [
         'visit_website'     => 'فتح الموقع',

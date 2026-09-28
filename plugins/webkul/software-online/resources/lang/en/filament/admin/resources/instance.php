@@ -30,7 +30,12 @@ return [
         'auto_renew'       => 'Auto Renew',
         'remote_tenant_id' => 'Remote Tenant ID',
         'last_api_error'   => 'Last API Error',
+        'last_api_sync_at' => 'Last API Sync',
         'remote_data'      => 'Remote Response Payload',
+    ],
+    'values' => [
+        'enabled'  => 'Enabled',
+        'disabled' => 'Disabled',
     ],
     'actions' => [
         'visit_website'     => 'Open Website',

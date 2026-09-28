@@ -2,7 +2,6 @@
 
 namespace Webkul\SoftwareOnline\Filament\Customer\Pages;
 
-use Carbon\CarbonImmutable;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
@@ -116,21 +115,6 @@ class ExploreSystemsPage extends Page
         $system = $this->systems->firstWhere('id', $this->selectedSystemId);
 
         return $system?->tenantLoginUrl($this->subdomain);
-    }
-
-    public function getSubscriptionExpiresAtPreviewProperty(): ?CarbonImmutable
-    {
-        $plan = $this->systems
-            ->flatMap(fn (OnlineSystem $system) => $system->plans)
-            ->firstWhere('id', $this->selectedPlanId);
-
-        if (! $plan) {
-            return null;
-        }
-
-        $cycle = BillingCycle::tryFrom($this->modalBillingCycle) ?? BillingCycle::Monthly;
-
-        return $plan->expiresAtFor($cycle);
     }
 
     public function createWebsite(): void

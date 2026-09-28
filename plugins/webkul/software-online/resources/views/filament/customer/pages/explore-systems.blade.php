@@ -196,11 +196,6 @@
                     </p>
                 @endif
 
-                @if($this->subscriptionExpiresAtPreview)
-                    <p class="mt-2 text-xs font-medium text-gray-600 dark:text-gray-300">
-                        {{ __('software-online::filament/customer/pages/explore.modal.expires_at_preview', ['date' => $this->subscriptionExpiresAtPreview->translatedFormat('Y-m-d H:i')]) }}
-                    </p>
-                @endif
             </div>
 
             <div>

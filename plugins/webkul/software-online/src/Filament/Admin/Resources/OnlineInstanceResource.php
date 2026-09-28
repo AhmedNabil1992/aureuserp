@@ -3,6 +3,7 @@
 namespace Webkul\SoftwareOnline\Filament\Admin\Resources;
 
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DateTimePicker;
@@ -10,6 +11,7 @@ use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
@@ -172,7 +174,7 @@ class OnlineInstanceResource extends Resource
                     DateTimePicker::make('expires_at')
                         ->label(__('software-online::filament/admin/resources/instance.fields.expires_at'))
                         ->required()
-                        ->readOnly(fn (string $operation): bool => $operation === 'create')
+                        ->hidden(fn (string $operation): bool => $operation === 'create')
                         ->after('starts_at'),
                     Toggle::make('auto_renew')
                         ->label(__('software-online::filament/admin/resources/instance.fields.auto_renew'))
@@ -194,6 +196,72 @@ class OnlineInstanceResource extends Resource
                 ->columns(2)
                 ->collapsed()
                 ->hidden(fn (string $operation): bool => $operation === 'create'),
+        ]);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema->components([
+            Section::make(__('software-online::filament/admin/resources/instance.sections.general'))
+                ->schema([
+                    TextEntry::make('instance_number')
+                        ->label(__('software-online::filament/admin/resources/instance.fields.instance_number'))
+                        ->prefix('#'),
+                    TextEntry::make('partner.name')
+                        ->label(__('software-online::filament/admin/resources/instance.fields.customer')),
+                    TextEntry::make('name')
+                        ->label(__('software-online::filament/admin/resources/instance.fields.name')),
+                    TextEntry::make('system.name')
+                        ->label(__('software-online::filament/admin/resources/instance.fields.system'))
+                        ->badge(),
+                    TextEntry::make('plan.name')
+                        ->label(__('software-online::filament/admin/resources/instance.fields.plan'))
+                        ->badge(),
+                    TextEntry::make('full_url')
+                        ->label(__('software-online::filament/admin/resources/instance.fields.instance_url'))
+                        ->url(fn (OnlineInstance $record): string => $record->full_url)
+                        ->openUrlInNewTab()
+                        ->columnSpanFull(),
+                ])
+                ->columns(2),
+            Section::make(__('software-online::filament/admin/resources/instance.sections.subscription'))
+                ->schema([
+                    TextEntry::make('status')
+                        ->label(__('software-online::filament/admin/resources/instance.fields.status'))
+                        ->badge(),
+                    TextEntry::make('billing_cycle')
+                        ->label(__('software-online::filament/admin/resources/instance.fields.billing_cycle'))
+                        ->badge(),
+                    TextEntry::make('price')
+                        ->label(__('software-online::filament/admin/resources/instance.fields.price'))
+                        ->money('EGP'),
+                    TextEntry::make('auto_renew')
+                        ->label(__('software-online::filament/admin/resources/instance.fields.auto_renew'))
+                        ->badge()
+                        ->formatStateUsing(fn (bool $state): string => $state
+                            ? __('software-online::filament/admin/resources/instance.values.enabled')
+                            : __('software-online::filament/admin/resources/instance.values.disabled')),
+                    TextEntry::make('starts_at')
+                        ->label(__('software-online::filament/admin/resources/instance.fields.starts_at'))
+                        ->dateTime(),
+                    TextEntry::make('expires_at')
+                        ->label(__('software-online::filament/admin/resources/instance.fields.expires_at'))
+                        ->dateTime(),
+                ])
+                ->columns(3),
+            Section::make(__('software-online::filament/admin/resources/instance.sections.remote_sync'))
+                ->schema([
+                    TextEntry::make('remote_tenant_id')
+                        ->label(__('software-online::filament/admin/resources/instance.fields.remote_tenant_id')),
+                    TextEntry::make('last_api_sync_at')
+                        ->label(__('software-online::filament/admin/resources/instance.fields.last_api_sync_at'))
+                        ->dateTime(),
+                    TextEntry::make('last_api_error')
+                        ->label(__('software-online::filament/admin/resources/instance.fields.last_api_error'))
+                        ->columnSpanFull(),
+                ])
+                ->columns(2)
+                ->collapsed(),
         ]);
     }
 
@@ -266,108 +334,110 @@ class OnlineInstanceResource extends Resource
                     ->options(InstanceStatus::class),
             ])
             ->recordActions([
-                Action::make('openWebsite')
-                    ->label(__('software-online::filament/admin/resources/instance.actions.visit_website'))
-                    ->icon('heroicon-o-arrow-top-right-on-square')
-                    ->color('success')
-                    ->url(fn (OnlineInstance $record) => $record->full_url)
-                    ->openUrlInNewTab()
-                    ->visible(fn (OnlineInstance $record) => ! empty($record->full_url)),
-                Action::make('provision')
-                    ->label(__('software-online::filament/admin/resources/instance.actions.provision_api'))
-                    ->icon('heroicon-o-cloud-arrow-up')
-                    ->color('info')
-                    ->requiresConfirmation()
-                    ->action(function (OnlineInstance $record) {
-                        $success = app(OnlineSystemProvisioningService::class)->provisionInstance($record);
-                        if ($success) {
-                            Notification::make()
-                                ->title(__('software-online::filament/admin/resources/instance.notifications.provision_success'))
-                                ->success()
-                                ->send();
-                        } else {
-                            Notification::make()
-                                ->title(__('software-online::filament/admin/resources/instance.notifications.provision_failed'))
-                                ->body($record->last_api_error)
-                                ->danger()
-                                ->send();
-                        }
-                    }),
-                Action::make('renew')
-                    ->label(__('software-online::filament/admin/resources/instance.actions.renew'))
-                    ->icon('heroicon-o-arrow-path')
-                    ->color('warning')
-                    ->form([
-                        Select::make('billing_cycle')
-                            ->label(__('software-online::filament/admin/resources/instance.fields.billing_cycle'))
-                            ->options(BillingCycle::class)
-                            ->default(BillingCycle::Monthly)
-                            ->required(),
-                    ])
-                    ->action(function (OnlineInstance $record, array $data) {
-                        $cycle = BillingCycle::tryFrom($data['billing_cycle']) ?? BillingCycle::Monthly;
-                        try {
-                            app(OnlineBillingService::class)->renewInstance($record, $cycle);
-                            Notification::make()
-                                ->title(__('software-online::filament/admin/resources/instance.notifications.renew_success'))
-                                ->success()
-                                ->send();
-                        } catch (\Exception $e) {
-                            Notification::make()
-                                ->title(__('software-online::filament/admin/resources/instance.notifications.renew_failed'))
-                                ->body($e->getMessage())
-                                ->danger()
-                                ->send();
-                        }
-                    }),
-                Action::make('syncStatus')
-                    ->label(__('software-online::filament/admin/resources/instance.actions.sync_status'))
-                    ->icon('heroicon-o-arrow-path-rounded-square')
-                    ->action(fn (OnlineInstance $record) => static::runRemoteAction(
-                        $record,
-                        fn (OnlineSystemProvisioningService $service): bool => $service->syncStatus($record),
-                        'sync_success',
-                        'sync_failed',
-                    ))
-                    ->visible(fn (OnlineInstance $record): bool => filled($record->remote_tenant_id)),
-                Action::make('syncEntitlements')
-                    ->label(__('software-online::filament/admin/resources/instance.actions.sync_entitlements'))
-                    ->icon('heroicon-o-adjustments-horizontal')
-                    ->requiresConfirmation()
-                    ->action(fn (OnlineInstance $record) => static::runRemoteAction(
-                        $record,
-                        fn (OnlineSystemProvisioningService $service): bool => $service->updateEntitlements($record),
-                        'entitlements_success',
-                        'entitlements_failed',
-                    ))
-                    ->visible(fn (OnlineInstance $record): bool => filled($record->remote_tenant_id)),
-                Action::make('suspend')
-                    ->label(__('software-online::filament/admin/resources/instance.actions.suspend'))
-                    ->icon('heroicon-o-pause-circle')
-                    ->color('warning')
-                    ->requiresConfirmation()
-                    ->action(fn (OnlineInstance $record) => static::runRemoteAction(
-                        $record,
-                        fn (OnlineSystemProvisioningService $service): bool => $service->suspendInstance($record),
-                        'suspend_success',
-                        'suspend_failed',
-                    ))
-                    ->visible(fn (OnlineInstance $record): bool => $record->status === InstanceStatus::Active && filled($record->remote_tenant_id)),
-                Action::make('activate')
-                    ->label(__('software-online::filament/admin/resources/instance.actions.activate'))
-                    ->icon('heroicon-o-play-circle')
-                    ->color('success')
-                    ->requiresConfirmation()
-                    ->action(fn (OnlineInstance $record) => static::runRemoteAction(
-                        $record,
-                        fn (OnlineSystemProvisioningService $service): bool => $service->activateInstance($record),
-                        'activate_success',
-                        'activate_failed',
-                    ))
-                    ->visible(fn (OnlineInstance $record): bool => $record->status === InstanceStatus::Suspended && filled($record->remote_tenant_id)),
-                ViewAction::make(),
-                EditAction::make(),
-                static::deleteRemoteAction(),
+                ActionGroup::make([
+                    Action::make('openWebsite')
+                        ->label(__('software-online::filament/admin/resources/instance.actions.visit_website'))
+                        ->icon('heroicon-o-arrow-top-right-on-square')
+                        ->color('success')
+                        ->url(fn (OnlineInstance $record) => $record->full_url)
+                        ->openUrlInNewTab()
+                        ->visible(fn (OnlineInstance $record) => $record->full_url !== '#'),
+                    Action::make('provision')
+                        ->label(__('software-online::filament/admin/resources/instance.actions.provision_api'))
+                        ->icon('heroicon-o-cloud-arrow-up')
+                        ->color('info')
+                        ->requiresConfirmation()
+                        ->action(function (OnlineInstance $record) {
+                            $success = app(OnlineSystemProvisioningService::class)->provisionInstance($record);
+                            if ($success) {
+                                Notification::make()
+                                    ->title(__('software-online::filament/admin/resources/instance.notifications.provision_success'))
+                                    ->success()
+                                    ->send();
+                            } else {
+                                Notification::make()
+                                    ->title(__('software-online::filament/admin/resources/instance.notifications.provision_failed'))
+                                    ->body($record->last_api_error)
+                                    ->danger()
+                                    ->send();
+                            }
+                        }),
+                    Action::make('renew')
+                        ->label(__('software-online::filament/admin/resources/instance.actions.renew'))
+                        ->icon('heroicon-o-arrow-path')
+                        ->color('warning')
+                        ->form([
+                            Select::make('billing_cycle')
+                                ->label(__('software-online::filament/admin/resources/instance.fields.billing_cycle'))
+                                ->options(BillingCycle::class)
+                                ->default(BillingCycle::Monthly)
+                                ->required(),
+                        ])
+                        ->action(function (OnlineInstance $record, array $data) {
+                            $cycle = BillingCycle::tryFrom($data['billing_cycle']) ?? BillingCycle::Monthly;
+                            try {
+                                app(OnlineBillingService::class)->renewInstance($record, $cycle);
+                                Notification::make()
+                                    ->title(__('software-online::filament/admin/resources/instance.notifications.renew_success'))
+                                    ->success()
+                                    ->send();
+                            } catch (\Exception $e) {
+                                Notification::make()
+                                    ->title(__('software-online::filament/admin/resources/instance.notifications.renew_failed'))
+                                    ->body($e->getMessage())
+                                    ->danger()
+                                    ->send();
+                            }
+                        }),
+                    Action::make('syncStatus')
+                        ->label(__('software-online::filament/admin/resources/instance.actions.sync_status'))
+                        ->icon('heroicon-o-arrow-path-rounded-square')
+                        ->action(fn (OnlineInstance $record) => static::runRemoteAction(
+                            $record,
+                            fn (OnlineSystemProvisioningService $service): bool => $service->syncStatus($record),
+                            'sync_success',
+                            'sync_failed',
+                        ))
+                        ->visible(fn (OnlineInstance $record): bool => filled($record->remote_tenant_id)),
+                    Action::make('syncEntitlements')
+                        ->label(__('software-online::filament/admin/resources/instance.actions.sync_entitlements'))
+                        ->icon('heroicon-o-adjustments-horizontal')
+                        ->requiresConfirmation()
+                        ->action(fn (OnlineInstance $record) => static::runRemoteAction(
+                            $record,
+                            fn (OnlineSystemProvisioningService $service): bool => $service->updateEntitlements($record),
+                            'entitlements_success',
+                            'entitlements_failed',
+                        ))
+                        ->visible(fn (OnlineInstance $record): bool => filled($record->remote_tenant_id)),
+                    Action::make('suspend')
+                        ->label(__('software-online::filament/admin/resources/instance.actions.suspend'))
+                        ->icon('heroicon-o-pause-circle')
+                        ->color('warning')
+                        ->requiresConfirmation()
+                        ->action(fn (OnlineInstance $record) => static::runRemoteAction(
+                            $record,
+                            fn (OnlineSystemProvisioningService $service): bool => $service->suspendInstance($record),
+                            'suspend_success',
+                            'suspend_failed',
+                        ))
+                        ->visible(fn (OnlineInstance $record): bool => $record->status === InstanceStatus::Active && filled($record->remote_tenant_id)),
+                    Action::make('activate')
+                        ->label(__('software-online::filament/admin/resources/instance.actions.activate'))
+                        ->icon('heroicon-o-play-circle')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->action(fn (OnlineInstance $record) => static::runRemoteAction(
+                            $record,
+                            fn (OnlineSystemProvisioningService $service): bool => $service->activateInstance($record),
+                            'activate_success',
+                            'activate_failed',
+                        ))
+                        ->visible(fn (OnlineInstance $record): bool => $record->status === InstanceStatus::Suspended && filled($record->remote_tenant_id)),
+                    ViewAction::make(),
+                    EditAction::make(),
+                    static::deleteRemoteAction(),
+                ]),
             ])
             ->toolbarActions([]);
     }
