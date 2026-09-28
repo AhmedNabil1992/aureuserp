@@ -69,7 +69,7 @@ class OnlineBillingService
      */
     public function hasUsedTrial(Partner $partner): bool
     {
-        return OnlineInstance::query()
+        return OnlineInstance::withTrashed()
             ->where('partner_id', $partner->id)
             ->where('billing_cycle', BillingCycle::Trial->value)
             ->exists()
@@ -142,16 +142,15 @@ class OnlineBillingService
     ): OnlineInstance {
         $plan->loadMissing('system', 'product');
 
-        if ($cycle === BillingCycle::Trial) {
-            if ($this->hasUsedTrial($partner)) {
-                throw new Exception(__('software-online::filament/customer/pages/explore.trial_already_used'));
-            }
-            $price = 0.00;
-        } else {
-            $price = $plan->priceFor($cycle);
-        }
+        $price = $plan->priceFor($cycle);
 
         return DB::transaction(function () use ($partner, $plan, $name, $subdomain, $cycle, $price, $adminUsername, $referralCode, $autoRenew, $customDomain, $requireFullSettlement) {
+            $partner = Partner::query()->lockForUpdate()->findOrFail($partner->id);
+
+            if ($cycle === BillingCycle::Trial && $this->hasUsedTrial($partner)) {
+                throw new Exception(__('software-online::filament/customer/pages/explore.trial_already_used'));
+            }
+
             $startsAt = now();
             $expiresAt = $plan->expiresAtFor($cycle, $startsAt);
 
