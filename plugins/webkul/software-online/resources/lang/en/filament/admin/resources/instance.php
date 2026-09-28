@@ -24,6 +24,7 @@ return [
         'instance_url'     => 'Direct Access URL',
         'status'           => 'Status',
         'billing_cycle'    => 'Billing Cycle',
+        'periods'          => 'Number of Periods',
         'price'            => 'Price',
         'starts_at'        => 'Starts At',
         'expires_at'       => 'Expires At',
@@ -40,7 +41,7 @@ return [
     'actions' => [
         'visit_website'     => 'Open Website',
         'provision_api'     => 'Provision via API',
-        'renew'             => 'Renew Subscription',
+        'renew'             => 'Renew or Change Billing Cycle',
         'sync_status'       => 'Sync Remote Status',
         'sync_entitlements' => 'Sync Entitlements',
         'suspend'           => 'Suspend Tenant',
@@ -50,7 +51,7 @@ return [
     'notifications' => [
         'provision_success'    => 'Tenant provisioned successfully via API',
         'provision_failed'     => 'Failed to provision remote tenant',
-        'renew_success'        => 'Subscription renewed successfully',
+        'renew_success'        => 'Subscription renewed or changed successfully',
         'renew_failed'         => 'Failed to renew subscription',
         'sync_success'         => 'Remote status synchronized successfully',
         'sync_failed'          => 'Failed to synchronize remote status',

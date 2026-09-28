@@ -98,9 +98,49 @@ class OnlineBillingService
         BillingCycle $cycle,
         ?string $adminUsername = null,
         ?string $referralCode = null,
+        bool $autoRenew = true,
+        ?string $customDomain = null,
+        bool $requireFullSettlement = true,
     ): OnlineInstance {
         $plan->loadMissing('system');
         app(OnlineSystemProvisioningService::class)->assertDomainAvailable($plan->system, (string) $subdomain);
+
+        $instance = $this->createSubscriptionRecord(
+            partner: $partner,
+            plan: $plan,
+            name: $name,
+            subdomain: $subdomain,
+            cycle: $cycle,
+            adminUsername: $adminUsername,
+            referralCode: $referralCode,
+            autoRenew: $autoRenew,
+            customDomain: $customDomain,
+            requireFullSettlement: $requireFullSettlement,
+        );
+
+        app(OnlineSystemProvisioningService::class)->provisionInstance($instance->fresh(['partner', 'plan', 'system']));
+
+        return $instance->fresh();
+    }
+
+    /**
+     * Create the local subscription, invoice, wallet settlement, and transaction atomically.
+     *
+     * Domain availability must be checked by the caller before this method is used directly.
+     */
+    public function createSubscriptionRecord(
+        Partner $partner,
+        OnlineSystemPlan $plan,
+        string $name,
+        ?string $subdomain,
+        BillingCycle $cycle,
+        ?string $adminUsername = null,
+        ?string $referralCode = null,
+        bool $autoRenew = true,
+        ?string $customDomain = null,
+        bool $requireFullSettlement = true,
+    ): OnlineInstance {
+        $plan->loadMissing('system', 'product');
 
         if ($cycle === BillingCycle::Trial) {
             if ($this->hasUsedTrial($partner)) {
@@ -111,7 +151,7 @@ class OnlineBillingService
             $price = $plan->priceFor($cycle);
         }
 
-        $instance = DB::transaction(function () use ($partner, $plan, $name, $subdomain, $cycle, $price, $adminUsername, $referralCode) {
+        return DB::transaction(function () use ($partner, $plan, $name, $subdomain, $cycle, $price, $adminUsername, $referralCode, $autoRenew, $customDomain, $requireFullSettlement) {
             $startsAt = now();
             $expiresAt = $plan->expiresAtFor($cycle, $startsAt);
 
@@ -121,6 +161,7 @@ class OnlineBillingService
                 'plan_id'         => $plan->id,
                 'name'            => $name,
                 'subdomain'       => $subdomain,
+                'custom_domain'   => $customDomain,
                 'instance_url'    => $plan->system?->tenantLoginUrl($subdomain),
                 'admin_email'     => $partner->email,
                 'admin_username'  => $adminUsername ?? 'admin',
@@ -130,12 +171,21 @@ class OnlineBillingService
                 'starts_at'       => $startsAt,
                 'expires_at'      => $expiresAt,
                 'last_renewed_at' => $startsAt,
-                'auto_renew'      => true,
+                'auto_renew'      => $autoRenew,
             ]);
 
             // Generate invoice move only if price > 0
             $moveData = $price > 0
-                ? $this->createSubscriptionInvoice($instance, $plan, $partner, $price, $cycle, 'new_subscription', $referralCode)
+                ? $this->createSubscriptionInvoice(
+                    $instance,
+                    $plan,
+                    $partner,
+                    $price,
+                    $cycle,
+                    'new_subscription',
+                    $referralCode,
+                    $requireFullSettlement,
+                )
                 : null;
 
             if ($moveData) {
@@ -144,24 +194,23 @@ class OnlineBillingService
 
             // Record transaction
             OnlineInstanceTransaction::create([
-                'instance_id'   => $instance->id,
-                'partner_id'    => $partner->id,
-                'type'          => TransactionType::NewSubscription,
-                'billing_cycle' => $cycle,
-                'amount'        => $moveData ? (float) $moveData['move']->amount_total : $price,
-                'status'        => 'paid',
-                'period_start'  => $startsAt->toDateString(),
-                'period_end'    => $expiresAt->toDateString(),
-                'move_id'       => $moveData['move']->id ?? null,
-                'move_line_id'  => $moveData['line']->id ?? null,
+                'instance_id'     => $instance->id,
+                'partner_id'      => $partner->id,
+                'type'            => TransactionType::NewSubscription,
+                'billing_cycle'   => $cycle,
+                'amount'          => $moveData ? (float) $moveData['move']->amount_total : $price,
+                'status'          => ! $moveData || abs((float) $moveData['move']->amount_residual) <= 0.0001
+                    ? 'paid'
+                    : 'pending',
+                'idempotency_key' => 'initial-billing:'.$instance->id,
+                'period_start'    => $startsAt->toDateString(),
+                'period_end'      => $expiresAt->toDateString(),
+                'move_id'         => $moveData['move']->id ?? null,
+                'move_line_id'    => $moveData['line']->id ?? null,
             ]);
 
             return $instance;
         });
-
-        app(OnlineSystemProvisioningService::class)->provisionInstance($instance->fresh(['partner', 'plan', 'system']));
-
-        return $instance->fresh();
     }
 
     /**
@@ -171,8 +220,12 @@ class OnlineBillingService
         OnlineInstance $instance,
         ?BillingCycle $cycle = null,
         ?\DateTimeInterface $dueBefore = null,
+        int $periods = 1,
+        bool $requireFullSettlement = true,
     ): bool {
-        $transaction = DB::transaction(function () use ($instance, $cycle, $dueBefore): ?OnlineInstanceTransaction {
+        $periods = max(1, $periods);
+
+        $transaction = DB::transaction(function () use ($instance, $cycle, $dueBefore, $periods, $requireFullSettlement): ?OnlineInstanceTransaction {
             $lockedInstance = OnlineInstance::query()
                 ->with(['partner', 'plan', 'system'])
                 ->lockForUpdate()
@@ -194,16 +247,16 @@ class OnlineBillingService
             }
 
             $price = $renewalCycle === BillingCycle::Annual
-                ? (float) $plan->annual_price
-                : (float) $plan->monthly_price;
+                ? (float) $plan->annual_price * $periods
+                : (float) $plan->monthly_price * $periods;
 
             $currentExpiry = ($lockedInstance->expires_at && $lockedInstance->expires_at->isFuture())
                 ? $lockedInstance->expires_at
                 : now();
 
             $newExpiry = $renewalCycle === BillingCycle::Annual
-                ? (clone $currentExpiry)->addYear()
-                : (clone $currentExpiry)->addMonth();
+                ? (clone $currentExpiry)->addYears($periods)
+                : (clone $currentExpiry)->addMonths($periods);
 
             $moveData = $this->createSubscriptionInvoice(
                 $lockedInstance,
@@ -212,6 +265,8 @@ class OnlineBillingService
                 $price,
                 $renewalCycle,
                 'renewal',
+                null,
+                $requireFullSettlement,
             );
 
             $lockedInstance->update([
@@ -231,7 +286,9 @@ class OnlineBillingService
                 'type'               => TransactionType::Renewal,
                 'billing_cycle'      => $renewalCycle,
                 'amount'             => (float) $moveData['move']->amount_total,
-                'status'             => 'paid',
+                'status'             => abs((float) $moveData['move']->amount_residual) <= 0.0001
+                    ? 'paid'
+                    : 'pending',
                 'idempotency_key'    => 'tenant-renewal:'.$lockedInstance->id.':'.$newExpiry->utc()->format('YmdHis'),
                 'remote_sync_status' => 'pending',
                 'period_start'       => $currentExpiry->toDateString(),
@@ -304,6 +361,7 @@ class OnlineBillingService
         BillingCycle $cycle,
         string $context,
         ?string $referralCode = null,
+        bool $requireFullSettlement = true,
     ): array {
         if (! DatabaseSchema::hasTable('accounts_account_moves') || ! DatabaseSchema::hasTable('accounts_account_move_lines')) {
             throw new Exception('Accounts tables are required for online-system billing.');
@@ -377,23 +435,40 @@ class OnlineBillingService
             AccountFacade::computeAccountMove($accountMove->refresh());
             $accountMove->refresh();
 
-            if (! $this->hasSufficientBalanceLocked($partner, $accountMove, $company->id, $company->currency_id)) {
+            if (
+                $requireFullSettlement
+                && ! $this->hasSufficientBalanceLocked($partner, $accountMove, $company->id, $company->currency_id)
+            ) {
                 throw ValidationException::withMessages([
                     'referralCode' => __('software-online::filament/customer/pages/explore.insufficient_balance'),
                 ]);
             }
 
             $accountMove = app(MoveWorkflow::class)->post($accountMove);
+
+            if (
+                class_exists(ReferralWalletService::class)
+                && Package::isPluginInstalled('referrals')
+                && DatabaseSchema::hasTable('referral_wallet_balances')
+            ) {
+                // MoveConfirmed normally applies the wallet. Calling the idempotent
+                // service directly also protects programmatic billing flows where
+                // the listener is unavailable or deferred.
+                app(ReferralWalletService::class)->applyToPostedInvoice($accountMove);
+            }
+
             $this->reconcileWithCustomerCredit($accountMove, $partner);
             $accountMove->refresh();
             $accountMove->computePaymentState();
             $accountMove->save();
 
-            if ($accountMove->payment_state !== PaymentState::PAID) {
+            if ($requireFullSettlement && abs((float) $accountMove->amount_residual) > 0.0001) {
                 throw new Exception('Online subscription invoice could not be fully settled from customer credit.');
             }
 
-            MovePaid::dispatch($accountMove);
+            if ($accountMove->payment_state === PaymentState::PAID) {
+                MovePaid::dispatch($accountMove);
+            }
 
             return [
                 'move' => $accountMove,

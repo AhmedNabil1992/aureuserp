@@ -4,6 +4,7 @@ namespace Webkul\SoftwareOnline\Filament\Customer\Resources;
 
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
@@ -157,11 +158,22 @@ class OnlineInstanceResource extends Resource
                             ])
                             ->default(fn (OnlineInstance $record) => $record->billing_cycle === BillingCycle::Annual ? BillingCycle::Annual->value : BillingCycle::Monthly->value)
                             ->required(),
+                        TextInput::make('periods')
+                            ->label(__('software-online::filament/customer/resources/my_instances.fields.periods'))
+                            ->integer()
+                            ->minValue(1)
+                            ->maxValue(120)
+                            ->default(1)
+                            ->required(),
                     ])
                     ->action(function (OnlineInstance $record, array $data) {
                         $cycle = BillingCycle::tryFrom($data['billing_cycle']) ?? BillingCycle::Monthly;
                         try {
-                            app(OnlineBillingService::class)->renewInstance($record, $cycle);
+                            app(OnlineBillingService::class)->renewInstance(
+                                instance: $record,
+                                cycle: $cycle,
+                                periods: (int) ($data['periods'] ?? 1),
+                            );
                             Notification::make()
                                 ->title(__('software-online::filament/customer/resources/my_instances.notifications.renewed_success'))
                                 ->success()
