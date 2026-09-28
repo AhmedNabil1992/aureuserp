@@ -1,0 +1,29 @@
+{
+    "name": "webkul/referrals",
+    "description": "Customer referral campaigns, invoice discounts, and accounting rewards.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Aureus ERP",
+            "email": "support@aureuserp.in"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webkul\\Referral\\ReferralServiceProvider"
+            ]
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Webkul\\Referral\\": "src/",
+            "Webkul\\Referral\\Database\\Factories\\": "database/factories/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Webkul\\Referral\\Tests\\": "tests/"
+        }
+    }
+}

@@ -27,12 +27,12 @@ return new class extends Migration
             $table->json('api_headers')->nullable();
 
             // API Endpoints
-            $table->string('create_tenant_endpoint')->default('/api/v1/tenants');
-            $table->string('renew_tenant_endpoint')->default('/api/v1/tenants/{tenant_id}/renew');
-            $table->string('suspend_tenant_endpoint')->default('/api/v1/tenants/{tenant_id}/suspend');
-            $table->string('activate_tenant_endpoint')->default('/api/v1/tenants/{tenant_id}/activate');
-            $table->string('delete_tenant_endpoint')->default('/api/v1/tenants/{tenant_id}');
-            $table->string('sync_status_endpoint')->default('/api/v1/tenants/{tenant_id}/status');
+            $table->string('create_tenant_endpoint')->default('/api/tenants');
+            $table->string('renew_tenant_endpoint')->default('/api/tenants/{tenant_id}/renew');
+            $table->string('suspend_tenant_endpoint')->default('/api/tenants/{tenant_id}/suspend');
+            $table->string('activate_tenant_endpoint')->default('/api/tenants/{tenant_id}/activate');
+            $table->string('delete_tenant_endpoint')->default('/api/tenants/{tenant_id}');
+            $table->string('sync_status_endpoint')->default('/api/tenants/{tenant_id}/status');
 
             $table->softDeletes();
             $table->timestamps();

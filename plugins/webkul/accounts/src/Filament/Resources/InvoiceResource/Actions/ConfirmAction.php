@@ -11,6 +11,8 @@ use Webkul\Account\Enums\AutoPost;
 use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Facades\Account as AccountFacade;
 use Webkul\Account\Models\Move;
+use Webkul\PluginManager\Package;
+use Webkul\Referral\Services\ReferralService;
 
 class ConfirmAction extends Action
 {
@@ -32,6 +34,20 @@ class ConfirmAction extends Action
                 $record->checked = $record->journal->auto_check_on_post;
 
                 try {
+                    if (
+                        filled($record->referral_code)
+                        && class_exists(ReferralService::class)
+                        && Package::isPluginInstalled('referrals')
+                    ) {
+                        app(ReferralService::class)->applyToDraftMove(
+                            $record,
+                            $record->referral_code,
+                            ReferralService::CONTEXT_SALES_INVOICE,
+                            Move::class,
+                            $record->id,
+                        );
+                    }
+
                     $record = AccountFacade::confirmMove($record);
 
                     $livewire->refreshFormData(['state', 'parent_state']);

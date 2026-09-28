@@ -15,6 +15,17 @@ return [
         'plan'       => 'الباقة',
         'status'     => 'الحالة',
         'expires_at' => 'تاريخ الانتهاء',
+        'url'        => 'رابط الموقع',
+        'price'      => 'سعر الاشتراك',
+        'auto_renew' => 'التجديد التلقائي',
+    ],
+    'sections' => [
+        'website'      => 'بيانات الموقع',
+        'subscription' => 'بيانات الاشتراك',
+    ],
+    'values' => [
+        'enabled'  => 'مفعّل',
+        'disabled' => 'غير مفعّل',
     ],
     'fields' => [
         'billing_cycle' => 'فترة التجديد',

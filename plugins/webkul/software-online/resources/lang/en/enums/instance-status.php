@@ -1,9 +1,12 @@
 <?php
 
 return [
-    'pending'   => 'Pending',
-    'active'    => 'Active',
-    'suspended' => 'Suspended',
-    'expired'   => 'Expired',
-    'failed'    => 'Failed',
+    'pending'      => 'Pending',
+    'provisioning' => 'Provisioning',
+    'active'       => 'Active',
+    'suspended'    => 'Suspended',
+    'expired'      => 'Expired',
+    'failed'       => 'Failed',
+    'deleting'     => 'Deleting',
+    'deleted'      => 'Deleted',
 ];

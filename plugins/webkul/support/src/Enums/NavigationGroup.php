@@ -59,7 +59,11 @@ enum NavigationGroup: string implements HasIcon, HasLabel
 
     case TechnicalSupport = 'technical-support';
 
+    case Vpn = 'vpn';
+
     case SoftwareOnline = 'software-online';
+
+    case Referrals = 'referrals';
 
     public function getLabel(): string
     {
@@ -95,7 +99,9 @@ enum NavigationGroup: string implements HasIcon, HasLabel
             self::Articles         => 'heroicon-o-book-open',
             self::WhattsApp        => 'heroicon-o-chat-bubble-left-right',
             self::TechnicalSupport => 'heroicon-o-lifebuoy',
+            self::Vpn              => 'heroicon-o-shield-check',
             self::SoftwareOnline   => 'heroicon-o-globe-alt',
+            self::Referrals        => 'heroicon-o-gift',
         };
     }
 }

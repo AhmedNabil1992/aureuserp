@@ -5,7 +5,6 @@ namespace Webkul\Wifi\Filament\Customer\Pages;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Tables\Columns\TextColumn;
@@ -16,15 +15,19 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema as DatabaseSchema;
 use Illuminate\Validation\ValidationException;
 use Webkul\Account\Enums\JournalType;
 use Webkul\Account\Enums\MoveState;
 use Webkul\Account\Enums\MoveType;
+use Webkul\Account\Enums\PaymentState;
 use Webkul\Account\Facades\Account as AccountFacade;
 use Webkul\Account\Models\Invoice;
 use Webkul\Account\Models\MoveLine;
 use Webkul\Accounting\Models\Journal;
 use Webkul\Partner\Models\Partner;
+use Webkul\PluginManager\Package;
+use Webkul\Referral\Services\ReferralWalletService;
 use Webkul\Wifi\Filament\Customer\Concerns\HasCustomerCloudAccess;
 use Webkul\Wifi\Filament\Customer\Concerns\HasWifiAccess;
 use Webkul\Wifi\Models\Cloud;
@@ -125,26 +128,41 @@ class VoucherInvoices extends Page implements HasTable
                         : $package->amount);
 
                     $totalCost = $packagesCount * $priceUnit;
-                    $availableCredit = $this->getPartnerAvailableCredit($partner->id);
+                    $companyId = (int) ($partner->company_id ?: current_company_id());
+                    $journal = Journal::query()
+                        ->where('type', JournalType::SALE->value)
+                        ->where('company_id', $companyId)
+                        ->orderBy('id')
+                        ->first();
 
-                    if ($availableCredit < $totalCost) {
+                    if (! $journal) {
+                        throw ValidationException::withMessages([
+                            'wifi_package_id' => 'دفتر مبيعات النظام غير مهيأ.',
+                        ]);
+                    }
+
+                    $availableCredit = $this->getPartnerAvailableCredit(
+                        $partner->id,
+                        (int) $journal->company_id,
+                        (int) $package->currency_id,
+                    );
+                    $referralCredit = $this->getPartnerReferralCredit(
+                        $partner->id,
+                        (int) $journal->company_id,
+                        (int) $package->currency_id,
+                    );
+                    $availableFunds = $availableCredit + $referralCredit;
+
+                    if ($availableFunds + 0.0001 < $totalCost) {
                         Notification::make()
                             ->title('رصيد الحساب غير كافٍ')
-                            ->body(sprintf('رصيدك الحسابي المتاح: %s — التكلفة المطلوبة للفاتورة: %s', number_format($availableCredit, 2), number_format($totalCost, 2)))
+                            ->body(sprintf('الرصيد الأساسي ورصيد الإحالات المتاحان: %s — تكلفة الفاتورة: %s', number_format($availableFunds, 2), number_format($totalCost, 2)))
                             ->danger()
                             ->persistent()
                             ->send();
 
                         throw ValidationException::withMessages([
-                            'wifi_package_id' => sprintf('الرصيد المتاح لحسابك غير كافٍ (%s متاح | %s مطلوب).', number_format($availableCredit, 2), number_format($totalCost, 2)),
-                        ]);
-                    }
-
-                    $journal = Journal::query()->where('type', JournalType::SALE->value)->orderBy('id')->first();
-
-                    if (! $journal) {
-                        throw ValidationException::withMessages([
-                            'wifi_package_id' => 'دفتر مبيعات النظام غير مهيأ.',
+                            'wifi_package_id' => sprintf('الرصيد المتاح غير كافٍ (%s متاح | %s مطلوب).', number_format($availableFunds, 2), number_format($totalCost, 2)),
                         ]);
                     }
 
@@ -186,13 +204,23 @@ class VoucherInvoices extends Page implements HasTable
                         $invoice = AccountFacade::confirmMove($invoice->refresh());
 
                         $this->applyOutstandingAdvancePayments($invoice->refresh());
+
+                        $invoice->refresh();
+                        $invoice->computePaymentState();
+                        $invoice->save();
+
+                        if ($invoice->payment_state !== PaymentState::PAID) {
+                            throw ValidationException::withMessages([
+                                'wifi_package_id' => 'تعذر تسوية قيمة الفاتورة بالكامل من رصيد الإحالات والرصيد الأساسي.',
+                            ]);
+                        }
                     });
 
                     $totalCards = $packagesCount * $packageCards;
 
                     Notification::make()
                         ->title('تم إنشاء الفاتورة وتخصيص رصيد الكروت بنجاح')
-                        ->body(sprintf('تم خصم %s من رصيدك المسبق وتفعيل %d كارت في السحابة (%d باقة).', number_format($totalCost, 2), $totalCards, $packagesCount))
+                        ->body(sprintf('تم تسوية %s من رصيد الإحالات و/أو الرصيد الأساسي وتفعيل %d كارت في السحابة (%d باقة).', number_format($totalCost, 2), $totalCards, $packagesCount))
                         ->success()
                         ->send();
                 }),
@@ -238,7 +266,7 @@ class VoucherInvoices extends Page implements HasTable
                         return [$package->id => $label];
                     })->all();
                 })
-                ->helperText(sprintf('الرصيد المتاح حالياً في حسابك: %s', number_format($availableCredit, 2)))
+                ->helperText(sprintf('رصيدك الأساسي المتاح: %s — ويُضاف إليه رصيد الإحالات بالكامل عند شراء كروت Wi-Fi.', number_format($availableCredit, 2)))
                 ->required()
                 ->searchable()
                 ->preload()
@@ -254,10 +282,12 @@ class VoucherInvoices extends Page implements HasTable
         ];
     }
 
-    protected function getPartnerAvailableCredit(int $partnerId): float
+    protected function getPartnerAvailableCredit(int $partnerId, ?int $companyId = null, ?int $currencyId = null): float
     {
         $creditRows = MoveLine::query()
             ->where('partner_id', $partnerId)
+            ->when($companyId, fn ($query) => $query->where('company_id', $companyId))
+            ->when($currencyId, fn ($query) => $query->where('currency_id', $currencyId))
             ->where('parent_state', MoveState::POSTED)
             ->where('reconciled', false)
             ->where('amount_residual', '<', 0)
@@ -266,6 +296,19 @@ class VoucherInvoices extends Page implements HasTable
             ->first();
 
         return abs((float) ($creditRows?->residual_total ?? 0.0));
+    }
+
+    protected function getPartnerReferralCredit(int $partnerId, int $companyId, int $currencyId): float
+    {
+        if (
+            ! class_exists(ReferralWalletService::class)
+            || ! Package::isPluginInstalled('referrals')
+            || ! DatabaseSchema::hasTable('referral_wallet_balances')
+        ) {
+            return 0.0;
+        }
+
+        return app(ReferralWalletService::class)->balance($companyId, $currencyId, $partnerId);
     }
 
     private function applyOutstandingAdvancePayments(Invoice $invoice): void
@@ -289,6 +332,7 @@ class VoucherInvoices extends Page implements HasTable
                 ->where('amount_residual', $operator, 0)
                 ->orderBy('date')
                 ->orderBy('id')
+                ->lockForUpdate()
                 ->get();
 
             if ($outstandingLines->isEmpty()) {

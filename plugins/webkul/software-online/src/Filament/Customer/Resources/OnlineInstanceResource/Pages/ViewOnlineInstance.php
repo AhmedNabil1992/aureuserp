@@ -7,6 +7,7 @@ use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Webkul\SoftwareOnline\Enums\BillingCycle;
+use Webkul\SoftwareOnline\Enums\InstanceStatus;
 use Webkul\SoftwareOnline\Filament\Customer\Resources\OnlineInstanceResource;
 use Webkul\SoftwareOnline\Services\OnlineBillingService;
 
@@ -23,7 +24,7 @@ class ViewOnlineInstance extends ViewRecord
                 ->color('success')
                 ->url(fn () => $this->record->full_url)
                 ->openUrlInNewTab()
-                ->visible(fn () => ! empty($this->record->full_url)),
+                ->visible(fn () => $this->record->status === InstanceStatus::Active && $this->record->full_url !== '#'),
             Action::make('renew')
                 ->label(__('software-online::filament/customer/resources/my_instances.actions.renew'))
                 ->icon('heroicon-o-arrow-path')

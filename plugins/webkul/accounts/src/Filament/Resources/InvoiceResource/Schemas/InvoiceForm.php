@@ -22,6 +22,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Enums\Size;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Schema as DatabaseSchema;
 use Webkul\Account\Enums\CommunicationStandard;
 use Webkul\Account\Enums\CommunicationType;
 use Webkul\Account\Enums\DisplayType;
@@ -44,7 +45,10 @@ use Webkul\Account\Models\Product;
 use Webkul\Account\Models\Tax;
 use Webkul\Account\Settings\CustomerInvoiceSettings;
 use Webkul\Field\Filament\Forms\Components\ProgressStepper as FormProgressStepper;
+use Webkul\PluginManager\Package;
 use Webkul\Product\Settings\ProductSettings;
+use Webkul\Referral\Services\ReferralService;
+use Webkul\Referral\Services\ReferralWalletService;
 use Webkul\Support\Filament\Forms\Components\Repeater;
 use Webkul\Support\Filament\Forms\Components\Repeater\TableColumn;
 use Webkul\Support\Models\Company;
@@ -112,6 +116,34 @@ class InvoiceForm
 
                                                 $set('invoice_payment_term_id', $partner?->property_payment_term_id);
                                             })
+                                            ->disabled(fn ($record) => in_array($record?->state, [MoveState::POSTED, MoveState::CANCEL])),
+                                        TextInput::make('referral_code')
+                                            ->label(__('referrals::app.fields.code'))
+                                            ->helperText(__('referrals::app.codes.invoice_help'))
+                                            ->maxLength(32)
+                                            ->dehydrateStateUsing(fn (?string $state): ?string => filled($state) ? strtoupper(trim($state)) : null)
+                                            ->visible(fn (): bool => class_exists(ReferralService::class)
+                                                && DatabaseSchema::hasColumn('accounts_account_moves', 'referral_code')
+                                                && Package::isPluginInstalled('referrals'))
+                                            ->disabled(fn ($record) => in_array($record?->state, [MoveState::POSTED, MoveState::CANCEL])),
+                                        TextInput::make('referral_wallet_amount')
+                                            ->label(__('referrals::app.wallet.use_on_invoice'))
+                                            ->helperText(function (Get $get): string {
+                                                if (! $get('company_id') || ! $get('currency_id') || ! $get('partner_id')) {
+                                                    return __('referrals::app.wallet.select_customer');
+                                                }
+
+                                                $available = app(ReferralWalletService::class)->balance(
+                                                    (int) $get('company_id'), (int) $get('currency_id'), (int) $get('partner_id')
+                                                );
+
+                                                return __('referrals::app.wallet.available', ['amount' => number_format($available, 2)]).
+                                                    ' '.__('referrals::app.wallet.usage_policy');
+                                            })
+                                            ->numeric()->minValue(0)->default(0)
+                                            ->visible(fn (): bool => class_exists(ReferralWalletService::class)
+                                                && DatabaseSchema::hasColumn('accounts_account_moves', 'referral_wallet_amount')
+                                                && Package::isPluginInstalled('referrals'))
                                             ->disabled(fn ($record) => in_array($record?->state, [MoveState::POSTED, MoveState::CANCEL])),
                                     ]),
 

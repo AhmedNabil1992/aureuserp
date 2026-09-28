@@ -82,6 +82,7 @@ class WebsitePlugin implements Plugin
             })
             ->when($panel->getId() == 'customer', function (Panel $panel) {
                 $panel
+                    ->passwordReset(RequestPasswordReset::class, ResetPassword::class)
                     ->discoverClusters(
                         in: __DIR__.'/Filament/Customer/Clusters',
                         for: 'Webkul\\Website\\Filament\\Customer\\Clusters'

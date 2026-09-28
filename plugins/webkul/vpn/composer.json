@@ -1,0 +1,27 @@
+{
+    "name": "webkul/vpn",
+    "description": "Multi-server SoftEther VPN management plugin.",
+    "authors": [
+        {
+            "name": "etech",
+            "email": "admin@etech-valley.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webkul\\Vpn\\VpnServiceProvider"
+            ]
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Webkul\\Vpn\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Webkul\\Vpn\\Tests\\": "tests/"
+        }
+    }
+}

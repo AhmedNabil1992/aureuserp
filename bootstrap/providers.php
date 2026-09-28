@@ -7,6 +7,7 @@ use App\Providers\Filament\WebsitePanelProvider;
 use Webkul\Account\AccountServiceProvider;
 use Webkul\Accounting\AccountingServiceProvider;
 use Webkul\Analytic\AnalyticServiceProvider;
+use Webkul\Article\ArticleServiceProvider;
 use Webkul\Barcode\BarcodeServiceProvider;
 use Webkul\Blog\BlogServiceProvider;
 use Webkul\Chatter\ChatterServiceProvider;
@@ -16,6 +17,7 @@ use Webkul\Field\FieldServiceProvider;
 use Webkul\FullCalendar\FullCalendarServiceProvider;
 use Webkul\Inventory\InventoryServiceProvider;
 use Webkul\Invoice\InvoiceServiceProvider;
+use Webkul\Lead\LeadServiceProvider;
 use Webkul\Maintenance\MaintenanceServiceProvider;
 use Webkul\Manufacturing\ManufacturingServiceProvider;
 use Webkul\Marketing\MarketingServiceProvider;
@@ -24,21 +26,22 @@ use Webkul\Payment\PaymentServiceProvider;
 use Webkul\PluginManager\PluginManagerServiceProvider;
 use Webkul\Product\ProductServiceProvider;
 use Webkul\Project\ProjectServiceProvider;
+use Webkul\Psmonitor\PsmonitorServiceProvider;
 use Webkul\Purchase\PurchaseServiceProvider;
 use Webkul\Recruitment\RecruitmentServiceProvider;
+use Webkul\Referral\ReferralServiceProvider;
 use Webkul\Sale\SaleServiceProvider;
 use Webkul\Security\SecurityServiceProvider;
 use Webkul\Software\SoftwareServiceProvider;
+use Webkul\SoftwareOnline\SoftwareOnlineServiceProvider;
 use Webkul\Support\SupportServiceProvider;
 use Webkul\TableViews\TableViewsServiceProvider;
+use Webkul\TechnicalSupport\TechnicalSupportServiceProvider;
 use Webkul\TimeOff\TimeOffServiceProvider;
 use Webkul\Timesheet\TimesheetServiceProvider;
+use Webkul\Vpn\VpnServiceProvider;
 use Webkul\Website\WebsiteServiceProvider;
 use Webkul\Wifi\WifiServiceProvider;
-use Webkul\Psmonitor\PsmonitorServiceProvider;
-use Webkul\Article\ArticleServiceProvider;
-use Webkul\Lead\LeadServiceProvider;
-use Webkul\TechnicalSupport\TechnicalSupportServiceProvider;
 
 // use App\Providers\AppServiceProvider;
 // use App\Providers\Filament\AdminPanelProvider;
@@ -110,5 +113,7 @@ return [
     ArticleServiceProvider::class,
     LeadServiceProvider::class,
     TechnicalSupportServiceProvider::class,
-    \Webkul\SoftwareOnline\SoftwareOnlineServiceProvider::class,
+    ReferralServiceProvider::class,
+    VpnServiceProvider::class,
+    SoftwareOnlineServiceProvider::class,
 ];

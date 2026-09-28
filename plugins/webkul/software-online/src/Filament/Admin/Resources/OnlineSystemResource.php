@@ -8,8 +8,8 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\KeyValue;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
@@ -24,6 +24,7 @@ use Webkul\SoftwareOnline\Filament\Admin\Resources\OnlineSystemResource\Pages\Ed
 use Webkul\SoftwareOnline\Filament\Admin\Resources\OnlineSystemResource\Pages\ListOnlineSystems;
 use Webkul\SoftwareOnline\Models\OnlineSystem;
 use Webkul\SoftwareOnline\Services\OnlineSystemProvisioningService;
+use Webkul\Support\Enums\NavigationGroup;
 
 class OnlineSystemResource extends Resource
 {
@@ -39,7 +40,7 @@ class OnlineSystemResource extends Resource
 
     public static function getNavigationGroup(): string|\UnitEnum|null
     {
-        return \Webkul\Support\Enums\NavigationGroup::SoftwareOnline;
+        return NavigationGroup::SoftwareOnline;
     }
 
     public static function getNavigationLabel(): string
@@ -101,24 +102,47 @@ class OnlineSystemResource extends Resource
                         ->password()
                         ->revealable()
                         ->columnSpanFull(),
+                    TextInput::make('api_secret')
+                        ->label('Webhook signing secret')
+                        ->helperText('Shared HMAC secret used only to verify callbacks from this system.')
+                        ->password()
+                        ->revealable()
+                        ->columnSpanFull(),
                     KeyValue::make('api_headers')
                         ->label(__('software-online::filament/admin/resources/system.fields.api_headers'))
                         ->columnSpanFull(),
+                    TextInput::make('check_domain_endpoint')
+                        ->label(__('software-online::filament/admin/resources/system.fields.check_domain_endpoint'))
+                        ->required()
+                        ->default('/api/tenants/check-domain'),
                     TextInput::make('create_tenant_endpoint')
                         ->label(__('software-online::filament/admin/resources/system.fields.create_endpoint'))
-                        ->default('/api/v1/tenants'),
+                        ->required()
+                        ->default('/api/tenants'),
                     TextInput::make('renew_tenant_endpoint')
                         ->label(__('software-online::filament/admin/resources/system.fields.renew_endpoint'))
-                        ->default('/api/v1/tenants/{tenant_id}/renew'),
+                        ->required()
+                        ->default('/api/tenants/{tenant_id}/renew'),
                     TextInput::make('suspend_tenant_endpoint')
                         ->label(__('software-online::filament/admin/resources/system.fields.suspend_endpoint'))
-                        ->default('/api/v1/tenants/{tenant_id}/suspend'),
+                        ->required()
+                        ->default('/api/tenants/{tenant_id}/suspend'),
                     TextInput::make('activate_tenant_endpoint')
                         ->label(__('software-online::filament/admin/resources/system.fields.activate_endpoint'))
-                        ->default('/api/v1/tenants/{tenant_id}/activate'),
+                        ->required()
+                        ->default('/api/tenants/{tenant_id}/activate'),
+                    TextInput::make('delete_tenant_endpoint')
+                        ->label(__('software-online::filament/admin/resources/system.fields.delete_endpoint'))
+                        ->required()
+                        ->default('/api/tenants/{tenant_id}'),
+                    TextInput::make('entitlements_endpoint')
+                        ->label(__('software-online::filament/admin/resources/system.fields.entitlements_endpoint'))
+                        ->required()
+                        ->default('/api/tenants/{tenant_id}/entitlements'),
                     TextInput::make('sync_status_endpoint')
                         ->label(__('software-online::filament/admin/resources/system.fields.sync_endpoint'))
-                        ->default('/api/v1/tenants/{tenant_id}/status'),
+                        ->required()
+                        ->default('/api/tenants/{tenant_id}/status'),
                 ])->columns(2)->collapsed(),
         ]);
     }

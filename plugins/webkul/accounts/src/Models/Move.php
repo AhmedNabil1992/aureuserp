@@ -92,6 +92,8 @@ class Move extends Model implements Sortable
         'invoice_source_email',
         'invoice_partner_display_name',
         'invoice_origin',
+        'referral_code',
+        'referral_wallet_amount',
         'incoterm_location',
         'date',
         'auto_post_until',
@@ -161,6 +163,7 @@ class Move extends Model implements Sortable
         'amount_total_in_currency_signed'   => 'decimal:4',
         'amount_untaxed_in_currency_signed' => 'decimal:4',
         'amount_total_signed'               => 'decimal:4',
+        'referral_wallet_amount'            => 'decimal:4',
         'state'                             => MoveState::class,
         'payment_state'                     => PaymentState::class,
         'move_type'                         => MoveType::class,
@@ -557,7 +560,9 @@ class Move extends Model implements Sortable
             if ($this->invoice_source_email) {
                 $vendorDisplayName = "@From: {$this->invoice_source_email}";
             } else {
-                $vendorDisplayName = "#Created by: {$this->creator->name}";
+                $vendorDisplayName = $this->creator
+                    ? "#Created by: {$this->creator->name}"
+                    : '#Created automatically';
             }
         }
 

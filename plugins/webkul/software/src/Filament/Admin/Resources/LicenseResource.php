@@ -21,6 +21,8 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Table;
+use Webkul\PluginManager\Package;
+use Webkul\Referral\Services\ReferralService;
 use Webkul\Software\Enums\LicensePlan;
 use Webkul\Software\Enums\LicenseStatus;
 use Webkul\Software\Filament\Admin\Clusters\Licensing;
@@ -58,7 +60,7 @@ class LicenseResource extends Resource
     {
         return __('software::filament/admin/resources/license.navigation.label');
     }
-    
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -171,13 +173,20 @@ class LicenseResource extends Resource
                                 ->default(fn (License $record): string => $record->license_plan?->value ?? LicensePlan::Full->value)
                                 ->live()
                                 ->required(),
+                            TextInput::make('referral_code')
+                                ->label(__('referrals::app.fields.code'))
+                                ->maxLength(32)
+                                ->dehydrateStateUsing(fn (?string $state): ?string => filled($state) ? strtoupper(trim($state)) : null)
+                                ->visible(fn (): bool => class_exists(ReferralService::class)
+                                    && Package::isPluginInstalled('referrals')),
                         ])
                         ->action(function (License $record, array $data): void {
                             try {
                                 $result = app(LicenseManager::class)->billLicense(
                                     $record,
                                     (int) $data['edition_id'],
-                                    (string) $data['license_plan']
+                                    (string) $data['license_plan'],
+                                    $data['referral_code'] ?? null,
                                 );
 
                                 if ($result['isTrial']) {

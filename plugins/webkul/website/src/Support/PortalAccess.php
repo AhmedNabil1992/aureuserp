@@ -17,7 +17,8 @@ class PortalAccess
 {
     public static function isAvailable(): bool
     {
-        return Package::isPluginInstalled('website') && static::panel() !== null;
+        return Package::isPluginInstalled('website')
+            && static::panel()?->hasPasswordReset() === true;
     }
 
     public static function panel(): ?Panel

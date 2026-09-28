@@ -96,6 +96,13 @@
                 <span>{{ money($grandTotal, $currency?->name) }}</span>
             </div>
 
+            @if ($referralWalletApplied > 0)
+                <div class="invoice-item text-success-600 dark:text-success-400">
+                    <span>{{ __('referrals::app.wallet.applied') }}</span>
+                    <span>- {{ money($referralWalletApplied, $currency?->name) }}</span>
+                </div>
+            @endif
+
             <!-- Reconciled Payments Section -->
             @if ($reconciledPayments && ! empty($reconciledPayments['lines']))
                 <div class="divider"></div>

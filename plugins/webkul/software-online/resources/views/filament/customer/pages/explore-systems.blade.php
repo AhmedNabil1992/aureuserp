@@ -195,6 +195,7 @@
                         <span>{{ __('software-online::filament/customer/pages/explore.modal.trial_used_notice') }}</span>
                     </p>
                 @endif
+
             </div>
 
             <div>
@@ -217,19 +218,30 @@
                 <div class="flex rounded-xl shadow-sm">
                     <input
                         type="text"
-                        wire:model.defer="subdomain"
+                        wire:model.live.debounce.400ms="subdomain"
+                        x-on:input="$event.target.value = $event.target.value.toLowerCase()"
+                        autocapitalize="none"
+                        autocomplete="off"
+                        spellcheck="false"
+                        pattern="[a-z0-9](?:[a-z0-9-]{0,48}[a-z0-9])?"
+                        maxlength="50"
                         class="flex-1 rounded-s-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:border-primary-500 focus:ring-primary-500"
                         placeholder="elnoor-store"
                     />
                     <span class="inline-flex items-center px-3 rounded-e-xl border border-s-0 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-xs">
                         @php
-                            $parsedBase = parse_url($activeSystem->base_url ?? $activeSystem->api_base_url ?? '');
-                            $baseHost = $parsedBase['host'] ?? null;
-                            $domainSuffix = $baseHost ? '.' . preg_replace('/^(www\.)/', '', $baseHost) : config('software-online.subdomain_suffix', '.example.com');
+                            $previewHost = $activeSystem->tenantHost('tenant');
+                            $baseHost = $previewHost ? preg_replace('/^tenant\./', '', $previewHost) : null;
+                            $domainSuffix = $baseHost ? '.' . $baseHost : config('software-online.subdomain_suffix', '.example.com');
                         @endphp
                         {{ $domainSuffix }}
                     </span>
                 </div>
+                @if($this->instanceUrlPreview)
+                    <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400" dir="ltr">
+                        {{ $this->instanceUrlPreview }}
+                    </p>
+                @endif
             </div>
 
             <div>
@@ -239,10 +251,25 @@
                 <input
                     type="email"
                     wire:model.defer="adminEmail"
+                    readonly
                     class="w-full rounded-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
                     required
                 />
             </div>
+
+            @if($modalBillingCycle !== 'trial' && class_exists(\Webkul\Referral\Services\ReferralService::class) && \Webkul\PluginManager\Package::isPluginInstalled('referrals'))
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        {{ __('referrals::app.fields.code') }}
+                    </label>
+                    <input
+                        type="text"
+                        wire:model.defer="referralCode"
+                        class="w-full rounded-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                        placeholder="REF-XXXXXXXX"
+                    />
+                </div>
+            @endif
 
             @if($modalBillingCycle === 'trial')
                 <div class="p-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl text-xs text-emerald-700 dark:text-emerald-300 flex items-center gap-2">

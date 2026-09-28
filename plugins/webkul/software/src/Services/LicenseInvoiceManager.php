@@ -10,8 +10,10 @@ use Webkul\Account\Enums\MoveType;
 use Webkul\Account\Facades\Account as AccountFacade;
 use Webkul\Account\Models\Journal;
 use Webkul\Account\Models\Move as AccountMove;
+use Webkul\PluginManager\Package;
 use Webkul\Product\Enums\ProductType;
 use Webkul\Product\Models\Product;
+use Webkul\Referral\Services\ReferralService;
 use Webkul\Software\Enums\ServiceType;
 use Webkul\Software\Models\License;
 use Webkul\Software\Models\LicenseInvoice;
@@ -31,7 +33,8 @@ class LicenseInvoiceManager
         License $license,
         int $editionId,
         string $licensePlan,
-        string $billingContext = 'initial'
+        string $billingContext = 'initial',
+        ?string $referralCode = null,
     ): array {
         $edition = ProgramEdition::findOrFail($editionId);
         $user = Auth::user();
@@ -53,6 +56,20 @@ class LicenseInvoiceManager
         // Create invoice lines
         $this->createEditionInvoiceLine($accountMove, $billingProduct, $licensePlan);
         $this->createFeatureInvoiceLines($accountMove, $license, $billingContext);
+
+        if (
+            filled($referralCode)
+            && class_exists(ReferralService::class)
+            && Package::isPluginInstalled('referrals')
+        ) {
+            app(ReferralService::class)->applyToDraftMove(
+                $accountMove,
+                $referralCode,
+                ReferralService::CONTEXT_LICENSE,
+                License::class,
+                $license->id,
+            );
+        }
 
         // Compute totals
         AccountFacade::computeAccountMove($accountMove);

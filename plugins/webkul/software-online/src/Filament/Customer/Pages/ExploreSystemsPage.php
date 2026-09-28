@@ -2,16 +2,16 @@
 
 namespace Webkul\SoftwareOnline\Filament\Customer\Pages;
 
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Webkul\SoftwareOnline\Enums\BillingCycle;
 use Webkul\SoftwareOnline\Models\OnlineSystem;
 use Webkul\SoftwareOnline\Models\OnlineSystemPlan;
+use Webkul\SoftwareOnline\Rules\Subdomain;
 use Webkul\SoftwareOnline\Services\OnlineBillingService;
+use Webkul\Support\Enums\NavigationGroup;
 
 class ExploreSystemsPage extends Page
 {
@@ -39,9 +39,11 @@ class ExploreSystemsPage extends Page
 
     public string $adminEmail = '';
 
+    public string $referralCode = '';
+
     public static function getNavigationGroup(): string|\UnitEnum|null
     {
-        return \Webkul\Support\Enums\NavigationGroup::SoftwareOnline;
+        return NavigationGroup::SoftwareOnline;
     }
 
     public static function getNavigationLabel(): string
@@ -97,23 +99,57 @@ class ExploreSystemsPage extends Page
 
     public function selectPlan(int $planId): void
     {
-        $this->selectedPlanId = $planId;
+        $plan = OnlineSystemPlan::query()
+            ->where('is_active', true)
+            ->whereHas('system', fn ($query) => $query->where('is_active', true))
+            ->findOrFail($planId);
+
+        $this->selectedPlanId = $plan->id;
+        $this->selectedSystemId = $plan->system_id;
         $this->modalBillingCycle = $this->billingPeriod;
         $this->dispatch('open-modal', id: 'create-instance-modal');
     }
 
+    public function getInstanceUrlPreviewProperty(): ?string
+    {
+        $system = $this->systems->firstWhere('id', $this->selectedSystemId);
+
+        return $system?->tenantLoginUrl($this->subdomain);
+    }
+
+    public function updatedSubdomain(string $value): void
+    {
+        $this->subdomain = strtolower(trim($value));
+    }
+
     public function createWebsite(): void
     {
+        $this->subdomain = strtolower(trim($this->subdomain));
+        $plan = OnlineSystemPlan::query()
+            ->where('is_active', true)
+            ->whereHas('system', fn ($query) => $query->where('is_active', true))
+            ->findOrFail($this->selectedPlanId);
+        $this->selectedSystemId = $plan->system_id;
+
         $this->validate([
-            'selectedPlanId'    => 'required|exists:online_system_plans,id',
+            'selectedPlanId'    => [
+                'required',
+                Rule::exists('online_system_plans', 'id')->where('is_active', true),
+            ],
             'websiteName'       => 'required|string|min:3|max:100',
-            'subdomain'         => 'nullable|string|alpha_dash|max:50',
-            'adminEmail'        => 'required|email',
+            'subdomain'         => [
+                'required',
+                'string',
+                'max:50',
+                new Subdomain,
+                Rule::unique('online_instances', 'subdomain')
+                    ->where(fn ($query) => $query->where('system_id', $this->selectedSystemId)),
+            ],
             'modalBillingCycle' => 'required|in:trial,monthly,annual',
+            'referralCode'      => 'nullable|string|max:32',
         ]);
 
         $partner = Auth::guard('customer')->user();
-        $plan = OnlineSystemPlan::findOrFail($this->selectedPlanId);
 
         $cycle = match ($this->modalBillingCycle) {
             'trial'  => BillingCycle::Trial,
@@ -128,8 +164,8 @@ class ExploreSystemsPage extends Page
                 name: $this->websiteName,
                 subdomain: $this->subdomain,
                 cycle: $cycle,
-                adminEmail: $this->adminEmail,
-                adminUsername: $this->adminUsername
+                adminUsername: $this->adminUsername,
+                referralCode: filled($this->referralCode) ? $this->referralCode : null,
             );
 
             Notification::make()
