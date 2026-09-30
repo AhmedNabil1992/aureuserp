@@ -29,6 +29,7 @@ class SoftwareServiceProvider extends PackageServiceProvider
             ->hasViews()
             ->hasTranslations()
             ->hasRoute('api')
+            ->hasDependencies(['accounts'])
             ->hasMigrations([
                 '2026_04_09_000001_create_software_programs_table',
                 '2026_04_09_000002_create_software_program_editions_table',
@@ -63,10 +64,12 @@ class SoftwareServiceProvider extends PackageServiceProvider
                 '2026_07_07_000033_create_software_program_edition_features_table',
                 '2026_07_31_112438_altra_software_license_devices_add_soft_delete',
                 '2026_07_31_120000_add_device_reset_fee_to_software_tables',
+                '2026_09_29_000034_create_software_firmwares_table',
             ])
             ->runsMigrations()
             ->hasInstallCommand(function (InstallCommand $command): void {
                 $command
+                    ->installDependencies()
                     ->runsMigrations();
             })
             ->hasUninstallCommand(function (UninstallCommand $command): void {})

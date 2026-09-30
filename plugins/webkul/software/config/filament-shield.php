@@ -1,6 +1,7 @@
 <?php
 
 use Webkul\Software\Filament\Admin\Resources\ErrorLogResource;
+use Webkul\Software\Filament\Admin\Resources\FirmwareResource;
 use Webkul\Software\Filament\Admin\Resources\LicenseActivityResource;
 use Webkul\Software\Filament\Admin\Resources\LicenseDeviceResource;
 use Webkul\Software\Filament\Admin\Resources\LicenseResource;
@@ -30,6 +31,7 @@ return [
             RemoteProfileResource::class       => [...$basic, ...$delete],
             LicenseActivityResource::class     => [...$basic, ...$delete],
             ErrorLogResource::class            => [...$basic, ...$delete],
+            FirmwareResource::class            => [...$basic, ...$delete],
             TagResource::class                 => [...$basic, ...$delete],
             TicketResource::class              => [...$basic, ...$delete],
             TicketEventResource::class         => [...$basic, ...$delete],

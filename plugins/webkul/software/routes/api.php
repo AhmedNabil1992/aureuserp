@@ -9,6 +9,10 @@ use Webkul\Software\Http\Controllers\API\Legacy\UpdateLegacyController;
 use Webkul\Software\Http\Controllers\API\V1\CustomerNotificationController;
 use Webkul\Software\Http\Controllers\API\V1\FcmTokenController;
 use Webkul\Software\Http\Controllers\API\V1\TicketController;
+use Webkul\Software\Http\Controllers\IoT\FirmwareUpdateController;
+
+Route::get('api/iot/firmware', FirmwareUpdateController::class)
+    ->name('api.iot.firmware');
 
 // ─── Admin / staff routes (Sanctum token required) ───────────────────────────
 Route::name('admin.api.v1.software.')
@@ -51,4 +55,6 @@ Route::prefix('api')->group(function (): void {
     Route::get('/product', [ProductLegacyController::class, 'getProduct']);
     Route::get('/governorates', [LocationLegacyController::class, 'index']);
     Route::get('/city', [LocationLegacyController::class, 'getCity']);
+    Route::get('/check_connection', [UpdateLegacyController::class, 'checkInternetConnection']);
+    Route::post('/get-key', [LicenseLegacyController::class, 'getKey']);
 });

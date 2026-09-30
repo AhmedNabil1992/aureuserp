@@ -3,6 +3,7 @@
 namespace Webkul\Software\Http\Controllers\API\Legacy;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -171,5 +172,31 @@ class LicenseLegacyController extends Controller
         } while (License::query()->where('serial_number', $serial)->exists());
 
         return $serial;
+    }
+
+    public function getKey(Request $request): JsonResponse
+    {
+        $request->validate([
+            'ComputerID' => 'required|string',
+        ]);
+
+        $key = LicenseDevice::query()
+            ->where('computer_id', $request->input('ComputerID'))
+            ->latest('id')
+            ->value('license_key');
+
+        if (! empty($key)) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Registered',
+                'data'    => ['LicenseKey' => $key],
+            ], 200);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Not Registered',
+            'data'    => null,
+        ], 200);
     }
 }

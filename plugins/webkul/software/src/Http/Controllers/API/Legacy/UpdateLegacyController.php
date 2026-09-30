@@ -12,6 +12,7 @@ use Webkul\Software\Http\Requests\API\Legacy\LicenseActivityUpsertRequest;
 use Webkul\Software\Models\License;
 use Webkul\Software\Models\LicenseActivity;
 use Webkul\Software\Models\ProgramRelease;
+use Illuminate\Support\Facades\DB;
 
 class UpdateLegacyController extends Controller
 {
@@ -169,5 +170,35 @@ class UpdateLegacyController extends Controller
             'current_version' => $currentVersion,
             'last_online_at'  => now(),
         ]);
+    }
+
+    public function checkInternetConnection(): JsonResponse
+    {
+        try {
+            $connected = @fsockopen('etech-valley.com', 80, $errno, $errstr, 5);
+
+            if ($connected) {
+                fclose($connected);
+
+                // Check if the database connection is working
+                DB::connection()->getPdo();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Connected',
+                ], 200);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Not connected',
+            ], 503);
+        } catch (\Exception $ex) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Not connected',
+                'error'   => 'An error occurred while processing the request.',
+            ], 500);
+        }
     }
 }
