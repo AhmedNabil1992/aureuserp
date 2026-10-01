@@ -46,9 +46,9 @@ class InsertLicenseRequest extends FormRequest
             'CompanyName' => ['required', 'string', 'max:255'],
             'ProductID'   => ['required', 'integer', 'exists:software_programs,id'],
             'ClientID'    => ['required', 'integer', 'exists:partners_partners,id'],
-            'GoverID'     => ['nullable', 'integer', 'exists:states,id'],
-            'CityID'      => ['nullable', 'integer', 'exists:cities,id'],
-            'Address'     => ['nullable', 'string', 'max:255'],
+            'GoverID'     => ['required', 'integer', 'exists:states,id'],
+            'CityID'      => ['required', 'integer', 'exists:cities,id'],
+            'Address'     => ['required', 'string', 'max:255'],
             // 'LicenseType' => ['nullable', 'string'],
             // 'Period'      => ['nullable', 'integer', 'min:1'],
         ];

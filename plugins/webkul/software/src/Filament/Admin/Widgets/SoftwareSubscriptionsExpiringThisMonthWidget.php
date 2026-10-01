@@ -7,6 +7,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Webkul\Software\Models\LicenseSubscription;
@@ -44,7 +45,7 @@ class SoftwareSubscriptionsExpiringThisMonthWidget extends BaseWidget
             ->selectRaw('MIN(end_date) as nearest_end_date')
             ->whereNotNull('end_date')
             ->whereBetween('end_date', [$startOfMonth, $endOfMonth])
-            ->groupBy('service_type')
+            ->groupByRaw("COALESCE(NULLIF(service_type, ''), 'unknown')")
             ->orderByDesc('expiring_count');
 
         return $table
@@ -64,6 +65,15 @@ class SoftwareSubscriptionsExpiringThisMonthWidget extends BaseWidget
                     ->formatStateUsing(fn (?string $state): ?string => $state ? Carbon::parse($state)->toDateString() : null)
                     ->sortable(),
             ]);
+    }
+
+    public function getTableRecordKey(Model|array $record): string
+    {
+        $serviceType = is_array($record)
+            ? ($record['service_type'] ?? null)
+            : $record->getAttribute('service_type');
+
+        return (string) ($serviceType ?: 'unknown');
     }
 
     private function resolveServiceTypeLabel(?string $serviceType): string

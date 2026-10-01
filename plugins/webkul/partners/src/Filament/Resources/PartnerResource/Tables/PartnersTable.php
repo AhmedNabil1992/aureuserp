@@ -105,7 +105,7 @@ class PartnersTable
                             IconColumn::make('is_dealer')
                                 ->label(__('partners::filament/resources/partner.table.columns.is-dealer'))
                                 ->trueIcon('heroicon-o-check-circle')
-                                ->falseIcon('heroicon-o-x-circle')
+                                ->falseIcon(false)
                                 ->sortable()
                                 ->alignCenter(),
                         ])

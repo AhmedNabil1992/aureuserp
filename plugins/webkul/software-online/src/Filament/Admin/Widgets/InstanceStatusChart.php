@@ -37,7 +37,7 @@ class InstanceStatusChart extends ChartWidget
     protected function getData(): array
     {
         $query = OnlineInstance::query()
-            ->whereHas('partner', fn (Builder $builder): Builder => $builder->where('company_id', current_company_id()));
+            ->whereHas('partner', fn (Builder $builder): Builder => $builder->where(owned_by_company()));
 
         $groups = [
             'active'    => [InstanceStatus::Active],

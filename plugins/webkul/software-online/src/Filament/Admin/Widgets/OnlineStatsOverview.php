@@ -71,6 +71,6 @@ class OnlineStatsOverview extends StatsOverviewWidget
 
     private function scopeToCompany(Builder $query): Builder
     {
-        return $query->where('company_id', current_company_id());
+        return $query->where(owned_by_company());
     }
 }

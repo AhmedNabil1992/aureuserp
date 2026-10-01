@@ -49,7 +49,7 @@ class CheckForUpdateRequest extends FormRequest
         return [
             'ApplicationName' => ['required', 'string', 'max:255'],
             'CurrentVersion'  => ['required', 'string', 'max:50'],
-            'ComputerID'      => ['required', 'string', 'max:255', 'exists:software_license_devices,computer_id'],
+            'ComputerID'      => ['required', 'string', 'max:255'],
         ];
     }
 }

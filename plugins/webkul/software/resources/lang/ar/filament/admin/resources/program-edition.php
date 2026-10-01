@@ -14,6 +14,7 @@ return [
     'form' => [
         'fields' => [
             'linked_variant' => 'المتغير المرتبط (مطلوب للفوترة)',
+            'device_reset_fee' => 'رسوم إعادة تعيين الجهاز',
         ],
         'feature_rules' => [
             'title'      => 'خصائص النسخة',

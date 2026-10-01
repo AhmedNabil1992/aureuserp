@@ -1,9 +1,12 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Webkul\Software\Http\Controllers\API\Legacy\ClientLegacyController;
+use Webkul\Software\Http\Controllers\API\Legacy\ErrorLogLegacyController;
 use Webkul\Software\Http\Controllers\API\Legacy\LicenseLegacyController;
 use Webkul\Software\Http\Controllers\API\Legacy\LocationLegacyController;
+use Webkul\Software\Http\Controllers\API\Legacy\MailLegacyController;
 use Webkul\Software\Http\Controllers\API\Legacy\ProductLegacyController;
 use Webkul\Software\Http\Controllers\API\Legacy\UpdateLegacyController;
 use Webkul\Software\Http\Controllers\API\V1\CustomerNotificationController;
@@ -45,6 +48,7 @@ Route::name('customer.api.v1.software.')
 
 // Route::prefix('api')->middleware(['App\Http\Middleware\VerifyLegacyApiKey'])->group(function (): void {
 Route::prefix('api')->group(function (): void {
+    Route::get('/user', fn (Request $request) => $request->user());
     Route::post('/insert-licenses', [LicenseLegacyController::class, 'insertLicenses']);
     Route::post('/insert-keys', [LicenseLegacyController::class, 'insertKeys']);
     Route::post('/license-info', [LicenseLegacyController::class, 'licenseInfo']);
@@ -57,4 +61,24 @@ Route::prefix('api')->group(function (): void {
     Route::get('/city', [LocationLegacyController::class, 'getCity']);
     Route::get('/check_connection', [UpdateLegacyController::class, 'checkInternetConnection']);
     Route::post('/get-key', [LicenseLegacyController::class, 'getKey']);
+    Route::post('/check-mail', [LicenseLegacyController::class, 'checkMail']);
+    Route::post('/check-valid', [LicenseLegacyController::class, 'checkValid']);
+    Route::post('/check-key', [LicenseLegacyController::class, 'checkKey']);
+    Route::post('/licenses-info', [LicenseLegacyController::class, 'licensesInfo']);
+    Route::post('/get-tech-support-info', [LicenseLegacyController::class, 'techSupportInfo']);
+    Route::post('/insert-logging', [ErrorLogLegacyController::class, 'insert']);
+    Route::post('/insert-logging-2', [ErrorLogLegacyController::class, 'insertV2']);
+    Route::post('/update-rust-desk', [UpdateLegacyController::class, 'updateRustDesk']);
+    Route::post('/send-mail', [MailLegacyController::class, 'sendShiftReport']);
+    Route::post('/send-generic-mail', [MailLegacyController::class, 'sendGenericMail']);
+    Route::get('/fb-webhook', function (Request $request) {
+        $verifyToken = config('services.facebook.webhook_verify_token', 'Wecandoitnow157#');
+
+        if ($request->query('hub_mode') === 'subscribe'
+            && $request->query('hub_verify_token') === $verifyToken) {
+            return response($request->query('hub_challenge'));
+        }
+
+        return response('Forbidden', 403);
+    });
 });

@@ -22,6 +22,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Validation\Rules\Unique;
+use Webkul\Partner\Models\Partner;
 use Webkul\SoftwareOnline\Enums\BillingCycle;
 use Webkul\SoftwareOnline\Enums\InstanceStatus;
 use Webkul\SoftwareOnline\Filament\Admin\Resources\OnlineInstanceResource\Pages\CreateOnlineInstance;
@@ -76,8 +77,18 @@ class OnlineInstanceResource extends Resource
                     Select::make('partner_id')
                         ->label(__('software-online::filament/admin/resources/instance.fields.customer'))
                         ->relationship('partner', 'name')
+                        ->getOptionLabelFromRecordUsing(function (Partner $record): string {
+                            $phoneNumbers = array_values(array_unique(array_filter([
+                                $record->phone,
+                                $record->mobile,
+                            ])));
+
+                            return $phoneNumbers === []
+                                ? $record->name
+                                : $record->name.' — '.implode(' / ', $phoneNumbers);
+                        })
                         ->required()
-                        ->searchable()
+                        ->searchable(['name', 'phone', 'mobile'])
                         ->preload(),
                     Select::make('system_id')
                         ->label(__('software-online::filament/admin/resources/instance.fields.system'))

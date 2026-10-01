@@ -3,7 +3,9 @@
 namespace Webkul\Software\Http\Controllers\API\Legacy;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 use Webkul\Software\Enums\ServiceType;
@@ -11,8 +13,9 @@ use Webkul\Software\Http\Requests\API\Legacy\CheckForUpdateRequest;
 use Webkul\Software\Http\Requests\API\Legacy\LicenseActivityUpsertRequest;
 use Webkul\Software\Models\License;
 use Webkul\Software\Models\LicenseActivity;
+use Webkul\Software\Models\LicenseDevice;
 use Webkul\Software\Models\ProgramRelease;
-use Illuminate\Support\Facades\DB;
+use Webkul\Software\Models\RemoteProfile;
 
 class UpdateLegacyController extends Controller
 {
@@ -198,6 +201,40 @@ class UpdateLegacyController extends Controller
                 'success' => false,
                 'message' => 'Not connected',
                 'error'   => 'An error occurred while processing the request.',
+            ], 500);
+        }
+    }
+
+    public function updateRustDesk(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'ComputerID'  => ['required', 'string'],
+            'RustDeskID'  => ['required', 'string'],
+        ]);
+
+        try {
+            $licenseId = LicenseDevice::query()
+                ->where('computer_id', $validated['ComputerID'])
+                ->value('license_id');
+
+            if (! $licenseId) {
+                return response()->json();
+            }
+
+            RemoteProfile::query()->updateOrCreate(
+                ['license_id' => $licenseId],
+                ['rustdesk' => $validated['RustDeskID']],
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'RustDesk ID updated successfully.',
+            ]);
+        } catch (Throwable $exception) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while updating RustDesk ID.',
+                'error'   => $exception->getMessage(),
             ], 500);
         }
     }

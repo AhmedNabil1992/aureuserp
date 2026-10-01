@@ -41,7 +41,7 @@ class SubscriptionRevenueChart extends ChartWidget
 
         $baseQuery = OnlineInstanceTransaction::query()
             ->where('status', 'paid')
-            ->whereHas('partner', fn (Builder $query): Builder => $query->where('company_id', current_company_id()));
+            ->whereHas('partner', fn (Builder $query): Builder => $query->where(owned_by_company()));
 
         return [
             'datasets' => [

@@ -42,7 +42,7 @@ class RecentSyncsWidget extends TableWidget
             ->query(
                 OnlineTenantWebhookEvent::query()
                     ->with('instance')
-                    ->whereHas('instance.partner', fn (Builder $query): Builder => $query->where('company_id', current_company_id()))
+                    ->whereHas('instance.partner', fn (Builder $query): Builder => $query->where(owned_by_company()))
                     ->latest('occurred_at')
             )
             ->defaultPaginationPageOption(5)

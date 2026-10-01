@@ -9,11 +9,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Throwable;
 use Webkul\Software\Enums\LicenseStatus;
+use Webkul\Software\Enums\ServiceType;
 use Webkul\Software\Http\Requests\API\Legacy\InsertKeysRequest;
 use Webkul\Software\Http\Requests\API\Legacy\InsertLicenseRequest;
 use Webkul\Software\Http\Requests\API\Legacy\LicenseInfoRequest;
 use Webkul\Software\Models\License;
 use Webkul\Software\Models\LicenseDevice;
+use Webkul\Software\Models\LicenseShiftEmail;
+use Webkul\Software\Models\LicenseSubscription;
 use Webkul\Software\Services\LegacyLicenseKeyGenerator;
 use Webkul\Support\Models\City;
 
@@ -129,10 +132,9 @@ class LicenseLegacyController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => $result['status'] === 'exists' ? 'Computer ID already exists.' : 'Inserted',
+                'message' => 'Inserted',
                 'data'    => [
                     'result' => $result['id'],
-                    'status' => $result['status'],
                 ],
             ]);
         } catch (Throwable $exception) {
@@ -198,5 +200,123 @@ class LicenseLegacyController extends Controller
             'message' => 'Not Registered',
             'data'    => null,
         ], 200);
+    }
+
+    public function checkMail(Request $request): JsonResponse
+    {
+        $validated = $request->validate(['ComputerID' => ['required', 'string']]);
+        $licenseId = $this->licenseIdForComputer($validated['ComputerID']);
+
+        $active = $licenseId
+            && LicenseSubscription::query()->where('license_id', $licenseId)
+                ->ofType(ServiceType::Mail->value)->activeNow()->exists()
+            && LicenseShiftEmail::query()->where('license_id', $licenseId)->exists();
+
+        if (! $active) {
+            return response()->json(['success' => true, 'message' => 'Not Active']);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Active',
+            'data'    => [
+                'result'    => 1,
+                'server'    => config('mail.mailers.smtp.host'),
+                'email'     => config('mail.mailers.smtp.username') ?: config('mail.from.address'),
+                'password'  => config('mail.mailers.smtp.password'),
+                'helo_name' => config('mail.mailers.smtp.local_domain'),
+                'status'    => config('mail.default') === 'smtp' ? 'True' : 'False',
+            ],
+        ]);
+    }
+
+    public function checkValid(Request $request): JsonResponse
+    {
+        $validated = $request->validate(['ComputerID' => ['required', 'string']]);
+        $active = LicenseDevice::query()
+            ->where('computer_id', $validated['ComputerID'])
+            ->whereHas('license', fn ($query) => $query->where('is_active', true))
+            ->exists();
+
+        return response()->json([
+            'success' => true,
+            'message' => $active ? 'Active' : 'Not Active',
+            'data'    => ['result' => $active ? 1 : 0],
+        ]);
+    }
+
+    public function checkKey(Request $request): JsonResponse
+    {
+        $validated = $request->validate(['ComputerID' => ['required', 'string']]);
+        $registered = LicenseDevice::query()->where('computer_id', $validated['ComputerID'])->exists();
+
+        return response()->json([
+            'success' => $registered,
+            'message' => $registered ? 'Registered' : 'Not Registered',
+        ]);
+    }
+
+    public function licensesInfo(Request $request): JsonResponse
+    {
+        $validated = $request->validate(['ComputerID' => ['required', 'string']]);
+        $license = License::query()
+            ->with(['program:id,name', 'subscriptions'])
+            ->whereHas('devices', fn ($query) => $query->where('computer_id', $validated['ComputerID']))
+            ->first();
+
+        if (! $license) {
+            return response()->json(['success' => false, 'message' => 'Not Registered', 'data' => null]);
+        }
+
+        $technicalSupport = $license->subscriptions
+            ->firstWhere('service_type', ServiceType::TechnicalSupport->value);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Registered',
+            'data'    => [
+                'LicenseID'   => $license->id,
+                'ProductName' => $license->program?->name,
+                'TechSupport' => optional($technicalSupport?->end_date)?->toDateString(),
+                'LicenseType' => $license->license_plan?->value,
+                'Company'     => $license->company_name,
+                'Client'      => $license->partner_id,
+            ],
+        ]);
+    }
+
+    public function techSupportInfo(Request $request): JsonResponse
+    {
+        $validated = $request->validate(['ComputerID' => ['required', 'string']]);
+        $license = License::query()
+            ->with(['program:id,name', 'subscriptions'])
+            ->whereHas('devices', fn ($query) => $query->where('computer_id', $validated['ComputerID']))
+            ->first();
+
+        if (! $license) {
+            return response()->json(['success' => false, 'message' => 'Not Registered', 'data' => null]);
+        }
+
+        $technicalSupport = $license->subscriptions->firstWhere('service_type', ServiceType::TechnicalSupport->value);
+        $mail = $license->subscriptions->firstWhere('service_type', ServiceType::Mail->value);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Registered',
+            'data'    => [
+                'ApplicationName'    => $license->program?->name,
+                'CompanyName'        => $license->company_name,
+                'TechSupportEndDate' => optional($technicalSupport?->end_date)?->toDateString() ?? 'N/A',
+                'MailEndDate'        => optional($mail?->end_date)?->toDateString() ?? 'N/A',
+                'LicensesID'         => $license->id,
+            ],
+        ]);
+    }
+
+    private function licenseIdForComputer(string $computerId): ?int
+    {
+        $licenseId = LicenseDevice::query()->where('computer_id', $computerId)->value('license_id');
+
+        return $licenseId ? (int) $licenseId : null;
     }
 }

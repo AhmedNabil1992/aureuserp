@@ -5,13 +5,14 @@ namespace App\Console\Commands;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
-use Webkul\Partner\Models\Tag;
-use Webkul\Wifi\Models\WifiPartnerCloud;
-use Webkul\Software\Models\License;
 use Illuminate\Support\Facades\DB;
+use Webkul\Partner\Models\Tag;
+use Webkul\Software\Models\License;
+use Webkul\SoftwareOnline\Models\OnlineInstance;
+use Webkul\Wifi\Models\WifiPartnerCloud;
 
 #[Signature('app:sync-partner-tags')]
-#[Description('Sync Wi-Fi and Software tags for partners hourly')]
+#[Description('Sync Wi-Fi, Software, and Online System tags for partners hourly')]
 class SyncPartnerTags extends Command
 {
     /**
@@ -26,7 +27,7 @@ class SyncPartnerTags extends Command
      *
      * @var string
      */
-    protected $description = 'Sync Wi-Fi and Software tags for partners hourly';
+    protected $description = 'Sync Wi-Fi, Software, and Online System tags for partners hourly';
 
     /**
      * Execute the console command.
@@ -34,7 +35,7 @@ class SyncPartnerTags extends Command
     public function handle()
     {
         // 1. جلب كل التاجز المتاحة عشان نستخدم الـ ID بتاعها
-        $tags = Tag::pluck('id', 'name')->toArray(); 
+        $tags = Tag::pluck('id', 'name')->toArray();
 
         $insertData = [];
 
@@ -43,7 +44,7 @@ class SyncPartnerTags extends Command
         // ==========================================
         if (isset($tags['Wi-Fi'])) {
             $wifiTagId = $tags['Wi-Fi'];
-            
+
             // هنجيب أرقام العملاء اللي ليهم أي ريكورد في جدول الواي فاي (بدون تكرار)
             $wifiPartnerIds = WifiPartnerCloud::whereNotNull('partner_id')
                 ->select('partner_id')
@@ -70,7 +71,7 @@ class SyncPartnerTags extends Command
 
         foreach ($softwareLicenses as $license) {
             $tagId = $tags[$license->slug] ?? $tags[$license->name] ?? null;
-            
+
             // لو التاج بتاع البرنامج ده موجود في جدول الـ Tags
             if ($tagId) {
                 $insertData[] = [
@@ -80,34 +81,53 @@ class SyncPartnerTags extends Command
             }
         }
 
+        // Sync online-system customers using either the system slug or name as the tag name.
+        $onlineInstances = OnlineInstance::query()
+            ->join('online_systems', 'online_instances.system_id', '=', 'online_systems.id')
+            ->whereNotNull('online_instances.partner_id')
+            ->select('online_instances.partner_id', 'online_systems.slug', 'online_systems.name')
+            ->distinct()
+            ->get();
+
+        foreach ($onlineInstances as $instance) {
+            $tagId = $tags[$instance->slug] ?? $tags[$instance->name] ?? null;
+
+            if ($tagId) {
+                $insertData[] = [
+                    'partner_id' => $instance->partner_id,
+                    'tag_id'     => $tagId,
+                ];
+            }
+        }
+
         // ==========================================
         // ثالثاً: فلترة البيانات ومنع الإدخال المكرر
         // ==========================================
-        if (!empty($insertData)) {
+        if (! empty($insertData)) {
             // نتأكد إن مفيش تكرار في الـ Array نفسها (نفس العميل بنفس التاج)
             $uniqueInsertData = collect($insertData)->unique(function ($item) {
-                return $item['partner_id'] . '-' . $item['tag_id'];
+                return $item['partner_id'].'-'.$item['tag_id'];
             });
 
             // جلب العلاقات المسجلة بالفعل في الداتا بيز لتفادي إضافتها مرة أخرى
             $existingPairs = DB::table('partners_partner_tag')
                 ->select('partner_id', 'tag_id')
                 ->get()
-                ->mapWithKeys(fn ($item) => [$item->partner_id . '-' . $item->tag_id => true])
+                ->mapWithKeys(fn ($item) => [$item->partner_id.'-'.$item->tag_id => true])
                 ->toArray();
 
             // الاحتفاظ فقط بالبيانات الجديدة غير الموجودة مسبقاً
             $newRecords = $uniqueInsertData->reject(function ($item) use ($existingPairs) {
-                return isset($existingPairs[$item['partner_id'] . '-' . $item['tag_id']]);
+                return isset($existingPairs[$item['partner_id'].'-'.$item['tag_id']]);
             })->values()->toArray();
 
-            if (!empty($newRecords)) {
+            if (! empty($newRecords)) {
                 // الإدخال في الداتا بيز على دفعات (Chunk)
                 foreach (array_chunk($newRecords, 500) as $chunk) {
                     DB::table('partners_partner_tag')->insert($chunk);
                 }
 
-                $this->info('Successfully added ' . count($newRecords) . ' new tag assignments.');
+                $this->info('Successfully added '.count($newRecords).' new tag assignments.');
             } else {
                 $this->info('All partner tags are already up to date. No new tags added.');
             }

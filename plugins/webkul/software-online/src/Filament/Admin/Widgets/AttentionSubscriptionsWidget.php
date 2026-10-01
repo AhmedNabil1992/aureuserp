@@ -43,7 +43,7 @@ class AttentionSubscriptionsWidget extends TableWidget
             ->query(
                 OnlineInstance::query()
                     ->with('partner')
-                    ->whereHas('partner', fn (Builder $query): Builder => $query->where('company_id', current_company_id()))
+                    ->whereHas('partner', fn (Builder $query): Builder => $query->where(owned_by_company()))
                     ->where(function (Builder $query): void {
                         $query
                             ->whereIn('status', [
