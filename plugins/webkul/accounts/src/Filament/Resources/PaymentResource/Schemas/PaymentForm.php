@@ -93,6 +93,11 @@ class PaymentForm
                                                 'name',
                                                 fn (Builder $query, Get $get) => $query->orderBy('id'),
                                             )
+                                            ->getOptionLabelFromRecordUsing(fn ($record): string => sprintf(
+                                                '%s — %s',
+                                                $record->name,
+                                                $record->phone ?: '—',
+                                            ))
                                             ->reactive()
                                             ->afterStateUpdated(function (Set $set, $state) {
                                                 $partner = $state ? Partner::find($state) : null;
@@ -100,7 +105,7 @@ class PaymentForm
                                                 $set('partner_bank_id', $partner?->bankAccounts->first()?->id);
                                                 $set('payment_method_line_id', $partner?->propertyInboundPaymentMethodLine?->id);
                                             })
-                                            ->searchable()
+                                            ->searchable(['name', 'phone'])
                                             ->preload(),
 
                                         Group::make()

@@ -2,12 +2,12 @@
 
 namespace Webkul\Psmonitor\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
-use Throwable;
-
 use InvalidArgumentException;
+use Throwable;
 use Webkul\Software\Models\License;
 
 abstract class RemoteModel extends Model
@@ -23,6 +23,22 @@ abstract class RemoteModel extends Model
 
         return static::onHost($license->server_ip, config('remote_access.remote_database', 'pstm'));
     }
+
+    /**
+     * Resolve and register the dynamic connection used by a customer's license.
+     */
+    public static function getRemoteConnectionName(License $license): ?string
+    {
+        if (! $license->isRemoteAccessible()) {
+            return null;
+        }
+
+        return static::setDynamicConnection(
+            $license->server_ip,
+            config('remote_access.remote_database', 'pstm'),
+        );
+    }
+
     /**
      * إعداد اتصال SQL Server بناءً على IP (وداتابيز اختيارية)
      */
@@ -33,9 +49,9 @@ abstract class RemoteModel extends Model
         $targetDatabase = (string) ($database ?? $baseDatabase);
 
         $connName = 'ps_sqlsrv_'
-            . preg_replace('/[^a-zA-Z0-9_]/', '_', $parsedHost)
-            . '_p' . $parsedPort
-            . '_db_' . preg_replace('/[^a-zA-Z0-9_]/', '_', $targetDatabase ?: 'default');
+            .preg_replace('/[^a-zA-Z0-9_]/', '_', $parsedHost)
+            .'_p'.$parsedPort
+            .'_db_'.preg_replace('/[^a-zA-Z0-9_]/', '_', $targetDatabase ?: 'default');
 
         $base = config('database.connections.ps_sqlsrv');
 
@@ -142,7 +158,7 @@ abstract class RemoteModel extends Model
      * without touching any real database. Used as a safe fallback when
      * the remote SQL Server connection is unavailable.
      */
-    public static function emptyQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function emptyQuery(): Builder
     {
         $connName = 'ps_null_connection';
 
@@ -184,6 +200,7 @@ abstract class RemoteModel extends Model
         }
 
         fclose($socket);
+
         return true;
     }
 }

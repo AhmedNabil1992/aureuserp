@@ -46,7 +46,15 @@ class WifiPurchaseResource extends Resource
             ->components([
                 Select::make('partner_id')
                     ->label(__('wifi::filament/resources/wifi_purchase.form.sections.general.fields.partner_id'))
-                    ->options(fn (): array => Partner::query()->orderBy('name')->pluck('name', 'id')->all())
+                    ->options(fn (): array => static::customerOptions())
+                    ->getSearchResultsUsing(fn (string $search): array => static::customerOptions($search))
+                    ->getOptionLabelUsing(function ($value): ?string {
+                        $partner = Partner::query()
+                            ->where('customer_rank', 1)
+                            ->find($value);
+
+                        return $partner ? static::customerOptionLabel($partner) : null;
+                    })
                     ->searchable()
                     ->preload()
                     ->live()
@@ -192,5 +200,28 @@ class WifiPurchaseResource extends Resource
         }
 
         return $formattedCredits->implode(' + ');
+    }
+
+    protected static function customerOptions(?string $search = null): array
+    {
+        return Partner::query()
+            ->where('customer_rank', 1)
+            ->when($search, fn ($query, string $search) => $query->where(function ($query) use ($search): void {
+                $query
+                    ->where('name', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
+            }))
+            ->orderBy('name')
+            ->limit(50)
+            ->get(['id', 'name', 'phone'])
+            ->mapWithKeys(fn (Partner $partner): array => [
+                $partner->id => static::customerOptionLabel($partner),
+            ])
+            ->all();
+    }
+
+    protected static function customerOptionLabel(Partner $partner): string
+    {
+        return sprintf('%s — %s', $partner->name, $partner->phone ?: '—');
     }
 }
