@@ -4,9 +4,11 @@ namespace Webkul\Software\Filament\Customer\Resources;
 
 use Closure;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\ViewAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
@@ -23,7 +25,9 @@ use Webkul\Software\Filament\Customer\Resources\LicenseResource\Pages\ListLicens
 use Webkul\Software\Filament\Customer\Resources\LicenseResource\Pages\ViewLicense;
 use Webkul\Software\Filament\Customer\Resources\LicenseResource\RelationManagers\SubscriptionsRelationManager;
 use Webkul\Software\Models\License;
+use Webkul\Software\Models\ProgramFeature;
 use Webkul\Software\Services\EmailValidationService;
+use Webkul\Software\Services\LicenseSubscriptionBillingService;
 
 class LicenseResource extends Resource
 {
@@ -143,63 +147,104 @@ class LicenseResource extends Resource
                     ->preload(),
             ])
             ->recordActions([
-                Action::make('shift_emails')
-                    ->label(__('software::filament/customer/license.table.actions.shift_emails.label'))
-                    ->icon('heroicon-o-envelope')
-                    ->modalHeading(__('software::filament/customer/license.table.actions.shift_emails.modal.heading'))
-                    ->modalDescription(__('software::filament/customer/license.table.actions.shift_emails.modal.description'))
-                    ->modalSubmitActionLabel(__('software::filament/customer/license.table.actions.shift_emails.modal.submit'))
-                    ->fillForm(fn (License $record): array => [
-                        'emails' => $record->shiftEmails()
-                            ->orderBy('id')
-                            ->get(['email'])
-                            ->map(fn ($shiftEmail): array => ['email' => $shiftEmail->email])
-                            ->all(),
-                    ])
-                    ->form([
-                        Repeater::make('emails')
-                            ->label(__('software::filament/customer/license.table.actions.shift_emails.form.emails.label'))
-                            ->addActionLabel(__('software::filament/customer/license.table.actions.shift_emails.form.emails.add'))
-                            ->schema([
-                                TextInput::make('email')
-                                    ->label(__('software::filament/customer/license.table.actions.shift_emails.form.email.label'))
-                                    ->email()
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->rules([
-                                        fn (): Closure => function (string $attribute, mixed $value, Closure $fail): void {
-                                            $validation = EmailValidationService::validate((string) $value);
+                ActionGroup::make([
+                    Action::make('renew_service')
+                        ->label(__('software::filament/customer/license.table.actions.renew_service.label'))
+                        ->icon('heroicon-o-arrow-path')
+                        ->color('success')
+                        ->form([
+                            Select::make('feature_id')
+                                ->label(__('software::filament/customer/license.table.actions.renew_service.service'))
+                                ->options(fn (License $record): array => ProgramFeature::query()
+                                    ->where('program_id', $record->program_id)
+                                    ->whereNotNull('service_type')
+                                    ->whereNotNull('product_id')
+                                    ->orderBy('name')
+                                    ->pluck('name', 'id')
+                                    ->all())
+                                ->required()
+                                ->searchable()
+                                ->preload(),
+                        ])
+                        ->requiresConfirmation()
+                        ->action(function (License $record, array $data): void {
+                            try {
+                                $result = app(LicenseSubscriptionBillingService::class)
+                                    ->subscribeOrRenew($record, (int) $data['feature_id'], true);
 
-                                            if (! $validation['valid']) {
-                                                $fail($validation['message']);
-                                            }
-                                        },
-                                    ]),
-                            ])
-                            ->columns(1),
-                    ])
-                    ->action(function (array $data, License $record): void {
-                        $emails = collect($data['emails'] ?? [])
-                            ->pluck('email')
-                            ->map(fn (string $email): string => strtolower(trim($email)))
-                            ->filter()
-                            ->unique()
-                            ->values();
+                                Notification::make()
+                                    ->title(__('software::filament/customer/license.table.actions.renew_service.notifications.success'))
+                                    ->body(__('software::filament/customer/license.table.actions.renew_service.notifications.ends_on', [
+                                        'date' => $result['subscription']->end_date?->format('Y-m-d'),
+                                    ]))
+                                    ->success()
+                                    ->send();
+                            } catch (\Throwable $exception) {
+                                Notification::make()
+                                    ->title(__('software::filament/customer/license.table.actions.renew_service.notifications.failed'))
+                                    ->body($exception->getMessage())
+                                    ->danger()
+                                    ->send();
+                            }
+                        }),
+                    Action::make('shift_emails')
+                        ->label(__('software::filament/customer/license.table.actions.shift_emails.label'))
+                        ->icon('heroicon-o-envelope')
+                        ->modalHeading(__('software::filament/customer/license.table.actions.shift_emails.modal.heading'))
+                        ->modalDescription(__('software::filament/customer/license.table.actions.shift_emails.modal.description'))
+                        ->modalSubmitActionLabel(__('software::filament/customer/license.table.actions.shift_emails.modal.submit'))
+                        ->fillForm(fn (License $record): array => [
+                            'emails' => $record->shiftEmails()
+                                ->orderBy('id')
+                                ->get(['email'])
+                                ->map(fn ($shiftEmail): array => ['email' => $shiftEmail->email])
+                                ->all(),
+                        ])
+                        ->form([
+                            Repeater::make('emails')
+                                ->label(__('software::filament/customer/license.table.actions.shift_emails.form.emails.label'))
+                                ->addActionLabel(__('software::filament/customer/license.table.actions.shift_emails.form.emails.add'))
+                                ->schema([
+                                    TextInput::make('email')
+                                        ->label(__('software::filament/customer/license.table.actions.shift_emails.form.email.label'))
+                                        ->email()
+                                        ->required()
+                                        ->maxLength(255)
+                                        ->rules([
+                                            fn (): Closure => function (string $attribute, mixed $value, Closure $fail): void {
+                                                $validation = EmailValidationService::validate((string) $value);
 
-                        DB::transaction(function () use ($emails, $record): void {
-                            $record->shiftEmails()->delete();
+                                                if (! $validation['valid']) {
+                                                    $fail($validation['message']);
+                                                }
+                                            },
+                                        ]),
+                                ])
+                                ->columns(1),
+                        ])
+                        ->action(function (array $data, License $record): void {
+                            $emails = collect($data['emails'] ?? [])
+                                ->pluck('email')
+                                ->map(fn (string $email): string => strtolower(trim($email)))
+                                ->filter()
+                                ->unique()
+                                ->values();
 
-                            $record->shiftEmails()->createMany(
-                                $emails->map(fn (string $email): array => ['email' => $email])->all(),
-                            );
-                        });
+                            DB::transaction(function () use ($emails, $record): void {
+                                $record->shiftEmails()->delete();
 
-                        Notification::make()
-                            ->title(__('software::filament/customer/license.table.actions.shift_emails.notifications.saved.title'))
-                            ->success()
-                            ->send();
-                    }),
-                ViewAction::make(),
+                                $record->shiftEmails()->createMany(
+                                    $emails->map(fn (string $email): array => ['email' => $email])->all(),
+                                );
+                            });
+
+                            Notification::make()
+                                ->title(__('software::filament/customer/license.table.actions.shift_emails.notifications.saved.title'))
+                                ->success()
+                                ->send();
+                        }),
+                    ViewAction::make(),
+                ]),
             ])
             ->paginated([10, 25, 50])
             ->defaultSort('start_date', 'desc')

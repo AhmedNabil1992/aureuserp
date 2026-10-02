@@ -32,6 +32,15 @@ return [
             'program' => 'البرنامج',
         ],
         'actions' => [
+            'renew_service' => [
+                'label'   => 'الاشتراك أو تجديد خدمة',
+                'service' => 'الخدمة',
+                'notifications' => [
+                    'success' => 'تم تجديد اشتراك الخدمة بنجاح',
+                    'ends_on' => 'الاشتراك نشط حتى :date.',
+                    'failed'  => 'تعذر تجديد الخدمة',
+                ],
+            ],
             'shift_emails' => [
                 'label' => 'إيميلات تقفيل الشيفت',
                 'modal' => [

@@ -9,6 +9,10 @@ return [
         'create' => 'إشتراك في خدمة',
     ],
 
+    'actions' => [
+        'renew' => 'تجديد لمدة سنة',
+    ],
+
     'form' => [
         'fields' => [
             'license' => 'الترخيص',

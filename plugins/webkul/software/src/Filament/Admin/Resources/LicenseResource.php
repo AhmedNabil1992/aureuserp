@@ -216,27 +216,13 @@ class LicenseResource extends Resource
                         ->label(__('software::filament/admin/resources/license.actions.renew'))
                         ->icon('heroicon-o-arrow-path')
                         ->color('info')
-                        ->visible(fn (License $record): bool => $record->invoices()->exists()
-                            && filled($record->edition_id)
-                            && in_array($record->license_plan?->value, [LicensePlan::Monthly->value, LicensePlan::Annual->value], true))
-                        ->form([
-                            Select::make('license_plan')
-                                ->label(__('software::filament/admin/resources/license.actions.type'))
-                                ->options([
-                                    LicensePlan::Monthly->value => ucfirst(LicensePlan::Monthly->value),
-                                    LicensePlan::Annual->value  => ucfirst(LicensePlan::Annual->value),
-                                ])
-                                ->default(fn (License $record): string => in_array($record->license_plan?->value, [LicensePlan::Monthly->value, LicensePlan::Annual->value], true)
-                                    ? $record->license_plan->value
-                                    : LicensePlan::Annual->value)
-                                ->required(),
-                        ])
+                        ->visible(fn (License $record): bool => $record->invoices()->exists() && filled($record->edition_id))
                         ->requiresConfirmation()
-                        ->action(function (License $record, array $data): void {
+                        ->action(function (License $record): void {
                             try {
                                 $result = app(LicenseManager::class)->renewLicense(
                                     $record,
-                                    (string) $data['license_plan']
+                                    LicensePlan::Annual->value
                                 );
 
                                 Notification::make()

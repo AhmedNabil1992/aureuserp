@@ -3,21 +3,22 @@
 namespace Webkul\Software\Filament\Admin\Resources;
 
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Webkul\Software\Enums\ServiceType;
 use Webkul\Software\Filament\Admin\Clusters\Licensing;
 use Webkul\Software\Filament\Admin\Resources\LicenseSubscriptionResource\Pages\ManageLicenseSubscriptions;
+use Webkul\Software\Models\License;
 use Webkul\Software\Models\LicenseSubscription;
+use Webkul\Software\Models\ProgramFeature;
+use Webkul\Software\Services\LicenseSubscriptionBillingService;
 
 class LicenseSubscriptionResource extends Resource
 {
@@ -44,13 +45,18 @@ class LicenseSubscriptionResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Select::make('license_id')->label(__('software::filament/admin/resources/license-subscription.form.fields.license'))->relationship('license', 'serial_number')->searchable()->preload()->required(),
-            Select::make('service_type')->label(__('software::filament/admin/resources/license-subscription.form.fields.service_type'))
-                ->options(collect(ServiceType::cases())->mapWithKeys(fn (ServiceType $case): array => [$case->value => ucfirst(str_replace('_', ' ', $case->value))])->all())
+            Select::make('license_id')->label(__('software::filament/admin/resources/license-subscription.form.fields.license'))->relationship('license', 'serial_number')->searchable()->preload()->live()->required(),
+            Select::make('feature_id')->label(__('software::filament/admin/resources/license-subscription.form.fields.service_type'))
+                ->options(function (Get $get): array {
+                    $license = License::find($get('license_id'));
+
+                    return $license
+                        ? ProgramFeature::query()->where('program_id', $license->program_id)->whereNotNull('service_type')->pluck('name', 'id')->all()
+                        : [];
+                })
+                ->searchable()
+                ->preload()
                 ->required(),
-            DatePicker::make('start_date')->label(__('software::filament/admin/resources/license-subscription.form.fields.start_date'))->native(false),
-            DatePicker::make('end_date')->label(__('software::filament/admin/resources/license-subscription.form.fields.end_date'))->native(false),
-            Toggle::make('is_active')->label(__('software::filament/admin/resources/license-subscription.form.fields.is_active'))->default(true),
         ])->columns(2);
     }
 
@@ -63,7 +69,23 @@ class LicenseSubscriptionResource extends Resource
             TextColumn::make('end_date')->label(__('software::filament/admin/resources/license-subscription.table.columns.end_date'))->date(),
             IconColumn::make('is_active')->label(__('software::filament/admin/resources/license-subscription.table.columns.is_active'))->boolean(),
         ])->recordActions([
-            // EditAction::make(),
+            Action::make('renew')
+                ->label(__('software::filament/admin/resources/license-subscription.actions.renew'))
+                ->icon('heroicon-o-arrow-path')
+                ->requiresConfirmation()
+                ->action(function (LicenseSubscription $record): void {
+                    $featureId = $record->feature_id ?: ProgramFeature::query()
+                        ->where('program_id', $record->license->program_id)
+                        ->where('service_type', $record->service_type)
+                        ->value('id');
+
+                    if (! $featureId) {
+                        throw new \RuntimeException('No matching program feature was found for this subscription.');
+                    }
+
+                    app(LicenseSubscriptionBillingService::class)
+                        ->subscribeOrRenew($record->license, (int) $featureId, false);
+                }),
             DeleteAction::make(),
         ])->toolbarActions([
             // DeleteBulkAction::make(),

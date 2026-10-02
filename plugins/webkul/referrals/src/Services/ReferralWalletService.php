@@ -256,6 +256,18 @@ class ReferralWalletService
             $fullCoverageProductIds = array_values(array_unique([...$fullCoverageProductIds, ...$onlineProductIds]));
         }
 
+        if (Schema::hasTable('software_program_features')) {
+            $softwareFeatureProductIds = DB::table('software_program_features')
+                ->whereNotNull('product_id')->pluck('product_id')->map(fn ($id): int => (int) $id)->all();
+            $fullCoverageProductIds = array_values(array_unique([...$fullCoverageProductIds, ...$softwareFeatureProductIds]));
+        }
+
+        if (Schema::hasTable('software_program_editions')) {
+            $softwareEditionProductIds = DB::table('software_program_editions')
+                ->whereNotNull('variant_product_id')->pluck('variant_product_id')->map(fn ($id): int => (int) $id)->all();
+            $fullCoverageProductIds = array_values(array_unique([...$fullCoverageProductIds, ...$softwareEditionProductIds]));
+        }
+
         $maximum = $invoice->invoiceLines->sum(function (MoveLine $line) use ($fullCoverageProductIds): float {
             $percentage = in_array((int) $line->product_id, $fullCoverageProductIds, true)
                 ? self::FULL_USAGE_PERCENT

@@ -88,15 +88,15 @@ class LicenseManager
         License $license,
         string $plan = 'annual'
     ): array {
-        return DB::transaction(function () use ($license, $plan) {
+        return DB::transaction(function () use ($license) {
             $this->validateRenewalRequest($license);
 
-            $updatedLicense = $this->renewLicenseDateAndStatus($license, $plan);
+            $updatedLicense = $this->renewLicenseDateAndStatus($license);
 
             $invoiceResult = $this->invoiceManager->createInvoice(
                 $updatedLicense,
                 $updatedLicense->edition_id,
-                $plan,
+                LicensePlan::Annual->value,
                 'renewal'
             );
 
@@ -288,17 +288,18 @@ class LicenseManager
     /**
      * Renew license date and status
      */
-    private function renewLicenseDateAndStatus(
-        License $license,
-        string $plan
-    ): License {
-        $planEnum = LicensePlan::from($plan);
+    private function renewLicenseDateAndStatus(License $license): License
+    {
+        $planEnum = LicensePlan::Annual;
+        $baseDate = $license->end_date?->isFuture()
+            ? $license->end_date->copy()
+            : now();
 
         $license->update([
             'license_plan' => $planEnum,
             'period'       => $this->computePeriod($planEnum),
-            'start_date'   => now()->toDateString(),
-            'end_date'     => $this->computeEndDate($planEnum),
+            'start_date'   => $license->start_date ?? now()->toDateString(),
+            'end_date'     => $baseDate->addYear()->toDateString(),
             'is_active'    => true,
             'status'       => LicenseStatus::Approved,
         ]);

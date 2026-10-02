@@ -8,6 +8,10 @@ return [
     'titles' => [
         'create' => 'Create Service Subscription',
     ],
+
+    'actions' => [
+        'renew' => 'Renew for one year',
+    ],
     
     'form' => [
         'fields' => [

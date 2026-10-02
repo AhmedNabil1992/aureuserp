@@ -32,6 +32,15 @@ return [
             'program' => 'Program',
         ],
         'actions' => [
+            'renew_service' => [
+                'label'   => 'Subscribe or renew service',
+                'service' => 'Service',
+                'notifications' => [
+                    'success' => 'Service subscription renewed successfully',
+                    'ends_on' => 'The subscription is active until :date.',
+                    'failed'  => 'Unable to renew the service',
+                ],
+            ],
             'shift_emails' => [
                 'label' => 'Shift closing emails',
                 'modal' => [

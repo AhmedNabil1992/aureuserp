@@ -206,7 +206,7 @@
                     type="text"
                     wire:model.defer="websiteName"
                     class="w-full rounded-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                    placeholder="متجر النور التجاري"
+                    placeholder="Game Station"
                     required
                 />
             </div>
@@ -228,7 +228,7 @@
                         pattern="[a-z0-9](?:[a-z0-9-]{0,48}[a-z0-9])?"
                         maxlength="50"
                         class="flex-1 rounded-s-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:border-primary-500 focus:ring-primary-500"
-                        placeholder="elnoor-store"
+                        placeholder="game-station"
                     />
                     <span class="inline-flex items-center px-3 rounded-e-xl border border-s-0 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-xs">
                         @php

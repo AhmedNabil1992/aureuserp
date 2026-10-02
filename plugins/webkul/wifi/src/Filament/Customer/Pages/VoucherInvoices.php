@@ -23,8 +23,8 @@ use Webkul\Account\Enums\MoveType;
 use Webkul\Account\Enums\PaymentState;
 use Webkul\Account\Facades\Account as AccountFacade;
 use Webkul\Account\Models\Invoice;
+use Webkul\Account\Models\Journal;
 use Webkul\Account\Models\MoveLine;
-use Webkul\Accounting\Models\Journal;
 use Webkul\Partner\Models\Partner;
 use Webkul\PluginManager\Package;
 use Webkul\Referral\Services\ReferralWalletService;
@@ -131,14 +131,16 @@ class VoucherInvoices extends Page implements HasTable
                         : $package->amount);
 
                     $totalCost = $packagesCount * $priceUnit;
-                    $companyId = (int) ($partner->company_id ?: current_company_id());
-                    $journal = Journal::query()
-                        ->where('type', JournalType::SALE->value)
-                        ->where('company_id', $companyId)
-                        ->orderBy('id')
-                        ->first();
+                    $journal = $this->resolveSalesJournal($partner, (int) $package->currency_id);
 
                     if (! $journal) {
+                        Notification::make()
+                            ->title('دفتر مبيعات النظام غير مهيأ')
+                            ->body('لا يوجد دفتر مبيعات بنفس شركة وعملة رصيدك.')
+                            ->danger()
+                            ->persistent()
+                            ->send();
+
                         throw ValidationException::withMessages([
                             'wifi_package_id' => 'دفتر مبيعات النظام غير مهيأ.',
                         ]);
@@ -247,7 +249,8 @@ class VoucherInvoices extends Page implements HasTable
 
             Select::make('wifi_package_id')
                 ->label('الباقة / عدد الكروت')
-                ->options(function () use ($partner): array {
+                ->options(function (): array {
+                    $partner = Auth::guard('customer')->user();
                     $packages = WifiPackage::query()
                         ->where('is_active', true)
                         ->with(['product', 'currency'])
@@ -272,8 +275,7 @@ class VoucherInvoices extends Page implements HasTable
                 ->helperText(sprintf('رصيدك الأساسي المتاح: %s — ويُضاف إليه رصيد الإحالات بالكامل عند شراء كروت Wi-Fi.', number_format($availableCredit, 2)))
                 ->required()
                 ->searchable()
-                ->preload()
-                ->live(),
+                ->preload(),
 
             TextInput::make('quantity')
                 ->label('عدد الباقات')
@@ -299,6 +301,35 @@ class VoucherInvoices extends Page implements HasTable
             ->first();
 
         return abs((float) ($creditRows?->residual_total ?? 0.0));
+    }
+
+    private function resolveSalesJournal(Partner $partner, int $currencyId): ?Journal
+    {
+        $companyId = (int) $partner->company_id;
+
+        if (! $companyId) {
+            $companyId = (int) MoveLine::query()
+                ->where('partner_id', $partner->id)
+                ->where('currency_id', $currencyId)
+                ->where('parent_state', MoveState::POSTED)
+                ->where('reconciled', false)
+                ->where('amount_residual', '<', 0)
+                ->whereHas('account', fn ($query) => $query->where('account_type', 'asset_receivable'))
+                ->orderBy('date')
+                ->value('company_id');
+        }
+
+        $companyId = $companyId ?: (int) current_company_id();
+
+        return Journal::query()
+            ->where('type', JournalType::SALE)
+            ->when(
+                $companyId,
+                fn ($query) => $query->where('company_id', $companyId),
+                fn ($query) => $query->whereHas('company', fn ($companyQuery) => $companyQuery->where('currency_id', $currencyId)),
+            )
+            ->orderBy('id')
+            ->first();
     }
 
     protected function getPartnerReferralCredit(int $partnerId, int $companyId, int $currencyId): float
