@@ -125,7 +125,7 @@ return [
             'prefix_indexes' => true,
             'login_timeout' => (int) env('PS_DB_LOGIN_TIMEOUT', 30),
             'encrypt' => env('DB_ENCRYPT', 'yes'),
-            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
         ],
 
     ],
