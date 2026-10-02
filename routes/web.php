@@ -12,6 +12,9 @@ Route::get('/login', function (Request $request) {
     return redirect()->route('filament.admin.auth.login');
 })->name('login');
 
+Route::permanentRedirect('/customer', '/portal')
+    ->name('customer.legacy');
+
 Route::get('/portal', function () {
     if (Auth::guard('customer')->check()) {
         return redirect()->route('filament.customer.pages.dashboard');
