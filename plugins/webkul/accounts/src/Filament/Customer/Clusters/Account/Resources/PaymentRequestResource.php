@@ -3,7 +3,8 @@
 namespace Webkul\Account\Filament\Customer\Clusters\Account\Resources;
 
 use Filament\Actions\ViewAction;
-use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
@@ -70,15 +71,30 @@ class PaymentRequestResource extends Resource
                         ->minValue(0.01)
                         ->maxValue(99999999999)
                         ->required(),
-                    DatePicker::make('date')
-                        ->label(__('accounts::filament/customer/payment-request.form.fields.date'))
+                    Select::make('transfer_type')
+                        ->label(__('accounts::filament/customer/payment-request.form.fields.transfer_type'))
+                        ->options([
+                            'instapay'      => __('accounts::filament/customer/payment-request.form.transfer_types.instapay'),
+                            'vodafone_cash' => __('accounts::filament/customer/payment-request.form.transfer_types.vodafone_cash'),
+                        ])
                         ->native(false)
-                        ->default(now())
+                        ->required(),
+                    Placeholder::make('transfer_instructions')
+                        ->label(__('accounts::filament/customer/payment-request.form.fields.transfer_instructions'))
+                        ->content(__('accounts::filament/customer/payment-request.form.transfer_instructions', [
+                            'number' => '01080003324',
+                        ])),
+                    TextInput::make('sender_number')
+                        ->label(__('accounts::filament/customer/payment-request.form.fields.sender_number'))
+                        ->tel()
+                        ->rule('regex:/^[0-9]+$/')
+                        ->minLength(10)
+                        ->maxLength(15)
                         ->required(),
                     Textarea::make('memo')
                         ->label(__('accounts::filament/customer/payment-request.form.fields.memo'))
                         ->rows(4)
-                        ->maxLength(255),
+                        ->maxLength(120),
                 ])
                 ->columns(1),
         ]);

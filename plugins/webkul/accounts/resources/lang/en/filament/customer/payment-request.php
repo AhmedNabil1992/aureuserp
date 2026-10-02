@@ -35,10 +35,19 @@ return [
 
     'form' => [
         'fields' => [
-            'amount' => 'Requested Amount',
-            'date'   => 'Request Date',
-            'memo'   => 'Memo / Notes',
+            'amount'                => 'Requested Amount',
+            'transfer_type'         => 'Transfer Method',
+            'transfer_instructions' => 'Transfer Account',
+            'sender_number'         => 'Transferred From Number',
+            'memo'                  => 'Memo / Notes',
         ],
+        'transfer_types' => [
+            'instapay'      => 'InstaPay',
+            'vodafone_cash' => 'Vodafone Cash',
+        ],
+        'transfer_instructions' => 'Transfer via InstaPay or Vodafone Cash to :number only.',
+        'combined_memo'         => "Transfer method: :type\nTransferred from: :number\nNotes: :notes",
+        'no_notes'              => 'None',
     ],
 
     'infolist' => [

@@ -20,6 +20,19 @@ class CreatePaymentRequest extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
+        $transferType = (string) ($data['transfer_type'] ?? '');
+        $senderNumber = (string) ($data['sender_number'] ?? '');
+        $notes = trim((string) ($data['memo'] ?? ''));
+
+        unset($data['transfer_type'], $data['sender_number']);
+
+        $data['date'] = now()->toDateString();
+        $data['memo'] = __('accounts::filament/customer/payment-request.form.combined_memo', [
+            'type'   => __('accounts::filament/customer/payment-request.form.transfer_types.'.$transferType),
+            'number' => $senderNumber,
+            'notes'  => $notes !== '' ? $notes : __('accounts::filament/customer/payment-request.form.no_notes'),
+        ]);
+
         $partner = Partner::query()
             ->with('propertyInboundPaymentMethodLine')
             ->find(Auth::guard('customer')->id());

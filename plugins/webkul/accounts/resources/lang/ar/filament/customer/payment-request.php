@@ -35,10 +35,19 @@ return [
 
     'form' => [
         'fields' => [
-            'amount' => 'المبلغ المطلوب',
-            'date'   => 'تاريخ الطلب',
-            'memo'   => 'البيان / الملاحظات',
+            'amount'                => 'المبلغ المطلوب',
+            'transfer_type'         => 'طريقة التحويل',
+            'transfer_instructions' => 'رقم التحويل',
+            'sender_number'         => 'الرقم المحول منه',
+            'memo'                  => 'البيان / الملاحظات',
         ],
+        'transfer_types' => [
+            'instapay'      => 'انستا باي',
+            'vodafone_cash' => 'فودافون كاش',
+        ],
+        'transfer_instructions' => 'التحويل عبر انستا باي أو فودافون كاش على الرقم :number فقط.',
+        'combined_memo'         => "طريقة التحويل: :type\nالرقم المحول منه: :number\nالملاحظات: :notes",
+        'no_notes'              => 'لا توجد',
     ],
 
     'infolist' => [
