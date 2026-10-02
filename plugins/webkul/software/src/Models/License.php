@@ -2,6 +2,7 @@
 
 namespace Webkul\Software\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,7 +16,6 @@ use Webkul\Software\Enums\LicensePlan;
 use Webkul\Software\Enums\LicenseStatus;
 use Webkul\Support\Models\City;
 use Webkul\Support\Models\State;
-use Illuminate\Database\Eloquent\Builder;
 
 class License extends Model
 {
@@ -102,6 +102,11 @@ class License extends Model
         return $this->hasMany(LicenseSubscription::class, 'license_id');
     }
 
+    public function shiftEmails(): HasMany
+    {
+        return $this->hasMany(LicenseShiftEmail::class, 'license_id');
+    }
+
     public function invoices(): HasMany
     {
         return $this->hasMany(LicenseInvoice::class, 'license_id');
@@ -139,7 +144,7 @@ class License extends Model
 
     public function hasRemoteServer(): bool
     {
-        return !empty($this->server_ip);
+        return ! empty($this->server_ip);
     }
 
     public function isRemoteAccessible(): bool

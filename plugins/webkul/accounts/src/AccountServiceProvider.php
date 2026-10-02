@@ -9,6 +9,7 @@ use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\Facades\Event;
 use Livewire\Livewire;
 use Webkul\Account\Casts\CompanyProperty;
+use Webkul\Account\Console\Commands\ImportLegacyCustomerBalancesCommand;
 use Webkul\Account\Enums\AccountType;
 use Webkul\Account\Facades\Account as AccountFacade;
 use Webkul\Account\Facades\Tax as TaxFacade;
@@ -133,6 +134,7 @@ class AccountServiceProvider extends PackageServiceProvider
                 '2025_12_02_094021_create_accounts_taxes_settings',
                 '2025_12_02_094021_create_customer_invoice_settings',
             ])
+            ->hasCommand(ImportLegacyCustomerBalancesCommand::class)
             ->runsSettings()
             ->hasDependencies([
                 'products',

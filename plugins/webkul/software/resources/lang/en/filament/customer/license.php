@@ -31,6 +31,37 @@ return [
             'status'  => 'Status',
             'program' => 'Program',
         ],
+        'actions' => [
+            'shift_emails' => [
+                'label' => 'Shift closing emails',
+                'modal' => [
+                    'heading'     => 'Manage shift closing emails',
+                    'description' => 'Add the email addresses that should receive shift closing reports for this license.',
+                    'submit'      => 'Save emails',
+                ],
+                'form' => [
+                    'emails' => [
+                        'label' => 'Approved email addresses',
+                        'add'   => 'Add another email',
+                    ],
+                    'email' => [
+                        'label' => 'Email address',
+                    ],
+                ],
+                'notifications' => [
+                    'saved' => [
+                        'title' => 'Shift closing emails saved successfully',
+                    ],
+                ],
+                'validation' => [
+                    'format'     => 'The email address format is invalid.',
+                    'disposable' => 'Disposable or temporary email addresses are not allowed.',
+                    'domain'     => 'The email domain (:domain) does not exist or has no MX records.',
+                    'mailbox'    => 'The email address (:email) does not exist on the mail server.',
+                    'valid'      => 'The email address is valid.',
+                ],
+            ],
+        ],
     ],
 
     'pages' => [
@@ -55,7 +86,7 @@ return [
                 'is_active'     => 'Active',
             ],
             'subscriptions' => [
-                'title' => 'Active Subscriptions',
+                'title'   => 'Active Subscriptions',
                 'columns' => [
                     'feature_name' => 'Service Name',
                     'service_type' => 'Service Type',

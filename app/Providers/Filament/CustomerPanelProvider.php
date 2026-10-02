@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Customer\Auth\EditProfile;
 use App\Http\Middleware\ApplyBrandSettings;
 use App\Http\Middleware\SetLocale;
 use Emuniq\FilamentBrowserNotifications\BrowserNotificationsPlugin;
@@ -35,7 +36,7 @@ class CustomerPanelProvider extends PanelProvider
             // ->register()
             ->emailVerification()
             ->authPasswordBroker('customers')
-            ->profile(isSimple: false)
+            ->profile(EditProfile::class, isSimple: false)
             ->favicon(asset('images/favicon.ico'))
             ->brandLogo(asset('images/logo.svg'))
             ->darkMode(false)

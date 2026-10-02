@@ -2,22 +2,28 @@
 
 namespace Webkul\Software\Filament\Customer\Resources;
 
-use Webkul\Software\Filament\Customer\Clusters\Licensing;
+use Closure;
+use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
+use Filament\Facades\Filament;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Webkul\Software\Enums\LicensePlan;
 use Webkul\Software\Filament\Customer\Resources\LicenseResource\Pages\ListLicenses;
 use Webkul\Software\Filament\Customer\Resources\LicenseResource\Pages\ViewLicense;
 use Webkul\Software\Filament\Customer\Resources\LicenseResource\RelationManagers\SubscriptionsRelationManager;
-use Webkul\Software\Enums\LicensePlan;
 use Webkul\Software\Models\License;
-use Filament\Facades\Filament;
-use Illuminate\Support\Facades\Schema;
-use Filament\Tables\Columns\TextInputColumn;
+use Webkul\Software\Services\EmailValidationService;
 
 class LicenseResource extends Resource
 {
@@ -40,7 +46,7 @@ class LicenseResource extends Resource
     {
         return __('admin.navigation.software');
     }
-    
+
     public static function getModelLabel(): string
     {
         return __('software::filament/customer/license.models.singular');
@@ -66,6 +72,12 @@ class LicenseResource extends Resource
         return License::where('partner_id', $user->id)->exists();
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where('partner_id', Auth::guard('customer')->id());
+    }
+
     public static function table(Table $table): Table
     {
         return $table
@@ -77,20 +89,16 @@ class LicenseResource extends Resource
                 //     ->copyable(),
 
                 TextColumn::make('program.name')
-                    ->label(__('software::filament/customer/license.table.columns.program_name'))
-                    ,
+                    ->label(__('software::filament/customer/license.table.columns.program_name')),
                 TextInputColumn::make('company_name')
                     ->label(__('software::filament/customer/license.table.columns.company_name'))
                     ->rules(['required', 'string', 'max:255']),
                 TextColumn::make('edition.name')
-                    ->label(__('software::filament/customer/license.table.columns.edition'))
-                    ,
+                    ->label(__('software::filament/customer/license.table.columns.edition')),
                 TextColumn::make('state.name')
-                    ->label(__('software::filament/customer/license.table.columns.state'))
-                    ,
+                    ->label(__('software::filament/customer/license.table.columns.state')),
                 TextColumn::make('city.name')
-                    ->label(__('software::filament/customer/license.table.columns.city'))
-                    ,
+                    ->label(__('software::filament/customer/license.table.columns.city')),
                 TextInputColumn::make('address')
                     ->label(__('software::filament/customer/license.table.columns.address'))
                     ->rules(['required', 'string', 'max:255']),
@@ -100,12 +108,10 @@ class LicenseResource extends Resource
                     ->formatStateUsing(fn ($state) => $state instanceof LicensePlan ? ucfirst($state->value) : (is_string($state) ? ucfirst($state) : '—')),
                 TextColumn::make('status')
                     ->label(__('software::filament/customer/license.table.columns.status'))
-                    ->badge()
-                    ,
+                    ->badge(),
                 TextColumn::make('start_date')
                     ->label(__('software::filament/customer/license.table.columns.start_date'))
-                    ->date('Y-m-d')
-                    ,
+                    ->date('Y-m-d'),
                 TextColumn::make('end_date')
                     ->label(__('software::filament/customer/license.table.columns.end_date'))
                     ->date('Y-m-d')
@@ -117,8 +123,7 @@ class LicenseResource extends Resource
                     ->searchable(false),
                 TextColumn::make('devices_count')
                     ->label(__('software::filament/customer/license.table.columns.devices_count'))
-                    ->counts('devices')
-                    ,
+                    ->counts('devices'),
             ])
             ->filters([
                 SelectFilter::make('status')
@@ -138,17 +143,67 @@ class LicenseResource extends Resource
                     ->preload(),
             ])
             ->recordActions([
+                Action::make('shift_emails')
+                    ->label(__('software::filament/customer/license.table.actions.shift_emails.label'))
+                    ->icon('heroicon-o-envelope')
+                    ->modalHeading(__('software::filament/customer/license.table.actions.shift_emails.modal.heading'))
+                    ->modalDescription(__('software::filament/customer/license.table.actions.shift_emails.modal.description'))
+                    ->modalSubmitActionLabel(__('software::filament/customer/license.table.actions.shift_emails.modal.submit'))
+                    ->fillForm(fn (License $record): array => [
+                        'emails' => $record->shiftEmails()
+                            ->orderBy('id')
+                            ->get(['email'])
+                            ->map(fn ($shiftEmail): array => ['email' => $shiftEmail->email])
+                            ->all(),
+                    ])
+                    ->form([
+                        Repeater::make('emails')
+                            ->label(__('software::filament/customer/license.table.actions.shift_emails.form.emails.label'))
+                            ->addActionLabel(__('software::filament/customer/license.table.actions.shift_emails.form.emails.add'))
+                            ->schema([
+                                TextInput::make('email')
+                                    ->label(__('software::filament/customer/license.table.actions.shift_emails.form.email.label'))
+                                    ->email()
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->rules([
+                                        fn (): Closure => function (string $attribute, mixed $value, Closure $fail): void {
+                                            $validation = EmailValidationService::validate((string) $value);
+
+                                            if (! $validation['valid']) {
+                                                $fail($validation['message']);
+                                            }
+                                        },
+                                    ]),
+                            ])
+                            ->columns(1),
+                    ])
+                    ->action(function (array $data, License $record): void {
+                        $emails = collect($data['emails'] ?? [])
+                            ->pluck('email')
+                            ->map(fn (string $email): string => strtolower(trim($email)))
+                            ->filter()
+                            ->unique()
+                            ->values();
+
+                        DB::transaction(function () use ($emails, $record): void {
+                            $record->shiftEmails()->delete();
+
+                            $record->shiftEmails()->createMany(
+                                $emails->map(fn (string $email): array => ['email' => $email])->all(),
+                            );
+                        });
+
+                        Notification::make()
+                            ->title(__('software::filament/customer/license.table.actions.shift_emails.notifications.saved.title'))
+                            ->success()
+                            ->send();
+                    }),
                 ViewAction::make(),
             ])
             ->paginated([10, 25, 50])
             ->defaultSort('start_date', 'desc')
-            ->modifyQueryUsing(function (Builder $query): Builder {
-                $partnerId = Auth::guard('customer')->id();
-
-                return $query
-                    ->where('partner_id', $partnerId)
-                    ->orderByDesc('created_at');
-            });
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->orderByDesc('created_at'));
     }
 
     public static function getRelations(): array
