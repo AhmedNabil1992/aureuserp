@@ -300,6 +300,7 @@ class CustomerWifiController extends Controller
 
             if (Schema::hasTable('wifi_purchases')) {
                 $remainingVouchers = (int) WifiPurchase::query()
+                    ->forPartner($request->integer('customer_id'))
                     ->whereIn('cloud_id', $cloudIds)
                     ->sum('remaining_quantity');
             }

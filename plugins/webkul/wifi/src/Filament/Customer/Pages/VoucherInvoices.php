@@ -73,12 +73,15 @@ class VoucherInvoices extends Page implements HasTable
     public function getTabCounts(): array
     {
         $cloudIds = $this->getCustomerCloudIds();
+        $customer = $this->getCustomer();
 
-        if (empty($cloudIds)) {
+        if (empty($cloudIds) || ! $customer) {
             return ['all' => 0, 'incomplete' => 0];
         }
 
-        $base = WifiPurchase::whereIn('cloud_id', $cloudIds);
+        $base = WifiPurchase::query()
+            ->forPartner($customer->id)
+            ->whereIn('cloud_id', $cloudIds);
 
         return [
             'all'        => (clone $base)->count(),
@@ -365,8 +368,9 @@ class VoucherInvoices extends Page implements HasTable
     public function table(Table $table): Table
     {
         $cloudIds = $this->getCustomerCloudIds();
+        $customer = $this->getCustomer();
 
-        if (empty($cloudIds)) {
+        if (empty($cloudIds) || ! $customer) {
             return $table
                 ->query(WifiPurchase::query()->whereRaw('1 = 0'))
                 ->columns([])
@@ -375,6 +379,7 @@ class VoucherInvoices extends Page implements HasTable
         }
 
         $query = WifiPurchase::query()
+            ->forPartner($customer->id)
             ->whereIn('cloud_id', $cloudIds)
             ->with(['package', 'cloud'])
             ->orderByDesc('created_at');

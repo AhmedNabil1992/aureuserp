@@ -20,7 +20,7 @@ class ImportLegacyCustomerBalancesCommand extends Command
 {
     protected $signature = 'accounts:import-legacy-customer-balances
         {file : JSON file containing id and Old_Balance fields}
-        {--journal= : Cash/bank/credit-card journal ID that receives the opening balances}
+        {--journal=6 : Cash/bank/credit-card journal ID that receives the opening balances}
         {--date= : Accounting date (Y-m-d); defaults to today}
         {--batch=old-system-balances : Stable batch name used to prevent duplicate imports}
         {--commit : Create and post the payments; without this option the command is a dry run}';

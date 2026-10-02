@@ -127,7 +127,7 @@ class WifiPurchaseResource extends Resource
                 TextColumn::make('invoiceLine.move.name')
                     ->label(__('wifi::filament/resources/wifi_purchase.table.columns.invoice'))
                     ->searchable(),
-                TextColumn::make('invoiceLine.move.partner.name')
+                TextColumn::make('partner.name')
                     ->label(__('wifi::filament/resources/wifi_purchase.table.columns.partner'))
                     ->searchable(),
                 TextColumn::make('cloud.name')

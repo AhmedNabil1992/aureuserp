@@ -17,6 +17,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Illuminate\Validation\ValidationException;
 use Webkul\Wifi\Enums\WifiPackageType;
 use Webkul\Wifi\Filament\Customer\Concerns\HasCustomerCloudAccess;
 use Webkul\Wifi\Filament\Customer\Concerns\HasWifiAccess;
@@ -63,6 +64,25 @@ class VoucherBatch extends Page implements HasTable
                 ->icon('heroicon-o-plus-circle')
                 ->model(WifiVoucherBatch::class)
                 ->form($this->getBatchFormSchema())
+                ->mutateDataUsing(function (array $data): array {
+                    $customer = $this->getCustomer();
+                    $purchaseId = (int) ($data['wifi_purchase_id'] ?? 0);
+
+                    $purchaseIsAccessible = $customer
+                        && WifiPurchase::query()
+                            ->forPartner($customer->id)
+                            ->whereKey($purchaseId)
+                            ->whereIn('cloud_id', $this->getCustomerCloudIds())
+                            ->exists();
+
+                    if (! $purchaseIsAccessible) {
+                        throw ValidationException::withMessages([
+                            'wifi_purchase_id' => 'The selected purchase is not available for this customer.',
+                        ]);
+                    }
+
+                    return $data;
+                })
                 ->after(function (WifiVoucherBatch $record): void {
                     try {
                         $result = app(VoucherGenerationService::class)->generateFromBatch($record);
@@ -94,12 +114,14 @@ class VoucherBatch extends Page implements HasTable
     protected function getBatchFormSchema(): array
     {
         $cloudIds = $this->getCustomerCloudIds();
+        $customer = $this->getCustomer();
 
         return [
             Select::make('wifi_purchase_id')
                 ->label(__('wifi::filament/resources/wifi_voucher_batch.form.sections.general.fields.wifi_purchase_id'))
-                ->options(function () use ($cloudIds): array {
+                ->options(function () use ($cloudIds, $customer): array {
                     return WifiPurchase::query()
+                        ->when($customer, fn ($query) => $query->forPartner($customer->id), fn ($query) => $query->whereRaw('1 = 0'))
                         ->whereIn('cloud_id', $cloudIds)
                         ->where('remaining_quantity', '>', 0)
                         ->with(['package', 'cloud'])
@@ -120,7 +142,10 @@ class VoucherBatch extends Page implements HasTable
                 ->preload()
                 ->live()
                 ->afterStateUpdated(function (Set $set, $state): void {
-                    $purchase = WifiPurchase::query()->with('package')->find($state);
+                    $customer = $this->getCustomer();
+                    $purchase = $customer
+                        ? WifiPurchase::query()->forPartner($customer->id)->with('package')->find($state)
+                        : null;
 
                     if ($purchase) {
                         $set('cloud_id', $purchase->cloud_id);
@@ -178,7 +203,7 @@ class VoucherBatch extends Page implements HasTable
                         ->orderBy('name')
                         ->get()
                         ->mapWithKeys(fn (DynamicClient $client): array => [
-                            $client->nasidentifier => ($client->name ? ($client->name . ' (' . $client->nasidentifier . ')') : $client->nasidentifier),
+                            $client->nasidentifier => ($client->name ? ($client->name.' ('.$client->nasidentifier.')') : $client->nasidentifier),
                         ])
                         ->all();
                 })
@@ -200,8 +225,8 @@ class VoucherBatch extends Page implements HasTable
                             }
 
                             $query->orWhere('cloud_id', -1)
-                                  ->orWhere('cloud_id', 0)
-                                  ->orWhereNull('cloud_id');
+                                ->orWhere('cloud_id', 0)
+                                ->orWhereNull('cloud_id');
                         })
                         ->orderBy('name')
                         ->pluck('name', 'id')
@@ -216,9 +241,9 @@ class VoucherBatch extends Page implements HasTable
                 ->numeric()
                 ->integer()
                 ->minValue(1)
-                ->maxValue(fn (Get $get): ?int => self::resolveAvailableQuantityForCustomer($get))
+                ->maxValue(fn (Get $get): ?int => $this->resolveAvailableQuantityForCustomer($get))
                 ->helperText(function (Get $get): ?string {
-                    $available = self::resolveAvailableQuantityForCustomer($get);
+                    $available = $this->resolveAvailableQuantityForCustomer($get);
 
                     if ($available === null) {
                         return null;
@@ -267,7 +292,7 @@ class VoucherBatch extends Page implements HasTable
         ];
     }
 
-    private static function resolveAvailableQuantityForCustomer(Get $get): ?int
+    private function resolveAvailableQuantityForCustomer(Get $get): ?int
     {
         $purchaseId = $get('wifi_purchase_id');
 
@@ -275,7 +300,16 @@ class VoucherBatch extends Page implements HasTable
             return null;
         }
 
-        $purchase = WifiPurchase::query()->find($purchaseId);
+        $customer = $this->getCustomer();
+
+        if (! $customer) {
+            return null;
+        }
+
+        $purchase = WifiPurchase::query()
+            ->forPartner($customer->id)
+            ->whereIn('cloud_id', $this->getCustomerCloudIds())
+            ->find($purchaseId);
 
         if (! $purchase) {
             return null;
@@ -287,8 +321,9 @@ class VoucherBatch extends Page implements HasTable
     public function table(Table $table): Table
     {
         $cloudIds = $this->getCustomerCloudIds();
+        $customer = $this->getCustomer();
 
-        if (empty($cloudIds)) {
+        if (empty($cloudIds) || ! $customer) {
             return $table
                 ->query(WifiVoucherBatch::query()->whereRaw('1 = 0'))
                 ->columns([])
@@ -298,6 +333,7 @@ class VoucherBatch extends Page implements HasTable
 
         $query = WifiVoucherBatch::query()
             ->whereIn('cloud_id', $cloudIds)
+            ->whereHas('purchase', fn ($query) => $query->forPartner($customer->id))
             ->orderByDesc('created_at');
 
         return $table
