@@ -18,7 +18,7 @@ return [
                     'cloud_id'                 => 'السحابة',
                     'realm_id'                 => 'المجال',
                     'nasidentifier'            => 'نقطة الوصول (NAS Identifier)',
-                    'profile_id'               => 'الملف التعريفي',
+                    'profile_id'               => 'باقة الكروت',
                     'validity'                 => 'مدة الصلاحية',
                     'days_valid'               => 'أيام',
                     'hours_valid'              => 'ساعات',
