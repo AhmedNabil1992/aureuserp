@@ -209,7 +209,8 @@ class VoucherBatch extends Page implements HasTable
                 })
                 ->disabled(fn (Get $get): bool => blank($get('realm_id')))
                 ->searchable()
-                ->preload(),
+                ->preload()
+                ->required(),
 
             Select::make('profile_id')
                 ->label(__('wifi::filament/resources/wifi_voucher_batch.form.sections.general.fields.profile_id'))
