@@ -24,6 +24,7 @@ class WifiVoucherBatch extends Model
         'batch_code',
         'quantity',
         'never_expire',
+        'expires_at',
         'caption',
         'creator_id',
     ];
@@ -39,6 +40,7 @@ class WifiVoucherBatch extends Model
             'minutes_valid'     => 'integer',
             'quantity'          => 'integer',
             'never_expire'      => 'boolean',
+            'expires_at'        => 'date',
         ];
     }
 

@@ -31,6 +31,7 @@ class WifiServiceProvider extends PackageServiceProvider
                 '2026_04_21_210001_alter_wifi_voucher_batches_add_profile_validity_drop_dynamic_client',
                 '2026_04_24_153145_add_currency_id_to_wifi_packages_table',
                 '2026_10_02_000001_alter_wifi_purchases_for_legacy_import',
+                '2026_10_03_000001_add_expires_at_to_wifi_voucher_batches_table',
             ])
             ->hasCommand(ImportLegacyWifiPurchasesCommand::class)
             ->runsMigrations()

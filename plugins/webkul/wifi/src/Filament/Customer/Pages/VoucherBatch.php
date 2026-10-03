@@ -382,7 +382,7 @@ class VoucherBatch extends Page implements HasTable
                             return __('wifi::filament/customer/pages/voucher-batch.never_expire_options.yes');
                         }
 
-                        return $record->updated_at ? $record->updated_at->format('Y-m-d') : '-';
+                        return $record->expires_at?->format('Y-m-d') ?? '-';
                     }),
 
                 TextColumn::make('created_at')

@@ -20,6 +20,7 @@ class CustomerWifiVoucherBatchResource extends JsonResource
             'hours_valid'   => $this->hours_valid,
             'minutes_valid' => $this->minutes_valid,
             'never_expire'  => (bool) $this->never_expire,
+            'expires_at'    => $this->expires_at?->toDateString(),
             'caption'       => $this->caption,
             'created_at'    => $this->created_at?->toIso8601String(),
             'updated_at'    => $this->updated_at?->toIso8601String(),

@@ -25,7 +25,7 @@ class VoucherGenerationService
         ?int $minutesValid = null,
         ?CarbonInterface $expireAt = null,
     ): array {
-        $batch->loadMissing(['cloud', 'realm', 'profile', 'purchase.package']);
+        $batch->loadMissing(['cloud', 'realm', 'profile', 'purchase.package', 'purchase.invoiceLine.move']);
 
         if (! $batch->cloud_id) {
             throw new RuntimeException('Cloud is required to generate vouchers.');
@@ -73,11 +73,12 @@ class VoucherGenerationService
         ];
 
         $isUnlimited = $this->isUnlimitedPackage($batch);
+        $resolvedExpireAt = null;
 
         if ($isUnlimited) {
             $payload['never_expire'] = 'on';
         } else {
-            $resolvedExpireAt = $expireAt ?? now()->addMonth();
+            $resolvedExpireAt = $this->resolveExpireAt($batch, $expireAt);
             $payload['expire'] = $resolvedExpireAt->format('m/d/Y');
         }
 
@@ -98,8 +99,10 @@ class VoucherGenerationService
             throw new RuntimeException(sprintf('Voucher API Error: %s', $msg));
         }
 
-        if ($batch->batch_code !== $batchCode) {
-            $batch->batch_code = $batchCode;
+        $batch->batch_code = $batchCode;
+        $batch->expires_at = $isUnlimited ? null : $resolvedExpireAt;
+
+        if ($batch->isDirty(['batch_code', 'expires_at'])) {
             $batch->save();
         }
 
@@ -121,6 +124,17 @@ class VoucherGenerationService
 
         return $packageType instanceof WifiPackageType
             && $packageType === WifiPackageType::Unlimited;
+    }
+
+    private function resolveExpireAt(WifiVoucherBatch $batch, ?CarbonInterface $expireAt): CarbonInterface
+    {
+        if ($expireAt) {
+            return $expireAt;
+        }
+
+        $invoiceDate = $batch->purchase?->invoiceLine?->move?->invoice_date;
+
+        return ($invoiceDate ?? now())->copy()->addMonthNoOverflow();
     }
 
     private function generateBatchCode(?string $cloudName): string
