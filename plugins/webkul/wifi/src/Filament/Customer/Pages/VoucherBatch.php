@@ -218,17 +218,15 @@ class VoucherBatch extends Page implements HasTable
                     $cloudId = $get('cloud_id');
 
                     return Profile::query()
-                        ->where(function ($query) use ($cloudId, $cloudIds) {
-                            if ($cloudId) {
-                                $query->where('cloud_id', $cloudId);
-                            } else {
-                                $query->whereIn('cloud_id', $cloudIds);
-                            }
-
-                            $query->orWhere('cloud_id', -1)
-                                ->orWhere('cloud_id', 0)
-                                ->orWhereNull('cloud_id');
-                        })
+                        ->whereIn('id', [
+                            272,
+                            240,
+                            241,
+                            242,
+                            512,
+                            239,
+                            243
+                        ])
                         ->orderBy('name')
                         ->pluck('name', 'id')
                         ->all();
@@ -376,15 +374,16 @@ class VoucherBatch extends Page implements HasTable
                     ->searchable()
                     ->placeholder('-'),
 
-                TextColumn::make('never_expire')
-                    ->label(__('wifi::filament/customer/pages/voucher-batch.columns.never_expire'))
+                TextColumn::make('expires_at')
+                    ->label(__('wifi::filament/customer/pages/voucher-batch.columns.expires_at'))
                     ->formatStateUsing(function ($state, $record) {
-                        if ($state) {
+                        if ($record->never_expire) {
                             return __('wifi::filament/customer/pages/voucher-batch.never_expire_options.yes');
                         }
 
-                        return $record->expires_at?->format('Y-m-d') ?? '-';
-                    }),
+                        return $state?->format('Y-m-d') ?? '-';
+                    })
+                    ->sortable(),
 
                 TextColumn::make('created_at')
                     ->label(__('wifi::filament/customer/pages/voucher-batch.columns.created_at'))

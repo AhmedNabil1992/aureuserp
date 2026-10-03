@@ -10,6 +10,7 @@ return [
         'batch_code'         => 'Batch File Name',
         'caption'            => 'Caption',
         'never_expire'       => 'Expiration Date',
+        'expires_at'         => 'Expiration Date',
         'created_at'         => 'Created At',
     ],
     'actions' => [

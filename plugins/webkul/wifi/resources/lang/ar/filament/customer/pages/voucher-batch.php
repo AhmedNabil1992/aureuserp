@@ -10,6 +10,7 @@ return [
         'batch_code'         => 'إسم الملف',
         'caption'            => 'التسمية التوضيحية',
         'never_expire'       => 'تاريخ الإنتهاء',
+        'expires_at'         => 'تاريخ انتهاء الصلاحية',
         'created_at'         => 'تاريخ الإنشاء',
     ],
     'actions' => [
