@@ -404,8 +404,9 @@ class VoucherBatch extends Page implements HasTable
                             ->label(__('wifi::filament/customer/pages/voucher-batch.columns.caption'))
                             ->required()
                             ->maxLength(255)
-                            ->rule('regex:/^[a-zA-Z0-9\s]+$/')
-                            ->helperText('Allowed: English letters, numbers, and spaces.'),
+                            // ->rule('regex:/^[a-zA-Z0-9\s]+$/')
+                            // ->helperText('Allowed: English letters, numbers, and spaces.')
+                            ,
                     ]),
             ])
             ->defaultPaginationPageOption(25);

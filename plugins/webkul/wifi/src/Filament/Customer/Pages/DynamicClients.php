@@ -19,8 +19,10 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
+use Illuminate\Database\Eloquent\Builder;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 use Webkul\Wifi\Filament\Customer\Concerns\HasWifiAccess;
+use Webkul\Wifi\Models\DynamicClientRealm;
 
 class DynamicClients extends Page implements HasTable
 {
@@ -80,7 +82,23 @@ class DynamicClients extends Page implements HasTable
             ->query($query)
             ->columns([
                 TextColumn::make('cloud.name')->label(__('wifi::filament/customer/pages/dynamicclient.table.columns.cloud'))->searchable()->sortable(),
-                TextColumn::make('dynamicClientRealms.realm.name')->label(__('wifi::filament/customer/pages/dynamicclient.table.columns.realm'))->searchable()->sortable()->placeholder('Available to All'),
+                TextColumn::make('dynamicClientRealms.realm.name')
+                    ->label(__('wifi::filament/customer/pages/dynamicclient.table.columns.realm'))
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query->whereHas(
+                        'dynamicClientRealms.realm',
+                        fn (Builder $realmQuery): Builder => $realmQuery->whereLike('name', "%{$search}%")
+                    ))
+                    ->sortable(query: function (Builder $query, string $direction): Builder {
+                        $realmName = DynamicClientRealm::query()
+                            ->select('realms.name')
+                            ->join('realms', 'realms.id', '=', 'dynamic_client_realms.realm_id')
+                            ->whereColumn('dynamic_client_realms.dynamic_client_id', 'dynamic_clients.id')
+                            ->orderBy('realms.name', $direction)
+                            ->limit(1);
+
+                        return $query->orderBy($realmName, $direction);
+                    })
+                    ->placeholder('Available to All'),
                 TextColumn::make('name')->label(__('wifi::filament/customer/pages/dynamicclient.table.columns.name'))->searchable()->sortable(),
                 TextColumn::make('nasidentifier')->label(__('wifi::filament/customer/pages/dynamicclient.table.columns.nasidentifier'))->searchable()->sortable(),
                 TextColumn::make('last_contact')->label(__('wifi::filament/customer/pages/dynamicclient.table.columns.last_contact'))->sortable()

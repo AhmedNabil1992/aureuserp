@@ -50,7 +50,7 @@ class WifiPurchaseResource extends Resource
                     ->getSearchResultsUsing(fn (string $search): array => static::customerOptions($search))
                     ->getOptionLabelUsing(function ($value): ?string {
                         $partner = Partner::query()
-                            ->where('customer_rank', 1)
+                            ->where('customer_rank', '>', 0)
                             ->find($value);
 
                         return $partner ? static::customerOptionLabel($partner) : null;
@@ -205,7 +205,7 @@ class WifiPurchaseResource extends Resource
     protected static function customerOptions(?string $search = null): array
     {
         return Partner::query()
-            ->where('customer_rank', 1)
+            ->where('customer_rank', '>', 0)
             ->when($search, fn ($query, string $search) => $query->where(function ($query) use ($search): void {
                 $query
                     ->where('name', 'like', "%{$search}%")
