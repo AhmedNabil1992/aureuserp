@@ -30,7 +30,10 @@ use Webkul\Support\Traits\BelongsToCompany;
 class Payment extends Model
 {
     use BelongsToCompany;
-    use HasChatter, HasCustomFields, HasFactory, HasLogActivity;
+    use HasChatter, HasCustomFields, HasFactory;
+    use HasLogActivity {
+        generateActivityDescription as generateDefaultActivityDescription;
+    }
 
     public const ACTIVITY_PLAN_PLUGIN = 'accounts';
 
@@ -72,9 +75,12 @@ class Payment extends Model
     ];
 
     protected $casts = [
-        'date'         => 'date',
-        'state'        => PaymentStatus::class,
-        'payment_type' => PaymentType::class,
+        'date'          => 'date',
+        'state'         => PaymentStatus::class,
+        'payment_type'  => PaymentType::class,
+        'is_reconciled' => 'boolean',
+        'is_matched'    => 'boolean',
+        'is_sent'       => 'boolean',
     ];
 
     public array $moveRelatedFields = [
@@ -94,11 +100,41 @@ class Payment extends Model
             'memo'               => __('accounts::models/payment.log-attributes.memo'),
             'payment_reference'  => __('accounts::models/payment.log-attributes.payment-reference'),
             'amount'             => __('accounts::models/payment.log-attributes.amount'),
+            'state'              => __('accounts::models/payment.log-attributes.state'),
+            'is_sent'            => __('accounts::models/payment.log-attributes.is-sent'),
+            'is_reconciled'      => __('accounts::models/payment.log-attributes.is-reconciled'),
+            'is_matched'         => __('accounts::models/payment.log-attributes.is-matched'),
             'partner.name'       => __('accounts::models/payment.log-attributes.partner'),
             'partnerBank.name'   => __('accounts::models/payment.log-attributes.partner-bank'),
             'paymentMethod.name' => __('accounts::models/payment.log-attributes.payment-method'),
             'currency.name'      => __('accounts::models/payment.log-attributes.currency'),
         ];
+    }
+
+    protected function generateActivityDescription(string $event): string
+    {
+        if ($event !== 'updated') {
+            return $this->generateDefaultActivityDescription($event);
+        }
+
+        if ($this->wasChanged('state')) {
+            return match ($this->state) {
+                PaymentStatus::IN_PROCESS,
+                PaymentStatus::PAID     => __('accounts::models/payment.activities.confirmed'),
+                PaymentStatus::DRAFT    => __('accounts::models/payment.activities.reset-to-draft'),
+                PaymentStatus::CANCELED => __('accounts::models/payment.activities.canceled'),
+                PaymentStatus::REJECTED => __('accounts::models/payment.activities.rejected'),
+                default                 => __('accounts::models/payment.activities.status-changed'),
+            };
+        }
+
+        if ($this->wasChanged('is_sent')) {
+            return $this->is_sent
+                ? __('accounts::models/payment.activities.marked-as-sent')
+                : __('accounts::models/payment.activities.marked-as-unsent');
+        }
+
+        return $this->generateDefaultActivityDescription($event);
     }
 
     public function move()
