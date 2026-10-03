@@ -2,12 +2,12 @@
 
 return [
     'navigation' => [
-        'title' => 'دفعات القسائم',
+        'title' => 'دفعات الكروت',
         'group' => 'شبكة واي فاي',
     ],
 
-    'model-label'        => 'دفعة قسيمة',
-    'plural-model-label' => 'دفعات القسائم',
+    'model-label'        => 'دفعة كروت',
+    'plural-model-label' => 'دفعات الكروت',
 
     'form' => [
         'sections' => [
@@ -30,15 +30,15 @@ return [
                     'caption'                  => 'العنوان',
                 ],
                 'buttons' => [
-                    'new_batch' => 'توليد القسائم',
+                    'new_batch' => 'توليد الكروت',
                 ],
             ],
         ],
     ],
 
     'messages' => [
-        'generated_success' => 'تم توليد القسائم بنجاح.',
-        'generated_warning' => 'تم حفظ الدفعة ولكن فشل توليد القسائم.',
+        'generated_success' => 'تم توليد الكروت بنجاح.',
+        'generated_warning' => 'تم حفظ الدفعة ولكن فشل توليد الكروت.',
     ],
 
     'table' => [
