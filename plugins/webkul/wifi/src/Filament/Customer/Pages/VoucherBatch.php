@@ -35,6 +35,16 @@ class VoucherBatch extends Page implements HasTable
 {
     use HasCustomerCloudAccess, HasWifiAccess, InteractsWithTable;
 
+    private const CUSTOMER_PROFILE_IDS = [
+        239,
+        240,
+        241,
+        242,
+        243,
+        272,
+        512,
+    ];
+
     protected string $view = 'wifi::filament.customer.pages.voucher-batch';
 
     protected static ?int $navigationSort = 3;
@@ -214,23 +224,11 @@ class VoucherBatch extends Page implements HasTable
 
             Select::make('profile_id')
                 ->label(__('wifi::filament/resources/wifi_voucher_batch.form.sections.general.fields.profile_id'))
-                ->options(function (Get $get) use ($cloudIds): array {
-                    $cloudId = $get('cloud_id');
-
-                    return Profile::query()
-                        ->whereIn('id', [
-                            272,
-                            240,
-                            241,
-                            242,
-                            512,
-                            239,
-                            243
-                        ])
-                        ->orderBy('name')
-                        ->pluck('name', 'id')
-                        ->all();
-                })
+                ->options(fn (): array => Profile::query()
+                    ->whereIn('id', self::CUSTOMER_PROFILE_IDS)
+                    ->orderBy('name')
+                    ->pluck('name', 'id')
+                    ->all())
                 ->searchable()
                 ->preload()
                 ->required(),
